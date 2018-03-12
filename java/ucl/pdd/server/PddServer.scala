@@ -6,13 +6,14 @@ import com.twitter.finatra.http.filters.{CommonFilters, LoggingMDCFilter, TraceI
 import com.twitter.finatra.http.routing.HttpRouter
 import com.twitter.inject.modules.StatsReceiverModule
 import io.sentry.Sentry
-import ucl.pdd.cron.PddCronModule
+import ucl.pdd.config.ConfigModule
+import ucl.pdd.cron.CronModule
 import ucl.pdd.storage.install.StorageModule
 
 object PddServerMain extends PddServer
 
 class PddServer extends HttpServer with LogbackConfigurator {
-  override def modules = Seq(PddCronModule, StorageModule, StatsReceiverModule)
+  override def modules = Seq(ConfigModule, StorageModule, CronModule, StatsReceiverModule)
 
   override def jacksonModule = PddJacksonModule
 

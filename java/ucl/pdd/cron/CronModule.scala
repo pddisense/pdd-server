@@ -6,7 +6,7 @@ import org.quartz._
 import org.quartz.impl.StdSchedulerFactory
 import org.quartz.spi.JobFactory
 
-object PddCronModule extends TwitterModule {
+object CronModule extends TwitterModule {
   override def configure(): Unit = {
     bind[JobFactory].to[GuiceJobFactory]
   }

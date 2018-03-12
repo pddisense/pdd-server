@@ -6,6 +6,7 @@ scala_binary(
   deps = [
     "//java/ucl/pdd/api",
     "//java/ucl/pdd/cron",
+    "//java/ucl/pdd/config",
     "//java/ucl/pdd/config:annotations",
     "//java/ucl/pdd/storage",
     "//java/ucl/pdd/storage/install",
