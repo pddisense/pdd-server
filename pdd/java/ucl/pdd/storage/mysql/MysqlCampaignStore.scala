@@ -16,19 +16,135 @@
 
 package ucl.pdd.storage.mysql
 
-import com.twitter.finagle.mysql.{Client => MysqlClient}
+import com.twitter.finagle.mysql.{OK, Row, ServerError, Client => MysqlClient}
 import com.twitter.util.Future
-import ucl.pdd.api.Campaign
+import ucl.pdd.api.{Campaign, Vocabulary, VocabularyQuery}
 import ucl.pdd.storage.{CampaignQuery, CampaignStore}
 
-private[mysql] final class MysqlCampaignStore(mysql: MysqlClient) extends CampaignStore {
-  override def list(query: CampaignQuery): Future[Seq[Campaign]] = ???
+import scala.collection.mutable
 
-  override def get(id: String): Future[Option[Campaign]] = ???
+private[mysql] final class MysqlCampaignStore(mysql: MysqlClient) extends CampaignStore with MysqlStore {
 
-  override def create(campaign: Campaign): Future[Boolean] = ???
+  import MysqlStore._
 
-  override def replace(campaign: Campaign): Future[Boolean] = ???
+  override def list(query: CampaignQuery): Future[Seq[Campaign]] = {
+    val where = mutable.ListBuffer.empty[String]
+    query.isActive.foreach {
+      case true => where += "startTime is not null and startTime <= now() and (endTime is null or endTime > now())"
+      case false => where += "startTime is null or startTime > now() or (endTime is not null and endTime <= now())"
+    }
+    val sql = "select * " +
+      "from campaigns " +
+      s"where ${if (where.isEmpty) "true" else where.mkString(" and ")} " +
+      "order by createTime desc"
+    mysql
+      .prepare(sql)
+      .select()(hydrate)
+  }
+
+  override def get(name: String): Future[Option[Campaign]] = {
+    mysql
+      .prepare("select * from campaigns where name = ? limit 1")
+      .select(name)(hydrate)
+      .map(_.headOption)
+  }
+
+  override def create(campaign: Campaign): Future[Boolean] = {
+    val sql = "insert into campaigns(name, createTime, displayName, email, vocabulary, startTime, " +
+      "endTime, collectRaw, collectEncrypted, delay, graceDelay, groupSize, samplingRate) " +
+      "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    mysql
+      .prepare(sql)
+      .apply(
+        campaign.name,
+        campaign.createTime,
+        campaign.displayName,
+        encodeEmail(campaign.email),
+        encodeVocabulary(campaign.vocabulary),
+        campaign.startTime,
+        campaign.endTime,
+        campaign.collectRaw,
+        campaign.collectEncrypted,
+        campaign.delay,
+        campaign.graceDelay,
+        campaign.groupSize,
+        campaign.samplingRate)
+      .map(_ => true)
+      .rescue {
+        // Error code 1062 corresponds to a duplicate entry, which means the object already exists.
+        case ServerError(1062, _, _) => Future.value(false)
+      }
+  }
+
+  override def replace(campaign: Campaign): Future[Boolean] = {
+    val sql = "update campaigns " +
+      "set createTime = ?, displayName = ?, email = ?, vocabulary = ?, startTime = ?, endTime = ?, " +
+      "collectRaw = ?, collectEncrypted = ?, delay = ?, graceDelay = ?, groupSize = ?, samplingRate = ? " +
+      "where name = ?"
+    mysql
+      .prepare(sql)
+      .apply(
+        campaign.createTime,
+        campaign.displayName,
+        encodeEmail(campaign.email),
+        encodeVocabulary(campaign.vocabulary),
+        campaign.startTime,
+        campaign.endTime,
+        campaign.collectRaw,
+        campaign.collectEncrypted,
+        campaign.delay,
+        campaign.graceDelay,
+        campaign.groupSize,
+        campaign.samplingRate,
+        campaign.name)
+      .map {
+        case ok: OK => ok.affectedRows == 1
+        case _ => false
+      }
+  }
+
+  private def hydrate(row: Row): Campaign = {
+    val email = toString(row, "email").split("\n").filter(_.nonEmpty)
+    val vocabulary = Vocabulary(toString(row, "vocabulary")
+      .split("\n")
+      .filter(_.nonEmpty)
+      .map(decodeQuery))
+    Campaign(
+      name = toString(row, "name"),
+      createTime = toInstant(row, "createTime"),
+      displayName = getString(row, "displayName"),
+      email = email,
+      vocabulary = vocabulary,
+      startTime = getInstant(row, "startTime"),
+      endTime = getInstant(row, "endTime"),
+      collectRaw = toBoolean(row, "collectRaw"),
+      collectEncrypted = toBoolean(row, "collectEncrypted"),
+      delay = toInt(row, "delay"),
+      graceDelay = toInt(row, "graceDelay"),
+      groupSize = toInt(row, "groupSize"),
+      samplingRate = getDouble(row, "samplingRate"))
+  }
+
+  private def decodeQuery(str: String): VocabularyQuery =
+    if (str.contains(",")) {
+      VocabularyQuery(terms = Some(str.split(",").filter(_.nonEmpty)))
+    } else {
+      VocabularyQuery(exact = Some(str))
+    }
+
+  private def encodeEmail(email: Seq[String]) = email.mkString("\n")
+
+  private def encodeVocabulary(vocabulary: Vocabulary) = {
+    vocabulary.queries.map(encodeQuery).mkString("\n")
+  }
+
+  private def encodeQuery(query: VocabularyQuery) = {
+    if (query.terms.isDefined) {
+      query.terms.get.mkString(",") + ","
+    } else {
+      query.exact.getOrElse("")
+    }
+  }
 }
 
 private[mysql] object MysqlCampaignStore {

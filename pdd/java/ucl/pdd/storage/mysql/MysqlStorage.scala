@@ -31,15 +31,14 @@ final class MysqlStorage(mysql: MysqlClient) extends AbstractIdleService with St
   override val sketches = new MysqlSketchStore(mysql)
 
   override def startUp(): Unit = {
-    val tables = MysqlClientStore.CreateSchemaDDL
+    val tables = MysqlClientStore.CreateSchemaDDL ++ MysqlCampaignStore.CreateSchemaDDL ++
+      MysqlAggregationStore.CreateSchemaDDL ++ MysqlSketchStore.CreateSchemaDDL
     val fs = tables.map { case (tableName, ddl) =>
       mysql
         .query(s"select 1 from `$tableName` limit 1")
         .rescue {
           // Error code 1146 corresponds to a table that does not exist.
-          case ServerError(1146, _, _) =>
-            //logger.info("Creating MySQL storage schema")
-            mysql.query(ddl).unit
+          case ServerError(1146, _, _) => mysql.query(ddl).unit
         }
     }.toSeq
     Await.result(Future.join(fs))

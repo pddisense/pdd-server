@@ -27,18 +27,16 @@ import scala.collection.JavaConverters._
 private[memory] final class MemorySketchStore extends SketchStore {
   private[this] val index = new ConcurrentHashMap[String, Sketch]().asScala
 
-  override def save(sketch: Sketch): Future[Unit] = {
-    index(sketch.name) = sketch
-    Future.Done
+  override def create(sketch: Sketch): Future[Boolean] = {
+    Future.value(index.putIfAbsent(sketch.name, sketch).isEmpty)
   }
 
-  override def delete(name: String): Future[Unit] = {
-    index.remove(name)
-    Future.Done
+  override def replace(sketch: Sketch): Future[Boolean] = {
+    Future.value(index.replace(sketch.name, sketch).isDefined)
   }
 
-  override def get(name: String): Future[Option[Sketch]] = {
-    Future.value(index.get(name))
+  override def delete(name: String): Future[Boolean] = {
+    Future.value(index.remove(name).isDefined)
   }
 
   override def list(query: SketchQuery = SketchQuery()): Future[Seq[Sketch]] = {

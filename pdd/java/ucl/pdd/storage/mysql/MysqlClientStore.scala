@@ -18,7 +18,6 @@ package ucl.pdd.storage.mysql
 
 import com.twitter.finagle.mysql.{OK, Row, ServerError, Client => MysqlClient}
 import com.twitter.util.Future
-import org.joda.time.Instant
 import ucl.pdd.api.Client
 import ucl.pdd.storage.{ClientQuery, ClientStore}
 
@@ -60,7 +59,10 @@ private[mysql] final class MysqlClientStore(mysql: MysqlClient) extends ClientSt
         client.externalName,
         client.leaveTime,
         client.name)
-      .map { case ok: OK => ok.affectedRows == 1 }
+      .map {
+        case ok: OK => ok.affectedRows == 1
+        case _ => false
+      }
   }
 
   override def list(query: ClientQuery): Future[Seq[Client]] = {
@@ -69,7 +71,8 @@ private[mysql] final class MysqlClientStore(mysql: MysqlClient) extends ClientSt
       case true => where += "leaveTime is not null"
       case false => where += "leaveTime is null"
     }
-    val sql = "select * from clients " +
+    val sql = "select * " +
+      "from clients " +
       s"where ${if (where.isEmpty) "true" else where.mkString(" and ")} " +
       "order by createTime desc"
     mysql
@@ -86,10 +89,10 @@ private[mysql] final class MysqlClientStore(mysql: MysqlClient) extends ClientSt
 
   private def hydrate(row: Row): Client = {
     Client(
-      name = getString(row, "name").getOrElse(""),
-      createTime = getInstant(row, "createTime").getOrElse(Instant.now()),
-      browser = getString(row, "browser").getOrElse(""),
-      publicKey = getString(row, "publicKey").getOrElse(""),
+      name = toString(row, "name"),
+      createTime = toInstant(row, "createTime"),
+      browser = toString(row, "browser"),
+      publicKey = toString(row, "publicKey"),
       externalName = getString(row, "externalName"),
       leaveTime = getInstant(row, "leaveTime"))
   }

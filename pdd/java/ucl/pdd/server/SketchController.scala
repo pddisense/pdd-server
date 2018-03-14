@@ -36,7 +36,13 @@ final class SketchController @Inject()(storage: Storage) extends Controller {
             submitTime = Some(Instant.now()),
             encryptedValues = req.encryptedValues,
             rawValues = req.rawValues)
-          storage.sketches.save(updated).map(_ => response.ok)
+          storage
+            .sketches
+            .replace(updated)
+            .map {
+              case true => response.ok
+              case false => response.notFound
+            }
       }
   }
 }

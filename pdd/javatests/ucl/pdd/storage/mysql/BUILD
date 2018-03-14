@@ -15,6 +15,7 @@
 scala_test(
   name = "mysql",
   srcs = glob(["*.scala"]),
+  size = "small",
   deps = [
     "//pdd/java/ucl/pdd/storage",
     "//pdd/java/ucl/pdd/storage/mysql",

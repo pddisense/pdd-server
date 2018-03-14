@@ -14,7 +14,7 @@
 
 package(default_visibility = ["//pdd/javatests/ucl/pdd/storage:__subpackages__"])
 
-scala_test(
+scala_library(
   name = "storage",
   srcs = glob(["*.scala"]),
   deps = [
@@ -22,5 +22,6 @@ scala_test(
     "//pdd/java/ucl/pdd/storage",
     "//pdd/javatests/ucl/testing",
     "//3rdparty/jvm/com/github/nscala_time",
+    "@scalatest//jar:jar",
   ]
 )

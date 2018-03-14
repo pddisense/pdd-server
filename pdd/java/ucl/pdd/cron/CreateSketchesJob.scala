@@ -87,7 +87,7 @@ final class CreateSketchesJob @Inject()(
               group = groupIdx,
               day = day,
               publicKey = client.publicKey)
-            storage.sketches.save(sketch).unit
+            storage.sketches.create(sketch).unit
           }
         }
         Future.collect(fs).unit

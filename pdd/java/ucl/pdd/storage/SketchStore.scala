@@ -20,11 +20,11 @@ import com.twitter.util.Future
 import ucl.pdd.api.Sketch
 
 trait SketchStore {
-  def save(sketch: Sketch): Future[Unit]
+  def create(sketch: Sketch): Future[Boolean]
 
-  def delete(name: String): Future[Unit]
+  def replace(sketch: Sketch): Future[Boolean]
 
-  def get(name: String): Future[Option[Sketch]]
+  def delete(name: String): Future[Boolean]
 
   def list(query: SketchQuery = SketchQuery()): Future[Seq[Sketch]]
 }
