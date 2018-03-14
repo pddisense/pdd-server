@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory
 trait LoggingConfigurator {
   this: App =>
 
-  premain {
+  init {
     initSentry()
     initLogback()
   }
