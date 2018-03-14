@@ -1,7 +1,0 @@
-[ignore]
-<PROJECT_ROOT>/node_modules/.*/test/.*
-
-[options]
-suppress_type=$FlowIssue
-esproposal.decorators=ignore
-munge_underscores=true
