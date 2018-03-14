@@ -25,6 +25,7 @@ scala_import(
         "//3rdparty/jvm/com/google/code/findbugs:jsr305",
         "//3rdparty/jvm/org/hdrhistogram:HdrHistogram",
         ":finagle_init_2_11",
+        ":finagle_toggle_2_11",
         ":util_app_2_11",
         ":util_cache_2_11",
         ":util_codec_2_11",
@@ -32,6 +33,7 @@ scala_import(
         ":util_hashing_2_11",
         ":util_jvm_2_11",
         ":util_lint_2_11",
+        ":util_logging_2_11",
         ":util_registry_2_11",
         ":util_security_2_11",
         ":util_stats",
@@ -286,6 +288,27 @@ scala_import(
 
 
 scala_import(
+    name = "finatra_httpclient",
+    exports = [
+        "//3rdparty/jvm/commons_codec:commons_codec",
+        "//3rdparty/jvm/org/scala_lang:scala_library",
+        ":finagle_core",
+        ":finagle_http_2_11",
+        ":finatra_jackson",
+        ":inject_utils",
+        ":util_core"
+    ],
+    jars = [
+        "//external:jar/com/twitter/finatra_httpclient_2_11"
+    ],
+    visibility = [
+        "//visibility:public"
+    ]
+)
+
+
+
+scala_import(
     name = "finatra_jackson",
     exports = [
         "//3rdparty/jvm/com/fasterxml/jackson/core:jackson_databind",
@@ -325,9 +348,14 @@ scala_import(
 
 
 
-java_library(
-    name = "inject_app_2_11",
+scala_import(
+    name = "inject_app",
     exports = [
+        "//3rdparty/jvm/org/scala_lang:scala_library",
+        ":inject_core",
+        ":util_core"
+    ],
+    jars = [
         "//external:jar/com/twitter/inject_app_2_11"
     ],
     visibility = [
@@ -384,7 +412,7 @@ scala_import(
     name = "inject_server",
     exports = [
         ":finagle_stats_2_11",
-        ":inject_app_2_11",
+        ":inject_app",
         ":inject_modules",
         ":twitter_server_2_11"
     ],

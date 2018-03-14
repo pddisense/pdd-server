@@ -1,3 +1,21 @@
+/*
+ * Private Data Donor is a platform to collect search logs via crowd-sourcing.
+ * Copyright (C) 2017-2018 Vincent Primault <v.primault@ucl.ac.uk>
+ *
+ * Private Data Donor is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Private Data Donor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Private Data Donor.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package ucl.pdd.api
 
 import org.joda.time.Instant
@@ -18,9 +36,6 @@ object CampaignValidator {
     }
     if (obj.startTime.zip(obj.endTime).exists { case (a, b) => b.isBefore(a) }) {
       errors += ErrorCause("Should be greater than or equal to `startTime`", "endTime")
-    }
-    if (obj.vocabulary.offset != 0) {
-      errors += ErrorCause("Cannot specify a partial vocabulary here (expected 0)", "vocabulary.offset")
     }
     if (obj.samplingRate.exists(samplingRate => samplingRate < 0 || samplingRate > 1)) {
       errors += ErrorCause("Should be between 0 and 1", "samplingRate")

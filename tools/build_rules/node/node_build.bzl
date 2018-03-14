@@ -1,68 +1,64 @@
+def _get_package_dir(ctx):
+  return ctx.label.package
+
+def _get_output_dir(ctx):
+  # If it's an external label, output to workspace_root.
+  if ctx.label.workspace_root:
+    return ctx.configuration.bin_dir.path + '/' + ctx.label.workspace_root + '/' + _get_package_dir(ctx)
+  return ctx.configuration.bin_dir.path + '/' + _get_package_dir(ctx)
+
+def _get_input_dir(ctx):
+    # If it's an external label, input is in workspace_root.
+    if ctx.label.workspace_root:
+        return ctx.label.workspace_root + '/' + _get_package_dir(ctx)
+    return _get_package_dir(ctx)
+
 def _node_build_impl(ctx):
   inputs = depset(
-    items = ctx.files.srcs + ctx.files.data + [ctx.file.config, ctx.executable._webpack],
+    items = ctx.files.srcs + [ctx.file._webpack_config, ctx.executable._webpack],
     transitive = [ctx.attr._node_modules[DefaultInfo].files] + [dep[DefaultInfo].files for dep in ctx.attr.deps],
   )
-  node_path = ["3rdparty/node_modules"] + [dep.label.package for dep in ctx.attr.deps];
-  dist_dir = ctx.actions.declare_directory("dist")
 
-  mkdirs = []
-  commands = []
-  commands.append(ctx.executable._webpack.path + " --config " + ctx.file.config.path + " --json > " + ctx.outputs.stats.path)
-  for file in ctx.files.data:
-    relative_path = file.path[len(ctx.label.package) + 1:]
-    if relative_path.rfind("/") > -1:
-      relative_dir = relative_path[:-len(file.basename)]
-      if not relative_dir in mkdirs:
-        commands.append("mkdir -p " + dist_dir.path + "/" + relative_dir)
-        mkdirs.append(relative_dir)
-    commands.append("cp " + file.path + " " + dist_dir.path + "/" + relative_path)
+  # Dependencies listed under `deps` are treated differently than those listed under `srcs`,
+  # because they are considered as modules of their own. The common node_modules are always
+  # registered.
+  node_path = ["3rdparty/node_modules"]
+  for dep in ctx.attr.deps:
+    if dep.label.package not in node_path:
+      node_path.append(dep.label.package)
 
+  # '_' prefixed environment variables are private, i.e., not exported to the application.
   env = dict(
     ctx.attr.env,
-    OUTDIR = dist_dir.path,
-    PACKAGE = ctx.label.package,
-    NODE_PATH = ",".join(node_path),
+    _INPUT_DIR = _get_input_dir(ctx),
+    _OUTPUT_DIR = _get_output_dir(ctx),
+    _ENTRY = ",".join([file.path for file in ctx.files.entry]),
+    _PATH = ",".join(node_path),
   )
+
+  outputs = [getattr(ctx.outputs, _get_output_key(entry.label)) for entry in ctx.attr.entry]
   ctx.actions.run_shell(
-    command = " && ".join(commands),
+    command = ctx.executable._webpack.path + " --config " + ctx.file._webpack_config.path,
     inputs = inputs,
-    outputs = [dist_dir, ctx.outputs.stats],
+    outputs = outputs,
     progress_message = "Building with webpack",
     mnemonic = "WebpackBuild",
     env = env,
   )
 
-  # This may not be supported on Windows, as we call directly the tar executable.
-  # Ideally we would like to rename the dist/ prefix into [name], but the --transform option
-  # is not supported on macOS.
-  ctx.actions.run(
-    executable = "tar",
-    arguments = ["-czhf", ctx.outputs.targz.path, "-C", dist_dir.dirname, dist_dir.basename],
-    inputs = [dist_dir],
-    outputs = [ctx.outputs.targz],
-    progress_message = "Creating deployable .tar.gz archive",
-    mnemonic = "TarGz",
-  )
+def _get_output_key(label):
+  basename = label.name.split('/')[-1]
+  return basename[:-3]
 
-  ctx.actions.run_shell(
-      command = "cd " + dist_dir.dirname + " && zip -r " + ctx.outputs.zip.basename + " " + dist_dir.basename,
-      inputs = [dist_dir],
-      outputs = [ctx.outputs.zip],
-      progress_message = "Creating deployable .zip archive",
-      mnemonic = "Zip",
-    )
-
-  return DefaultInfo(files=depset([ctx.outputs.stats]))
+def _get_outputs(entry):
+  return {_get_output_key(label): label.name[:-3] + ".bundle.js" for label in entry}
 
 node_build = rule(
   implementation = _node_build_impl,
   attrs = {
-    #"entry_points": attr.label_list(allow_files=True, allow_empty=False),
     "srcs": attr.label_list(allow_files=[".js", ".jsx", ".css"]),
-    "data": attr.label_list(allow_files=True),
     "deps": attr.label_list(providers=[DefaultInfo]),
-    "config": attr.label(allow_single_file=True),
+    "entry": attr.label_list(allow_files=[".js"], allow_empty=False),
     "env": attr.string_dict(),
     "_node_modules": attr.label(default="//3rdparty:node_modules"),
     "_webpack": attr.label(
@@ -76,9 +72,5 @@ node_build = rule(
       single_file=True,
     ),
   },
-  outputs = {
-    "stats": "%{name}.json",
-    "targz": "%{name}_deploy.tar.gz",
-    "zip": "%{name}_deploy.zip",
-  }
+  outputs = _get_outputs,
 )

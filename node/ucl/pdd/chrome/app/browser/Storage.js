@@ -1,28 +1,54 @@
 // @flow
+/*
+ * Private Data Donor is a platform to collect search logs via crowd-sourcing.
+ * Copyright (C) 2017-2018 Vincent Primault <v.primault@ucl.ac.uk>
+ *
+ * Private Data Donor is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Private Data Donor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Private Data Donor.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-import type { KeyPair } from '../crypto';
-
-export type Tracer = {
-  keyPair: KeyPair,
-  namespace: string,
-  clientName: string,
-  campaignName: string,
-  joinTime: string,
-  vocabulary: Array<any>,
-  activeQueries: Array<boolean>,
-};
-
-type Storage = { [key: string]: Tracer };
+import type { Client } from '../types';
 
 // Key under which the data is actually stored inside Chrome local storage.
-const KEY = 'tracers';
+const CLIENT_KEY = 'client';
 
 // In-memory cache of the data.
-let localCache: Storage = {};
+let loaded = false;
+let localClient: ?Client = null;
 
-function save(cache: Storage): Promise<void> {
+function reload(): Promise<void> {
+  if (loaded) {
+    return Promise.resolve();
+  }
   return new Promise((resolve, reject) => {
-    chrome.storage.local.set({ [KEY]: JSON.stringify(Object.values(cache)) }, () => {
+    chrome.storage.local.get({ [CLIENT_KEY]: '{}' }, (items) => {
+      if (chrome.runtime.lastError) {
+        reject(chrome.runtime.lastError);
+      } else {
+        let client = JSON.parse(items[CLIENT_KEY]);
+        if (Object.keys(client).length > 0) {
+          localClient = client;
+        }
+        loaded = true;
+        resolve();
+      }
+    });
+  });
+}
+
+function write(key: string, item: any): Promise<void> {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.set({ [key]: JSON.stringify(item) }, () => {
       if (chrome.runtime.lastError) {
         reject(chrome.runtime.lastError);
       } else {
@@ -32,53 +58,17 @@ function save(cache: Storage): Promise<void> {
   });
 }
 
+function getClient(): Promise<?Client> {
+  return reload().then(() => localClient);
+}
+
+function setClient(client: Client): Promise<void> {
+  return write(CLIENT_KEY, client).then(() => {
+    localClient = client;
+  });
+}
+
 export default {
-  getAll: function (): Array<mixed> {
-    return Object.values(localCache);
-  },
-
-  get: function (key: string): ?Tracer {
-    return (key in localCache) ? localCache[key] : null;
-  },
-
-  set: function (key: string, value: Tracer): Promise<void> {
-    const cache = { ...localCache };
-    if (key in cache) {
-      cache[key] = { ...cache[key], ...value };
-    } else {
-      cache[key] = value;
-    }
-    return save(cache).then(() => {
-      localCache = cache;
-    });
-  },
-
-  remove: function (key: string): Promise<void> {
-    const cache = { ...localCache };
-    delete cache[key];
-    return save(cache).then(() => {
-      localCache = cache;
-    });
-  },
-
-  clear: function (): Promise<void> {
-    return save({}).then(() => {
-      localCache = {};
-    });
-  },
-
-  reload: function (): Promise<Storage> {
-    return new Promise((resolve, reject) => {
-      chrome.storage.local.get({ [KEY]: '[]' }, (items) => {
-        if (chrome.runtime.lastError) {
-          reject(chrome.runtime.lastError);
-        } else {
-          const cache = {};
-          JSON.parse(items[KEY]).forEach(tracer => cache[tracer.campaignName] = tracer);
-          localCache = cache;
-          resolve(cache);
-        }
-      });
-    });
-  },
+  getClient,
+  setClient,
 };

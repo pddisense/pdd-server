@@ -23,11 +23,11 @@ dependencies:
     finatra:
       version: 18.2.0
       lang: scala
-      modules: [http, jackson]
+      modules: [http, httpclient, jackson]
     inject:
       version: 18.2.0
       lang: scala
-      modules: [core, slf4j]
+      modules: [core, app, slf4j]
     util:
       version: 18.2.0
       lang: scala

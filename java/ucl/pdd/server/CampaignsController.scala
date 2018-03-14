@@ -1,3 +1,21 @@
+/*
+ * Private Data Donor is a platform to collect search logs via crowd-sourcing.
+ * Copyright (C) 2017-2018 Vincent Primault <v.primault@ucl.ac.uk>
+ *
+ * Private Data Donor is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Private Data Donor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Private Data Donor.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package ucl.pdd.server
 
 import java.util.UUID
@@ -38,7 +56,14 @@ final class CampaignsController @Inject()(storage: Storage) extends Controller {
       groupSize = req.groupSize,
       samplingRate = req.samplingRate)
     CampaignValidator.validate(campaign) match {
-      case ValidationResult.Valid => storage.campaigns.save(campaign).map(_ => campaign)
+      case ValidationResult.Valid =>
+        storage
+          .campaigns
+          .create(campaign)
+          .map {
+            case true => response.ok(campaign)
+            case false => response.conflict
+          }
       case err: ValidationResult.Invalid => response.badRequest(err)
     }
   }
@@ -69,7 +94,14 @@ final class CampaignsController @Inject()(storage: Storage) extends Controller {
           groupSize = req.groupSize,
           samplingRate = req.samplingRate)
         CampaignValidator.validate(campaign) match {
-          case ValidationResult.Valid => storage.campaigns.save(campaign).map(_ => campaign)
+          case ValidationResult.Valid =>
+            storage
+              .campaigns
+              .replace(campaign)
+              .map {
+                case true => response.ok(campaign)
+                case false => response.notFound
+              }
           case err: ValidationResult.Invalid => Future.value(response.badRequest(err))
         }
     }

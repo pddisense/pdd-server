@@ -1,3 +1,21 @@
+/*
+ * Private Data Donor is a platform to collect search logs via crowd-sourcing.
+ * Copyright (C) 2017-2018 Vincent Primault <v.primault@ucl.ac.uk>
+ *
+ * Private Data Donor is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Private Data Donor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Private Data Donor.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package ucl.pdd.server
 
 import java.util.UUID
@@ -31,7 +49,14 @@ final class ClientsController @Inject()(storage: Storage, @DayDuration dayDurati
       publicKey = req.publicKey,
       externalName = req.externalName)
     ClientValidator.validate(client) match {
-      case ValidationResult.Valid => storage.clients.save(client).map(_ => client)
+      case ValidationResult.Valid =>
+        storage
+          .clients
+          .create(client)
+          .map {
+            case true => response.ok(client)
+            case false => response.conflict
+          }
       case err: ValidationResult.Invalid => response.badRequest(err)
     }
   }
@@ -56,14 +81,16 @@ final class ClientsController @Inject()(storage: Storage, @DayDuration dayDurati
                     .map { publicKeys =>
                       val startTime = campaign.startTime.get + (dayDuration * sketch.day)
                       val endTime = startTime + dayDuration
+                      val round = 1 // TODO.
                       SubmitSketchCommand(
-                        name = sketch.name,
+                        sketchName = sketch.name,
                         startTime = startTime,
                         endTime = endTime,
                         vocabulary = Some(campaign.vocabulary),
                         publicKeys = publicKeys,
                         collectRaw = campaign.collectRaw,
-                        collectEncrypted = campaign.collectEncrypted)
+                        collectEncrypted = campaign.collectEncrypted,
+                        round = round)
                     }
                 }
                 Future.collect(fs)
@@ -83,7 +110,13 @@ final class ClientsController @Inject()(storage: Storage, @DayDuration dayDurati
       case None => Future.value(response.notFound)
       case Some(client) =>
         val updated = client.copy(leaveTime = Some(Instant.now))
-        storage.clients.save(updated).map(_ => updated)
+        storage.
+          clients
+          .replace(updated)
+          .map {
+            case true => response.ok
+            case false => response.notFound
+          }
     }
   }
 
@@ -94,15 +127,11 @@ final class ClientsController @Inject()(storage: Storage, @DayDuration dayDurati
       .map(_.flatMap(_.toSeq).map(campaign => campaign.name -> campaign).toMap)
   }
 
-  private def collectKeys(clientName: String, campaignName: String, group: Int): Future[Seq[ClientKey]] = {
+  private def collectKeys(clientName: String, campaignName: String, group: Int): Future[Seq[String]] = {
     storage
       .sketches
       .list(SketchQuery(campaignName = Some(campaignName), group = Some(group)))
-      .map { sketches =>
-        sketches
-          .sortBy(_.clientName)
-          .map(sketch => ClientKey(sketch.publicKey, sketch.clientName == clientName))
-      }
+      .map(sketches => sketches.sortBy(_.clientName).map(sketch => sketch.publicKey))
   }
 }
 

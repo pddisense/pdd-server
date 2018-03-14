@@ -8,6 +8,8 @@ scala_binary(
     "//java/ucl/pdd/cron",
     "//java/ucl/pdd/config",
     "//java/ucl/pdd/config:annotations",
+    "//java/ucl/pdd/jackson",
+    "//java/ucl/pdd/slf4j",
     "//java/ucl/pdd/storage",
     "//java/ucl/pdd/storage/install",
     "//3rdparty/jvm/com/twitter:finatra_http",
@@ -16,6 +18,4 @@ scala_binary(
     "//3rdparty/jvm/io/sentry:sentry_logback",
   ],
   main_class = "ucl.pdd.server.PddServerMain",
-  resources = ["logback.xml"],
-  resource_strip_prefix = "java"
 )

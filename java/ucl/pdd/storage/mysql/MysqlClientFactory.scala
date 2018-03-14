@@ -23,8 +23,8 @@ import com.twitter.finagle.Mysql
 import com.twitter.finagle.client.DefaultPool
 import com.twitter.finagle.mysql.Client
 
-final class MysqlClientFactory(server: String, user: String, pass: String, base: String) {
-  def apply(): Client = {
+private[storage] object MysqlClientFactory {
+  def apply(server: String, user: String, pass: String, base: String): Client = {
     Mysql.client
       .withCredentials(user, pass)
       .withDatabase(base)

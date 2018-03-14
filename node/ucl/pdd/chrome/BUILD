@@ -1,5 +1,6 @@
 package(default_visibility = ["//visibility:public"])
 load("//tools/build_rules/node:node_build.bzl", "node_build")
+load("//tools/build_rules/pkg:pkg.bzl", "pkg_zip")
 
 config_setting(name = "devel", define_values = {"env": "devel"})
 config_setting(name = "production", define_values = {"env": "production"})
@@ -7,23 +8,18 @@ config_setting(name = "production", define_values = {"env": "production"})
 devel_env = {
   "NODE_ENV": "devel",
   "API_URL": "http://localhost:8080",
-  "SENTRY_DSN": "",
 }
 
 production_env = {
   "NODE_ENV": "production",
   "API_URL": "https://api.ppd.cs.ucl.ac.uk",
-  "SENTRY_DSN": "https://c02524fee4574cf7b2fa608cdc1ef0eb@sentry.ppd.cs.ucl.ac.uk/4",
+  "SENTRY_DSN": "https://7460f432c8bf4fe6bf516fa467141b24@sentry.io/302350",
 }
 
 node_build(
   name = "chrome",
+  entry = ["app/options.js", "app/background.js"],
   srcs = glob(["**/*.js", "**/*.css"]),
-  config = "webpack.config.js",
-  deps = [
-    "//node/ucl/colossus",
-  ],
-  data = glob(["images/*"]) + ["options.html", "manifest.json"],
   env = select({
     ":devel": devel_env,
     ":production": production_env,
@@ -31,17 +27,11 @@ node_build(
   })
 )
 
-# Actual NPM dependencies:
-# - @blueprintjs/core
-# - autobind-decorator
-# - bn.js
-# - crypto-browserify
-# - elliptic
-# - moment
-# - prop-types
-# - raven-js
-# - react
-# - react-addons-css-transition-group
-# - react-dom
-# - request
-# - url-parse
+pkg_zip(
+  name = "package",
+  srcs = [
+    ":chrome",
+    "options.html",
+    "manifest.json",
+  ] + glob(["images/**"]),
+)
