@@ -17,6 +17,7 @@
 package ucl.pdd.api
 
 import com.github.nscala_time.time.Imports._
+import com.twitter.finatra.validation.{Min, NotEmpty}
 import org.joda.time.Instant
 
 /**
@@ -49,15 +50,19 @@ import org.joda.time.Instant
 case class Campaign(
   name: String,
   createTime: Instant,
-  displayName: Option[String],
+  @NotEmpty
+  displayName: String,
   email: Seq[String],
   vocabulary: Vocabulary,
   startTime: Option[Instant],
   endTime: Option[Instant],
   collectRaw: Boolean,
   collectEncrypted: Boolean,
+  @Min(0)
   delay: Int,
+  @Min(0)
   graceDelay: Int,
+  @Min(1)
   groupSize: Int,
   samplingRate: Option[Double]) {
 

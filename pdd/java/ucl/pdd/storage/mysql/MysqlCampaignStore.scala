@@ -112,7 +112,7 @@ private[mysql] final class MysqlCampaignStore(mysql: MysqlClient) extends Campai
     Campaign(
       name = toString(row, "name"),
       createTime = toInstant(row, "createTime"),
-      displayName = getString(row, "displayName"),
+      displayName = toString(row, "displayName"),
       email = email,
       vocabulary = vocabulary,
       startTime = getInstant(row, "startTime"),

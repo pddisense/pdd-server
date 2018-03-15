@@ -25,7 +25,8 @@ import com.twitter.finagle.mysql.Client
 
 private[storage] object MysqlClientFactory {
   def apply(server: String, user: String, pass: String, base: String): Client = {
-    Mysql.client
+    Mysql
+      .client
       .withCredentials(user, pass)
       .withDatabase(base)
       .withMonitor(MysqlMonitor)

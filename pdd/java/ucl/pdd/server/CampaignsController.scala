@@ -111,11 +111,11 @@ case class GetCampaignRequest(@RouteParam id: String)
 case class ListCampaignsRequest(@QueryParam active: Option[Boolean])
 
 case class CreateCampaignRequest(
-  displayName: Option[String] = None,
+  displayName: String,
   email: Seq[String] = Seq.empty,
   vocabulary: Vocabulary = Vocabulary(),
-  startTime: Option[Instant] = None,
-  endTime: Option[Instant] = None,
+  startTime: Option[Instant],
+  endTime: Option[Instant],
   collectRaw: Boolean = true,
   collectEncrypted: Boolean = true,
   delay: Int = 0,
@@ -125,7 +125,7 @@ case class CreateCampaignRequest(
 
 case class UpdateCampaignRequest(
   @RouteParam id: String,
-  displayName: Option[String],
+  displayName: String,
   email: Seq[String],
   vocabulary: Vocabulary,
   startTime: Option[Instant],
