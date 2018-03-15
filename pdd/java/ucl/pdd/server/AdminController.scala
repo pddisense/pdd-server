@@ -24,10 +24,10 @@ import com.twitter.finatra.request.{QueryParam, RouteParam}
 import com.twitter.util.Future
 import org.joda.time.Instant
 import ucl.pdd.api._
-import ucl.pdd.storage.{CampaignQuery, Storage}
+import ucl.pdd.storage.{CampaignQuery, ClientQuery, Storage}
 
 @Singleton
-final class CampaignsController @Inject()(storage: Storage) extends Controller {
+final class AdminController @Inject()(storage: Storage) extends Controller {
   get("/api/campaigns") { req: ListCampaignsRequest =>
     storage
       .campaigns
@@ -104,6 +104,17 @@ final class CampaignsController @Inject()(storage: Storage) extends Controller {
         }
     }
   }
+
+  get("/api/clients") { req: ListClientsRequest =>
+    storage
+      .clients
+      .list(ClientQuery(hasLeft = req.active))
+      .map(clients => ObjectList(clients))
+  }
+
+  get("/api/clients/:name") { req: GetClientRequest =>
+    storage.clients.get(req.name)
+  }
 }
 
 case class GetCampaignRequest(@RouteParam id: String)
@@ -136,3 +147,7 @@ case class UpdateCampaignRequest(
   graceDelay: Int,
   groupSize: Int,
   samplingRate: Option[Double])
+
+case class ListClientsRequest(@QueryParam active: Option[Boolean])
+
+case class GetClientRequest(@RouteParam name: String)

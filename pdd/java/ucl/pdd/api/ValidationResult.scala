@@ -44,7 +44,7 @@ object ValidationResult {
 
 case class ErrorCause(field: Option[String], message: String) {
   @JsonValue
-  override def toString: String = field.map(_ + ": ") + message
+  override def toString: String = field.map(_ + ": ").getOrElse("") + message
 }
 
 object ErrorCause {

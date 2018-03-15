@@ -21,23 +21,16 @@ import java.util.UUID
 import com.github.nscala_time.time.Imports._
 import com.google.inject.{Inject, Singleton}
 import com.twitter.finatra.http.Controller
-import com.twitter.finatra.request.{QueryParam, RouteParam}
+import com.twitter.finatra.request.RouteParam
 import com.twitter.util.Future
 import org.joda.time.Instant
 import ucl.pdd.api._
 import ucl.pdd.config.DayDuration
-import ucl.pdd.storage.{ClientQuery, SketchQuery, Storage}
+import ucl.pdd.storage.{SketchQuery, Storage}
 
 @Singleton
-final class ClientsController @Inject()(storage: Storage, @DayDuration dayDuration: Duration)
+final class PublicController @Inject()(storage: Storage, @DayDuration dayDuration: Duration)
   extends Controller {
-
-  get("/api/clients") { req: ListClientsRequest =>
-    storage
-      .clients
-      .list(ClientQuery(hasLeft = req.active))
-      .map(clients => ObjectList(clients))
-  }
 
   post("/api/clients") { req: CreateClientRequest =>
     val client = Client(
@@ -57,10 +50,6 @@ final class ClientsController @Inject()(storage: Storage, @DayDuration dayDurati
           }
       case err: ValidationResult.Invalid => response.badRequest(err)
     }
-  }
-
-  get("/api/clients/:name") { req: GetClientRequest =>
-    storage.clients.get(req.name)
   }
 
   get("/api/clients/:name/ping") { req: PingClientRequest =>
@@ -118,6 +107,28 @@ final class ClientsController @Inject()(storage: Storage, @DayDuration dayDurati
     }
   }
 
+  patch("/api/sketches/:name") { req: UpdateSketchRequest =>
+    // In practice this corresponds to a JSON merge patch.
+    storage
+      .sketches
+      .get(req.name)
+      .flatMap {
+        case None => Future.value(response.notFound)
+        case Some(sketch) =>
+          val updated = sketch.copy(
+            submitTime = Some(Instant.now()),
+            encryptedValues = req.encryptedValues,
+            rawValues = req.rawValues)
+          storage
+            .sketches
+            .replace(updated)
+            .map {
+              case true => response.ok
+              case false => response.notFound
+            }
+      }
+  }
+
   private def batchGetCampaigns(ids: Seq[String]): Future[Map[String, Campaign]] = {
     storage
       .campaigns
@@ -133,11 +144,7 @@ final class ClientsController @Inject()(storage: Storage, @DayDuration dayDurati
   }
 }
 
-case class GetClientRequest(@RouteParam name: String)
-
 case class PingClientRequest(@RouteParam name: String)
-
-case class ListClientsRequest(@QueryParam active: Option[Boolean])
 
 case class CreateClientRequest(
   publicKey: String,
@@ -145,3 +152,8 @@ case class CreateClientRequest(
   externalName: Option[String])
 
 case class DeleteClientRequest(@RouteParam name: String)
+
+case class UpdateSketchRequest(
+  @RouteParam name: String,
+  encryptedValues: Option[Seq[String]],
+  rawValues: Option[Seq[Long]])

@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package ucl.pdd.dashboard
+package ucl.pdd.config;
 
-import com.twitter.finatra.httpclient.modules.HttpClientModule
+import com.google.inject.BindingAnnotation;
 
-object ApiHttpClientModule extends HttpClientModule {
-  private[this] val destFlag = flag("api.server", "localhost:8000", "Address to the API server")
-  private[this] val tokenFlag = flag[String]("api.access_token", "Token to communicate with the API")
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-  override def dest = destFlag()
-
-  override def defaultHeaders = Map("Authorization" -> s"Bearer ${tokenFlag()}")
+@BindingAnnotation
+@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface AccessToken {
 }

@@ -29,7 +29,6 @@ object CampaignValidator {
     if (obj.samplingRate.exists(samplingRate => samplingRate < 0 || samplingRate > 1)) {
       errors += ErrorCause("Should be between 0 and 1", "samplingRate")
     }
-
     if (errors.isEmpty) ValidationResult.Valid else ValidationResult.Invalid(errors.toList)
   }
 

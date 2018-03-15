@@ -22,12 +22,26 @@ import com.twitter.inject.TwitterModule
 import com.twitter.util.{Duration => TwitterDuration}
 import org.joda.time.{DateTimeZone, Duration}
 
+import scala.util.Random
+
 object ConfigModule extends TwitterModule {
-  private[this] val dayDurationFlag = flag("day_duration", TwitterDuration.fromTimeUnit(1, TimeUnit.DAYS), "Duration of one day")
-  private[this] val timezoneFlag = flag("timezone", "Europe/London", "Reference timezone")
+  private[this] val dayDurationFlag = flag("api.day_duration", TwitterDuration.fromTimeUnit(1, TimeUnit.DAYS), "Duration of one day")
+  private[this] val timezoneFlag = flag("api.timezone", "Europe/London", "Reference timezone")
+  private[this] val tokenFlag = flag[String]("api.access_token", "Token used to secure the access to relevant endpoints")
 
   override def configure(): Unit = {
     bind[Duration].annotatedWith[DayDuration].toInstance(new Duration(dayDurationFlag().inMillis))
     bind[DateTimeZone].annotatedWith[Timezone].toInstance(DateTimeZone.forID(timezoneFlag()))
+    bind[String].annotatedWith[AccessToken].toInstance(tokenFlag.get.getOrElse(randomToken(20)))
+  }
+
+  private[this] val characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+  private def randomToken(length: Int): String = {
+    val token = Seq.fill(length)(characters(Random.nextInt(characters.length))).mkString
+    logger.info("---------------------------------------------------------")
+    logger.info(s"Randomly generated API access token: $token")
+    logger.info("---------------------------------------------------------")
+    token
   }
 }
