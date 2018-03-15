@@ -45,7 +45,7 @@ class ViewCampaign extends React.Component {
 
         <div className="attr-row">
           <div className="attr-name">Vocabulary size</div>
-          <div className="attr-value">{campaign.vocabulary.queries.length}</div>
+          <div className="attr-value">{campaign.vocabulary.queries.length} word{campaign.vocabulary.queries.length > 1 ? 's' : ''}</div>
         </div>
 
         <div className="attr-row">
@@ -58,6 +58,16 @@ class ViewCampaign extends React.Component {
         <div className="attr-row">
           <div className="attr-name">Sampling rate</div>
           <div className="attr-value">{campaign.samplingRate}</div>
+        </div>
+
+        <div className="attr-row">
+          <div className="attr-name">Collect raw data</div>
+          <div className="attr-value">{campaign.collectRaw ? 'yes' : 'no'}</div>
+        </div>
+
+        <div className="attr-row">
+          <div className="attr-name">Collect encrypted data</div>
+          <div className="attr-value">{campaign.collectEncrypted ? 'yes' : 'no'}</div>
         </div>
 
         {campaign.collectEncrypted ?

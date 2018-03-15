@@ -6,13 +6,13 @@ import CampaignForm from './CampaignForm';
 
 class NewCampaign extends React.Component {
   render() {
-    const item = {
+    const campaign = {
       displayName: 'Untitled campaign',
     };
     return (
       <div>
         <h2>New campaign</h2>
-        <CampaignForm item={item} onSubmit={this.props.onSubmit} />
+        <CampaignForm campaign={campaign} onSubmit={this.props.onSubmit} />
       </div>
     );
   }

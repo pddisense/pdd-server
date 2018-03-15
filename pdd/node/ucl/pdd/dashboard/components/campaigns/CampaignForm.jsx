@@ -1,15 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import autobind from 'autobind-decorator';
-import {noop, isEqual} from 'lodash';
+import { isEqual } from 'lodash';
 
 import FormGroup from '../form/FormGroup';
 import TextInput from '../form/TextInput';
 
-function attrsToState(item) {
+function attrsToState(campaign) {
   return {
-    displayName: item.displayName ? item.displayName : '',
-    email: item.email ? item.email.join(' ') : '',
+    displayName: campaign.displayName ? campaign.displayName : '',
+    email: campaign.email ? campaign.email.join(' ') : '',
   };
 }
 
@@ -23,11 +23,11 @@ function stateToAttrs(state) {
 class CampaignForm extends React.Component {
   constructor(props) {
     super(props);
-    this.state = attrsToState(props.item);
+    this.state = attrsToState(props.campaign);
   }
 
   componentWillReceiveProps(nextProps) {
-    this.setState(attrsToState(nextProps.item));
+    this.setState(attrsToState(nextProps.campaign));
   }
 
   @autobind
@@ -38,7 +38,7 @@ class CampaignForm extends React.Component {
   @autobind
   handleSubmit(e) {
     e.preventDefault();
-    const obj = { ...this.props.item, ...stateToAttrs(this.state) };
+    const obj = { ...this.props.campaign, ...stateToAttrs(this.state) };
     this.props.onSubmit(obj);
   }
 
@@ -72,12 +72,8 @@ class CampaignForm extends React.Component {
 }
 
 CampaignForm.propTypes = {
-  item: PropTypes.object.isRequired,
-  onSubmit: PropTypes.func,
-};
-
-CampaignForm.defaultProps = {
-  onSubmit: noop,
+  campaign: PropTypes.object.isRequired,
+  onSubmit: PropTypes.func.isRequired,
 };
 
 export default CampaignForm;

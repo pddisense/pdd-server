@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { combineReducers} from 'redux';
+import React from 'react';
 
-import entitiesReducer from './entities';
+import CampaignTable from './CampaignTable';
+import withCampaignList from '../hoc/withCampaignList';
 
-export default combineReducers({
-  entities: entitiesReducer,
-});
+export default withCampaignList(CampaignTable);

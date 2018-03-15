@@ -7,11 +7,12 @@ import StrategyForm from './StrategyForm';
 
 class EditStrategy extends React.Component {
   render() {
-    const { item } = this.props;
     return (
       <div>
-        <h2>{this.props.item.displayName ? this.props.item.displayName : 'Untitled campaign'}</h2>
-        <Tabs item={item}/>
+        <h2>{this.props.campaign.displayName}</h2>
+
+        <Tabs campaign={this.props.campaign}/>
+
         <StrategyForm {...this.props} />
       </div>
     );
@@ -19,12 +20,10 @@ class EditStrategy extends React.Component {
 }
 
 EditStrategy.propTypes = {
-  onSubmit: PropTypes.func,
-  item: PropTypes.object.isRequired,
-};
-
-EditStrategy.defaultProps = {
-  onSubmit: noop,
+  onSubmit: PropTypes.func.isRequired,
+  isLoading: PropTypes.bool.isRequired,
+  errors: PropTypes.array.isRequired,
+  campaign: PropTypes.object.isRequired,
 };
 
 export default EditStrategy;

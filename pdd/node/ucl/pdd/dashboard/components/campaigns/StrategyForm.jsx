@@ -1,3 +1,19 @@
+/*
+ * Copyright 2017-2018 UCL / Vincent Primault <v.primault@ucl.ac.uk>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import { noop } from 'lodash';
@@ -7,16 +23,16 @@ import autobind from 'autobind-decorator';
 
 import FormGroup from '../form/FormGroup';
 
-function attrsToState(item) {
+function attrsToState(campaign) {
   return {
-    startTime: item.startTime ? new Date(item.startTime) : null,
-    endTime: item.endTime ? new Date(item.endTime) : null,
-    delay: item.delay,
-    graceDelay: item.graceDelay,
-    collectRaw: item.collectRaw,
-    collectEncrypted: item.collectEncrypted,
-    groupSize: item.groupSize,
-    samplingRate: item.samplingRate ? item.samplingRate : 1,
+    startTime: campaign.startTime ? new Date(campaign.startTime) : null,
+    endTime: campaign.endTime ? new Date(campaign.endTime) : null,
+    delay: campaign.delay,
+    graceDelay: campaign.graceDelay,
+    collectRaw: campaign.collectRaw,
+    collectEncrypted: campaign.collectEncrypted,
+    groupSize: campaign.groupSize,
+    samplingRate: campaign.samplingRate ? campaign.samplingRate : 1,
   };
 }
 
@@ -36,7 +52,7 @@ function stateToAttrs(state) {
 class StrategyForm extends React.Component {
   constructor(props) {
     super(props);
-    this.state = attrsToState(props.item);
+    this.state = attrsToState(props.campaign);
   }
 
   @autobind
@@ -82,7 +98,7 @@ class StrategyForm extends React.Component {
   @autobind
   handleSubmit(e) {
     e.preventDefault();
-    const obj = { ...this.props.item, ...stateToAttrs(this.state) };
+    const obj = { ...this.props.campaign, ...stateToAttrs(this.state) };
     this.props.onSubmit(obj);
   }
 
@@ -176,7 +192,7 @@ class StrategyForm extends React.Component {
 
 StrategyForm.propTypes = {
   onSubmit: PropTypes.func,
-  item: PropTypes.object.isRequired,
+  campaign: PropTypes.object.isRequired,
 };
 
 StrategyForm.defaultProps = {

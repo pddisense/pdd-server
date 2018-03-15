@@ -17,6 +17,6 @@
 import React from 'react';
 
 import EditCampaign from './EditCampaign';
-import updateNamed from '../updateNamed';
+import withUpdateCampaign from '../hoc/withUpdateCampaign';
 
-export default updateNamed('campaigns')(EditCampaign);
+export default withUpdateCampaign(EditCampaign);

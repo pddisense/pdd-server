@@ -16,31 +16,29 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { noop } from 'lodash';
 
 import CampaignForm from './CampaignForm';
 import Tabs from './Tabs';
 
 class EditCampaign extends React.Component {
   render() {
-    const { item } = this.props;
     return (
       <div>
-        <h2>{this.props.item.displayName ? this.props.item.displayName : 'Untitled campaign'}</h2>
-        <Tabs item={item}/>
-        <CampaignForm item={item} onSubmit={this.props.onSubmit} />
+        <h2>{this.props.campaign.displayName}</h2>
+
+        <Tabs campaign={this.props.campaign}/>
+
+        <CampaignForm {...this.props} />
       </div>
     );
   }
 }
 
 EditCampaign.propTypes = {
-  onSubmit: PropTypes.func,
-  item: PropTypes.object.isRequired,
-};
-
-EditCampaign.defaultProps = {
-  onSubmit: noop,
+  onSubmit: PropTypes.func.isRequired,
+  isLoading: PropTypes.bool.isRequired,
+  errors: PropTypes.array.isRequired,
+  campaign: PropTypes.object.isRequired,
 };
 
 export default EditCampaign;

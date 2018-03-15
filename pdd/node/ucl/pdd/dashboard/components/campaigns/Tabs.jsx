@@ -31,7 +31,7 @@ class Tabs extends React.Component {
   handleClick(e, idx) {
     e.preventDefault();
     const link = LINKS[idx];
-    let url = `/campaigns/${link.action}/${this.props.item.name}`;
+    let url = `/campaigns/${link.action}/${this.props.campaign.name}`;
     if (link.what) {
       url += `/${link.what}`;
     }
@@ -66,7 +66,7 @@ class Tabs extends React.Component {
 }
 
 Tabs.propTypes = {
-  item: PropTypes.object,
+  campaign: PropTypes.object,
 };
 
 export default Tabs;

@@ -1,12 +1,27 @@
+/*
+ * Copyright 2017-2018 UCL / Vincent Primault <v.primault@ucl.ac.uk>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import { cloneDeep, some, noop } from 'lodash';
-import { Toaster, Intent } from '@blueprintjs/core';
+import { Intent } from '@blueprintjs/core';
 import autobind from 'autobind-decorator';
 
 import TextInput from '../form/TextInput';
-
-const toaster = Toaster.create();
+import toaster from '../toaster';
 
 function appendVocabulary(obj, newQuery) {
   if (!obj.vocabulary.queries) {
@@ -49,7 +64,7 @@ class VocabularyForm extends React.Component {
     if (this.state.newQuery === '') {
       return;
     }
-    const obj = cloneDeep(this.props.item);
+    const obj = cloneDeep(this.props.campaign);
     if (appendVocabulary(obj, this.state.newQuery)) {
       this.props.onChange(obj);
       this.setState({ newQuery: '' });
@@ -80,7 +95,7 @@ class VocabularyForm extends React.Component {
 
 VocabularyForm.propTypes = {
   onChange: PropTypes.func,
-  item: PropTypes.object.isRequired,
+  campaign: PropTypes.object.isRequired,
 };
 
 VocabularyForm.defaultProps = {

@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-import { createStore, applyMiddleware, compose } from 'redux';
-import thunk from 'redux-thunk';
+import React from 'react';
 
-import reducer from './reducers';
+import ClientTable from './ClientTable';
+import withClientList from '../hoc/withClientList';
 
-const enableDevTools = process.env.NODE_ENV === 'devel' && typeof window === 'object' && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__;
-const composeEnhancers = enableDevTools ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ : compose;
-
-export default createStore(reducer, composeEnhancers(applyMiddleware(thunk)));
+export default withClientList(ClientTable);
