@@ -36,7 +36,7 @@ object CampaignValidator {
       errors += ErrorCause("should be at least 1", "groupSize")
     }
     if (obj.startTime.zip(obj.endTime).exists { case (a, b) => b.isBefore(a) }) {
-      errors += ErrorCause("should be greater than or equal to `startTime`", "endTime")
+      errors += ErrorCause("should be greater than or equal to start time", "endTime")
     }
     if (obj.samplingRate.exists(samplingRate => samplingRate < 0 || samplingRate > 1)) {
       errors += ErrorCause("should be between 0 and 1", "samplingRate")
