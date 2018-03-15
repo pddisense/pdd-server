@@ -22,12 +22,11 @@ object ClientValidator {
   def validate(obj: Client): ValidationResult = {
     val errors = mutable.ListBuffer.empty[ErrorCause]
     if (obj.publicKey.isEmpty) {
-      errors += ErrorCause("Should not be empty", "publicKey")
+      errors += ErrorCause("should not be empty", "publicKey")
     }
     if (obj.browser.isEmpty) {
-      errors += ErrorCause("Should not be empty", "browser")
+      errors += ErrorCause("should not be empty", "browser")
     }
-
     if (errors.isEmpty) ValidationResult.Valid else ValidationResult.Invalid(errors.toList)
   }
 }
