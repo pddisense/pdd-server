@@ -30,7 +30,7 @@ class EditVocabulary extends React.Component {
 
         <Tabs campaign={this.props.campaign}/>
 
-        <VocabularyForm campaign={this.props.campaign} onChange={this.props.onChange}/>
+        <VocabularyForm campaign={this.props.campaign} onSubmit={this.props.onSubmit}/>
 
         <div className="rythmed">
           <VocabularyTable campaign={this.props.campaign} />

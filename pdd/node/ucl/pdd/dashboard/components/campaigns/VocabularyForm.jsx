@@ -16,9 +16,9 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { cloneDeep, some, noop } from 'lodash';
-import { Intent } from '@blueprintjs/core';
 import autobind from 'autobind-decorator';
+import { cloneDeep, some } from 'lodash';
+import { Intent } from '@blueprintjs/core';
 
 import TextInput from '../form/TextInput';
 import toaster from '../toaster';
@@ -54,7 +54,7 @@ class VocabularyForm extends React.Component {
   }
 
   @autobind
-  handleNewQueryChange(e) {
+  handleChange(e) {
     this.setState({newQuery: e.target.value});
   }
 
@@ -66,7 +66,7 @@ class VocabularyForm extends React.Component {
     }
     const obj = cloneDeep(this.props.campaign);
     if (appendVocabulary(obj, this.state.newQuery)) {
-      this.props.onChange(obj);
+      this.props.onSubmit(obj);
       this.setState({ newQuery: '' });
     } else {
       toaster.show({
@@ -84,7 +84,7 @@ class VocabularyForm extends React.Component {
             <TextInput
               placeholder="flu,influenza"
               value={this.state.newQuery}
-              onChange={this.handleNewQueryChange} />
+              onChange={this.handleChange} />
           </div>
           <button className="pt-button pt-intent-primary">Add query</button>
         </div>
@@ -94,12 +94,8 @@ class VocabularyForm extends React.Component {
 }
 
 VocabularyForm.propTypes = {
-  onChange: PropTypes.func,
+  onSubmit: PropTypes.func.isRequired,
   campaign: PropTypes.object.isRequired,
-};
-
-VocabularyForm.defaultProps = {
-  onChange: noop,
 };
 
 export default VocabularyForm;
