@@ -50,7 +50,6 @@ import org.joda.time.Instant
 case class Campaign(
   name: String,
   createTime: Instant,
-  @NotEmpty
   displayName: String,
   email: Seq[String],
   vocabulary: Vocabulary,
@@ -58,11 +57,8 @@ case class Campaign(
   endTime: Option[Instant],
   collectRaw: Boolean,
   collectEncrypted: Boolean,
-  @Min(0)
   delay: Int,
-  @Min(0)
   graceDelay: Int,
-  @Min(1)
   groupSize: Int,
   samplingRate: Option[Double]) {
 

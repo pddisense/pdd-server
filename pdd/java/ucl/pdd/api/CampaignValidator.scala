@@ -23,6 +23,18 @@ import scala.collection.mutable
 object CampaignValidator {
   def validate(obj: Campaign): ValidationResult = {
     val errors = mutable.ListBuffer.empty[ErrorCause]
+    if (obj.displayName.isEmpty) {
+      errors += ErrorCause("Should not be empty", "displayName")
+    }
+    if (obj.delay < 0) {
+      errors += ErrorCause("Should not be negative", "delay")
+    }
+    if (obj.graceDelay < 0) {
+      errors += ErrorCause("Should not be negative", "graceDelay")
+    }
+    if (obj.groupSize < 1) {
+      errors += ErrorCause("Should be at least 1", "groupSize")
+    }
     if (obj.startTime.zip(obj.endTime).exists { case (a, b) => b.isBefore(a) }) {
       errors += ErrorCause("Should be greater than or equal to `startTime`", "endTime")
     }
