@@ -1,3 +1,19 @@
+/*
+ * Copyright 2017-2018 UCL / Vincent Primault <v.primault@ucl.ac.uk>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 
@@ -5,49 +21,49 @@ import Tabs from './Tabs';
 
 class ViewCampaign extends React.Component {
   render() {
-    const { item } = this.props;
+    const { campaign } = this.props;
     return (
       <div>
-        <h2>{item.displayName}</h2>
+        <h2>{campaign.displayName}</h2>
 
-        <Tabs item={item} />
+        <Tabs campaign={campaign} />
 
         <div className="attr-row">
           <div className="attr-name">E-mail addresse(s)</div>
-          <div className="attr-value">{item.email.join(', ')}</div>
+          <div className="attr-value">{campaign.email.join(', ')}</div>
         </div>
 
         <div className="attr-row">
           <div className="attr-name">Start date</div>
-          <div className="attr-value">{item.startTime ? new Date(item.startTime).toLocaleDateString() : '–'}</div>
+          <div className="attr-value">{campaign.startTime ? new Date(campaign.startTime).toLocaleDateString() : '–'}</div>
         </div>
 
         <div className="attr-row">
           <div className="attr-name">End date</div>
-          <div className="attr-value">{item.endTime ? new Date(item.endTime).toLocaleDateString() : item.startTime ? 'never' : '–'}</div>
+          <div className="attr-value">{campaign.endTime ? new Date(campaign.endTime).toLocaleDateString() : campaign.startTime ? 'never' : '–'}</div>
         </div>
 
         <div className="attr-row">
           <div className="attr-name">Vocabulary size</div>
-          <div className="attr-value">{item.vocabulary.queries.length}</div>
+          <div className="attr-value">{campaign.vocabulary.queries.length}</div>
         </div>
 
         <div className="attr-row">
           <div className="attr-name">Delay</div>
           <div className="attr-value">
-            {item.delay} day{item.delay > 1 ? 's' : ''} (+{item.graceDelay} day{item.graceDelay > 1 ? 's' : ''})
+            {campaign.delay} day{campaign.delay > 1 ? 's' : ''} (+{campaign.graceDelay} day{campaign.graceDelay > 1 ? 's' : ''})
           </div>
         </div>
 
         <div className="attr-row">
           <div className="attr-name">Sampling rate</div>
-          <div className="attr-value">{item.samplingRate}</div>
+          <div className="attr-value">{campaign.samplingRate}</div>
         </div>
 
-        {item.collectEncrypted ?
+        {campaign.collectEncrypted ?
           <div className="attr-row">
             <div className="attr-name">Group size</div>
-            <div className="attr-value">{item.groupSize}</div>
+            <div className="attr-value">{campaign.groupSize}</div>
           </div>: null}
       </div>
     );
@@ -55,7 +71,7 @@ class ViewCampaign extends React.Component {
 }
 
 ViewCampaign.propTypes = {
-  item: PropTypes.object.isRequired,
+  campaign: PropTypes.object.isRequired,
 };
 
 export default ViewCampaign;
