@@ -9,7 +9,7 @@ import TextInput from '../form/TextInput';
 function attrsToState(item) {
   return {
     displayName: item.displayName ? item.displayName : '',
-    email: item.email ? item.email.join(' ') : [],
+    email: item.email ? item.email.join(' ') : '',
   };
 }
 

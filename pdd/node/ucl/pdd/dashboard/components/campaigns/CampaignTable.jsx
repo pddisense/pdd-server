@@ -8,12 +8,12 @@ import {identity} from 'lodash';
 @withRouter
 class CampaignTable extends React.Component {
   @autobind
-  handleClick(item) {
-    this.props.history.push(`/campaigns/view/${item.name}`);
+  handleClick(campaign) {
+    this.props.history.push(`/campaigns/view/${campaign.name}`);
   }
 
   render() {
-    const rows = !this.props.items ? [] : this.props.items.map((item, idx) => {
+    const rows = !this.props.campaigns ? [] : this.props.campaigns.map((item, idx) => {
       const wrap = (el) => item.startTime ? el : <span className="pt-text-muted">{el}</span>;
       return (
         <tr onClick={() => this.handleClick(item)} key={idx}>
@@ -43,11 +43,11 @@ class CampaignTable extends React.Component {
 }
 
 CampaignTable.propTypes = {
-  items: PropTypes.array,
+  campaigns: PropTypes.array,
 };
 
 CampaignTable.defaultProps = {
-  items: [],
+  campaigns: [],
 };
 
 export default CampaignTable;

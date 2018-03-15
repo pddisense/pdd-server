@@ -8,7 +8,8 @@ class ViewCampaign extends React.Component {
     const { item } = this.props;
     return (
       <div>
-        <h2>{item.displayName ? item.displayName : 'Untitled campaign'}</h2>
+        <h2>{item.displayName}</h2>
+
         <Tabs item={item} />
 
         <div className="attr-row">
@@ -24,6 +25,11 @@ class ViewCampaign extends React.Component {
         <div className="attr-row">
           <div className="attr-name">End date</div>
           <div className="attr-value">{item.endTime ? new Date(item.endTime).toLocaleDateString() : item.startTime ? 'never' : '–'}</div>
+        </div>
+
+        <div className="attr-row">
+          <div className="attr-name">Vocabulary size</div>
+          <div className="attr-value">{item.vocabulary.queries.length}</div>
         </div>
 
         <div className="attr-row">

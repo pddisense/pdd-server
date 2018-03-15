@@ -14,22 +14,9 @@
  * limitations under the License.
  */
 
-const status = (response) => {
-  if (response.status >= 200 && response.status < 300) {
-    return Promise.resolve(response.json());
-  } else {
-    return Promise.reject(response.json().then(error => {
-      return { status: response.status, ...error };
-    }));
-  }
-};
+import { Toaster } from '@blueprintjs/core';
 
-export default function xhr(url, params = {}) {
-  params = {
-    headers: {'Content-Type': 'application/json'},
-    credentials: 'same-origin',
-    method: 'GET',
-    ...params
-  };
-  return fetch(url, params).then(status, e => Promise.reject(e));
-}
+// Singleton instance of a toaster used to display ephemeral messages.
+const toaster = Toaster.create();
+
+export default toaster;
