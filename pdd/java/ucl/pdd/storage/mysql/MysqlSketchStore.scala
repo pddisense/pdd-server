@@ -115,6 +115,13 @@ private[mysql] final class MysqlSketchStore(mysql: MysqlClient) extends SketchSt
       .select(params: _*)(hydrate)
   }
 
+  override def get(name: String): Future[Option[Sketch]] = {
+    mysql
+      .prepare("select * from sketches where name = ? limit 1")
+      .select(name)(hydrate)
+      .map(_.headOption)
+  }
+
   private def hydrate(row: Row): Sketch = {
     Sketch(
       name = toString(row, "name"),

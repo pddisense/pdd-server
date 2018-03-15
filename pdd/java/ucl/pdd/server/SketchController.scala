@@ -25,7 +25,8 @@ import ucl.pdd.storage.Storage
 
 @Singleton
 final class SketchController @Inject()(storage: Storage) extends Controller {
-  put("/api/sketches/:name") { req: UpdateSketchRequest =>
+  patch("/api/sketches/:name") { req: UpdateSketchRequest =>
+    // In practice this corresponds to a JSON merge patch.
     storage
       .sketches
       .get(req.name)

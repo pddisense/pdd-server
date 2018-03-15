@@ -27,6 +27,8 @@ trait SketchStore {
   def delete(name: String): Future[Boolean]
 
   def list(query: SketchQuery = SketchQuery()): Future[Seq[Sketch]]
+
+  def get(name: String): Future[Option[Sketch]]
 }
 
 case class SketchQuery(

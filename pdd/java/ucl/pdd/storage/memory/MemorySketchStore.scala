@@ -42,4 +42,6 @@ private[memory] final class MemorySketchStore extends SketchStore {
   override def list(query: SketchQuery = SketchQuery()): Future[Seq[Sketch]] = {
     Future.value(index.values.filter(query.matches).toSeq)
   }
+
+  override def get(name: String): Future[Option[Sketch]] = Future.value(index.get(name))
 }
