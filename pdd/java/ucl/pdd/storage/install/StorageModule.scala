@@ -27,8 +27,8 @@ object StorageModule extends TwitterModule {
 
   // MySQL options.
   private[this] val mysqlServerFlag = flag("storage.mysql.server", "127.0.0.1:3306", "Address to MySQL server")
-  private[this] val mysqlUserFlag = flag[String]("storage.mysql.user", "root", "MySQL username")
-  private[this] val mysqlPassFlag = flag("storage.mysql.pass", "", "MySQL password")
+  private[this] val mysqlUserFlag = flag("storage.mysql.user", "root", "MySQL username")
+  private[this] val mysqlPassFlag = flag[String]("storage.mysql.pass", "MySQL password")
   private[this] val mysqlBaseFlag = flag("storage.mysql.database", "pdd", "MySQL database")
 
   override def configure(): Unit = {
@@ -47,7 +47,7 @@ object StorageModule extends TwitterModule {
     override def get(): Storage = {
       val client = MysqlClientFactory(
         user = mysqlUserFlag(),
-        pass = mysqlPassFlag(),
+        pass = mysqlPassFlag.get.orNull,
         base = mysqlBaseFlag(),
         server = mysqlServerFlag())
       new MysqlStorage(client)
