@@ -18,8 +18,8 @@ def _get_package_dir(ctx):
 def _get_output_dir(ctx):
   # If it's an external label, output to workspace_root.
   if ctx.label.workspace_root:
-    return ctx.configuration.bin_dir.path + '/' + ctx.label.workspace_root + '/' + _get_package_dir(ctx)
-  return ctx.configuration.bin_dir.path + '/' + _get_package_dir(ctx)
+    return ctx.bin_dir.path + '/' + ctx.label.workspace_root + '/' + _get_package_dir(ctx)
+  return ctx.bin_dir.path + '/' + _get_package_dir(ctx)
 
 def _get_input_dir(ctx):
     # If it's an external label, input is in workspace_root.

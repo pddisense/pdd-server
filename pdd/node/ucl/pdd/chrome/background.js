@@ -52,7 +52,10 @@ chrome.alarms.onAlarm.addListener(alarm => {
     getOrRegisterClient().then(client => ping(client));
   }
 });
-chrome.alarms.create('ping', { when: nextDay().valueOf() });
+// We schedule a first ping in 2 minutes. Normally, scheduling it the next day would be sufficient,
+// but for testing purposes the duration of a "day" may be reduced at first. So we prefer to do a
+// first useless ping query, that will give us the next ping time.
+chrome.alarms.create('ping', { when: moment().add(2, 'minutes').valueOf() });
 
 function ping(client) {
   console.log(`Pinging the server for client ${client.name}...`);
@@ -64,17 +67,29 @@ function ping(client) {
       // Schedule next ping time. Normally, the response comes with a suggested time. If for any
       // reason it is not present, we still schedule one for the next day (otherwise the extension
       // will simply stop sending data).
-      const nextPingTime = resp.nextPingTime ? moment(resp.nextPingTime) : nextDay();
+      const nextPingTime = resp.nextPingTime
+        ? moment(resp.nextPingTime)
+        : moment().add(1, 'day').hours(1);
       chrome.alarms.create('ping', { when: nextPingTime.valueOf() });
     });
 }
 
+/**
+ * Return the currently registered client, or register a new client it if no one was found.
+ *
+ * @returns PromiseLike<Client>
+ */
 function getOrRegisterClient() {
   return storage.getClient().then(client => {
     return client || registerClient();
   });
 }
 
+/**
+ * Register a new client.
+ *
+ * @returns Promise<Client>
+ */
 function registerClient() {
   console.log('Registering client...');
   const keyPair = generateKeyPair();
@@ -106,19 +121,10 @@ function submitSketch(client, command) {
       const encryptedValues = command.collectEncrypted
         ? encryptCounters(command.publicKeys, command.round, client.keyPair, rawValues)
         : [];
-      const sketch = {
-        name: command.sketchName,
-        submitTime: moment().toISOString(),
-        rawValues,
-        encryptedValues,
-      };
+      const sketch = { rawValues, encryptedValues };
       return xhr(
         `${API_URL}/api/sketches/${command.sketchName}`,
-        { method: 'PUT', body: JSON.stringify(sketch) }
+        { method: 'PATCH', body: JSON.stringify(sketch) }
       );
     });
-}
-
-function nextDay() {
-  return moment().add(1, 'day').hours(1);
 }

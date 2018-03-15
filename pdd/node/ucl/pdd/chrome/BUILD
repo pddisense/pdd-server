@@ -33,7 +33,7 @@ production_env = {
 
 node_build(
   name = "chrome",
-  entry = ["app/options.js", "app/background.js"],
+  entry = ["options.js", "background.js"],
   srcs = glob(["**/*.js", "**/*.css"]),
   env = select({
     ":devel": devel_env,

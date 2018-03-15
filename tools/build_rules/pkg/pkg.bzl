@@ -14,7 +14,7 @@
 
 def _pkg_zip_impl(ctx):
   ctx.actions.run_shell(
-    command = "zip -r " + ctx.outputs.out.path + " " + " ".join([dep.path for dep in ctx.files.srcs]),
+    command = "zip -j " + ctx.outputs.out.path + " " + " ".join([dep.path for dep in ctx.files.srcs]),
     inputs = ctx.files.srcs,
     outputs = [ctx.outputs.out],
     progress_message = "Creating .zip archive",
@@ -30,3 +30,14 @@ pkg_zip = rule(
     "out": "%{name}.zip",
   },
 )
+"""Create a zip archive. The archive will be created flat, i.e., all specified
+files will be at the root of the archive, and the hierarchy will be lost.
+
+Args:
+  srcs: List of files to include within the archive. All files will be placed at the root of the
+        generated archive, meaning any hierarchy will be lost (and files will the same name will
+        be overwritten).
+
+Outputs:
+  %{name}.zip: A zip archive.
+"""

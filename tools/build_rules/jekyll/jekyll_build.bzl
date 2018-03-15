@@ -90,7 +90,7 @@ jekyll_build = rule(
 """Build a Jekyll website.
 
 Args:
-  srcs: Source files the website is composed of. They should include the _config.yml file.
+  srcs: Source files the website is composed of. It should include the _config.yml file.
 
 Outputs:
   %{name}: Locally served website.
