@@ -33,12 +33,11 @@ private[mysql] final class MysqlCampaignStore(mysql: MysqlClient) extends Campai
       case true => where += "startTime is not null and startTime <= now() and (endTime is null or endTime > now())"
       case false => where += "startTime is null or startTime > now() or (endTime is not null and endTime <= now())"
     }
-    val sql = "select * " +
-      "from campaigns " +
-      s"where ${if (where.isEmpty) "true" else where.mkString(" and ")} " +
-      "order by createTime desc"
     mysql
-      .prepare(sql)
+      .prepare("select * " +
+        "from campaigns " +
+        s"where ${if (where.isEmpty) "true" else where.mkString(" and ")} " +
+        "order by createTime desc")
       .select()(hydrate)
   }
 

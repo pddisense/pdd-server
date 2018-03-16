@@ -25,11 +25,11 @@ private[mysql] final class MysqlAggregationStore(mysql: MysqlClient) extends Agg
 
   import MysqlStore._
 
-  override def create(aggregation: Aggregation): Future[Boolean] = {
-    val sql = "insert into aggregations(name, campaignName, day, decryptedValues, rawValues, activeCount, submittedCount, decryptedCount) " +
-      "values (?, ?, ?, ?, ?, ?, ?, ?)"
+  override def save(aggregation: Aggregation): Future[Unit] = {
     mysql
-      .prepare(sql)
+      .prepare("insert into aggregations(name, campaignName, day, decryptedValues, rawValues, " +
+        "activeCount, submittedCount, decryptedCount) " +
+        "values (?, ?, ?, ?, ?, ?, ?, ?)")
       .apply(
         aggregation.name,
         aggregation.campaignName,
@@ -39,11 +39,24 @@ private[mysql] final class MysqlAggregationStore(mysql: MysqlClient) extends Agg
         aggregation.stats.activeCount,
         aggregation.stats.submittedCount,
         aggregation.stats.decryptedCount)
-      .map(_ => true)
       .rescue {
         // Error code 1062 corresponds to a duplicate entry, which means the object already exists.
-        case ServerError(1062, _, _) => Future.value(false)
+        case ServerError(1062, _, _) =>
+          mysql
+            .prepare("update aggregations set campaignName = ?, day = ?, decryptedValues = ?, " +
+              "rawValues = ?, activeCount = ?, submittedCount = ?, decryptedCount = ? " +
+              "where name = ?")
+            .apply(
+              aggregation.campaignName,
+              aggregation.day,
+              aggregation.decryptedValues,
+              aggregation.rawValues,
+              aggregation.stats.activeCount,
+              aggregation.stats.submittedCount,
+              aggregation.stats.decryptedCount,
+              aggregation.name)
       }
+      .unit
   }
 
   override def list(query: AggregationStore.Query): Future[Seq[Aggregation]] = {

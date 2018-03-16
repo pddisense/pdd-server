@@ -89,13 +89,13 @@ final class AggregateSketchesJob @Inject()(storage: Storage, @Timezone timezone:
       submittedCount = sketches.count(_.isSubmitted),
       decryptedCount = decryptedCount)
     val aggregation = Aggregation(
-      name = UUID.randomUUID().toString,
+      name = s"${campaign.name}-$day",
       campaignName = campaign.name,
       day = day,
       decryptedValues = decryptedValues,
       rawValues = rawValues,
       stats = stats)
-    storage.aggregations.create(aggregation).unit
+    storage.aggregations.save(aggregation).unit
   }
 
   private def foldRaw(values: Iterable[Seq[Long]]): Seq[Long] = {

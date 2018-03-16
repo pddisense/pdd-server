@@ -27,8 +27,8 @@ import scala.collection.JavaConverters._
 private[memory] final class MemoryAggregationStore extends AggregationStore {
   private[this] val index = new ConcurrentHashMap[String, Aggregation]().asScala
 
-  override def create(aggregation: Aggregation): Future[Boolean] = Future {
-    index.putIfAbsent(aggregation.name, aggregation).isEmpty
+  override def save(aggregation: Aggregation): Future[Unit] = Future {
+    index.put(aggregation.name, aggregation)
   }
 
   override def list(query: AggregationStore.Query): Future[Seq[Aggregation]] = Future {

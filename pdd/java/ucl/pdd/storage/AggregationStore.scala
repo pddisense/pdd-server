@@ -20,13 +20,30 @@ import com.twitter.util.Future
 import ucl.pdd.api.Aggregation
 
 trait AggregationStore {
-  def create(aggregation: Aggregation): Future[Boolean]
+  /**
+   * Save an aggregation. If the aggregation does not exist, it will be created. If an aggregation
+   * with the same name already exists, it will be updated.
+   *
+   * @param aggregation An aggregation to save.
+   */
+  def save(aggregation: Aggregation): Future[Unit]
 
+  /**
+   * Retrieve aggregations, according to a query.
+   *
+   * @param query A query used to filter aggregations.
+   */
   def list(query: AggregationStore.Query): Future[Seq[Aggregation]]
 }
 
 object AggregationStore {
 
+  /**
+   * A query used to filter aggregations. The `campaignName` field has to be specified, by design,
+   * as it is meaningless to retrieve all aggregations across all campaigns.
+   *
+   * @param campaignName Return only aggregations belonging to a given campaign.
+   */
   case class Query(campaignName: String)
 
 }
