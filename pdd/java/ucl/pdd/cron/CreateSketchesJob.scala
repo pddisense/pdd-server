@@ -32,11 +32,11 @@ import ucl.pdd.strategy.{Strategy, StrategyAttrs}
 import scala.util.Random
 
 /**
- * This cron job create each day the relevant sketches for the active campaigns.
+ * Cron job creating each day the relevant sketches for the active campaigns.
  *
- * @param storage
- * @param strategy
- * @param timezone
+ * @param storage  Storage.
+ * @param strategy Groups strategy.
+ * @param timezone Timezone.
  */
 final class CreateSketchesJob @Inject()(
   storage: Storage,
@@ -46,7 +46,7 @@ final class CreateSketchesJob @Inject()(
 
   override def execute(jobExecutionContext: JobExecutionContext): Unit = {
     logger.info(s"Starting ${getClass.getSimpleName}")
-
+    
     val now = new Instant(jobExecutionContext.getFireTime.getTime).toDateTime(timezone)
     val f = storage.campaigns
       .list(CampaignQuery(isActive = Some(true)))
