@@ -19,7 +19,7 @@ package ucl.pdd.storage.mysql
 import com.twitter.finagle.mysql.{OK, Row, ServerError, Client => MysqlClient}
 import com.twitter.util.Future
 import ucl.pdd.api.Client
-import ucl.pdd.storage.{ClientQuery, ClientStore}
+import ucl.pdd.storage.ClientStore
 
 import scala.collection.mutable
 
@@ -65,7 +65,7 @@ private[mysql] final class MysqlClientStore(mysql: MysqlClient) extends ClientSt
       }
   }
 
-  override def list(query: ClientQuery): Future[Seq[Client]] = {
+  override def list(query: ClientStore.Query): Future[Seq[Client]] = {
     val where = mutable.ListBuffer.empty[String]
     query.hasLeft.foreach {
       case true => where += "leaveTime is not null"

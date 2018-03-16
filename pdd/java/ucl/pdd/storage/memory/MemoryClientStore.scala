@@ -19,25 +19,34 @@ package ucl.pdd.storage.memory
 import java.util.concurrent.ConcurrentHashMap
 
 import com.twitter.util.Future
-import ucl.pdd.api.{Client, instantOrdering}
-import ucl.pdd.storage.{ClientQuery, ClientStore}
+import ucl.pdd.api.Client
+import ucl.pdd.storage.ClientStore
 
 import scala.collection.JavaConverters._
 
 private[memory] final class MemoryClientStore extends ClientStore {
   private[this] val index = new ConcurrentHashMap[String, Client]().asScala
 
-  override def create(client: Client): Future[Boolean] = {
-    Future.value(index.putIfAbsent(client.name, client).isEmpty)
+  override def create(client: Client): Future[Boolean] = Future {
+    index.putIfAbsent(client.name, client).isEmpty
   }
 
-  override def replace(client: Client): Future[Boolean] = {
-    Future.value(index.replace(client.name, client).isDefined)
+  override def replace(client: Client): Future[Boolean] = Future {
+    index.replace(client.name, client).isDefined
   }
 
-  override def list(query: ClientQuery): Future[Seq[Client]] = {
-    Future.value(index.values.filter(query.matches).toSeq.sortBy(_.createTime).reverse)
+  override def list(query: ClientStore.Query): Future[Seq[Client]] = Future {
+    index.values
+      .filter(matches(query, _))
+      .toSeq
+      .sortWith { case (a, b) => a.createTime.compareTo(b.createTime) >= 0 }
   }
 
-  override def get(name: String): Future[Option[Client]] = Future.value(index.get(name))
+  override def get(name: String): Future[Option[Client]] = Future {
+    index.get(name)
+  }
+
+  private def matches(query: ClientStore.Query, client: Client): Boolean = {
+    query.hasLeft.forall(client.hasLeft == _)
+  }
 }

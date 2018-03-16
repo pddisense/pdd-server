@@ -19,7 +19,7 @@ package ucl.pdd.storage.mysql
 import com.twitter.finagle.mysql.{Row, ServerError, Client => MysqlClient}
 import com.twitter.util.Future
 import ucl.pdd.api.{Aggregation, AggregationStats}
-import ucl.pdd.storage.{AggregationQuery, AggregationStore}
+import ucl.pdd.storage.AggregationStore
 
 private[mysql] final class MysqlAggregationStore(mysql: MysqlClient) extends AggregationStore with MysqlStore {
 
@@ -46,13 +46,9 @@ private[mysql] final class MysqlAggregationStore(mysql: MysqlClient) extends Agg
       }
   }
 
-  override def list(query: AggregationQuery): Future[Seq[Aggregation]] = {
-    val sql = "select * " +
-      "from aggregations " +
-      "where campaignName = ? " +
-      "order by day desc"
+  override def list(query: AggregationStore.Query): Future[Seq[Aggregation]] = {
     mysql
-      .prepare(sql)
+      .prepare("select * from aggregations where campaignName = ? order by day desc")
       .select(query.campaignName)(hydrate)
   }
 

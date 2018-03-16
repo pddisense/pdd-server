@@ -16,6 +16,7 @@
 
 package ucl.pdd.storage
 
+import com.twitter.util.Await
 import org.joda.time.{DateTime, Instant}
 import org.scalatest.BeforeAndAfterEach
 import ucl.testing.UnitSpec
@@ -27,13 +28,13 @@ private[storage] abstract class StoreSpec extends UnitSpec with BeforeAndAfterEa
 
   override def beforeEach(): Unit = {
     storage = createStorage
-    storage.startAsync().awaitRunning()
+    Await.ready(storage.startUp())
 
     super.beforeEach()
   }
 
   override def afterEach(): Unit = {
-    storage.stopAsync().awaitTerminated()
+    Await.ready(storage.shutDown())
     storage = null
 
     super.afterEach()

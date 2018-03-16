@@ -67,10 +67,10 @@ abstract class SketchStoreSpec extends StoreSpec {
 
     sketches.foreach(sketch => Await.result(storage.sketches.create(sketch)) shouldBe true)
 
-    Await.result(storage.sketches.list(SketchQuery(campaignName = Some("campaign1")))) should contain theSameElementsAs Seq(sketches(0), sketches(1), sketches(2))
-    Await.result(storage.sketches.list(SketchQuery(clientName = Some("client1")))) should contain theSameElementsAs Seq(sketches(0), sketches(1))
-    Await.result(storage.sketches.list(SketchQuery(isSubmitted = Some(true)))) should contain theSameElementsAs Seq(sketches(0))
-    Await.result(storage.sketches.list(SketchQuery(isSubmitted = Some(false)))) should contain theSameElementsAs Seq(sketches(1), sketches(2), sketches(3))
+    Await.result(storage.sketches.list(SketchStore.Query(campaignName = Some("campaign1")))) should contain theSameElementsAs Seq(sketches(0), sketches(1), sketches(2))
+    Await.result(storage.sketches.list(SketchStore.Query(clientName = Some("client1")))) should contain theSameElementsAs Seq(sketches(0), sketches(1))
+    Await.result(storage.sketches.list(SketchStore.Query(isSubmitted = Some(true)))) should contain theSameElementsAs Seq(sketches(0))
+    Await.result(storage.sketches.list(SketchStore.Query(isSubmitted = Some(false)))) should contain theSameElementsAs Seq(sketches(1), sketches(2), sketches(3))
   }
 
   it should "replace sketches" in {

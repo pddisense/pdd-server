@@ -26,7 +26,7 @@ import com.twitter.util.Future
 import org.joda.time.Instant
 import ucl.pdd.api._
 import ucl.pdd.config.Timezone
-import ucl.pdd.storage.{SketchQuery, Storage}
+import ucl.pdd.storage.{SketchStore, Storage}
 
 @Singleton
 final class PublicController @Inject()(storage: Storage, @Timezone timezone: DateTimeZone)
@@ -58,7 +58,7 @@ final class PublicController @Inject()(storage: Storage, @Timezone timezone: Dat
       case Some(client) =>
         storage
           .sketches
-          .list(SketchQuery(clientName = Some(client.name), isSubmitted = Some(false)))
+          .list(SketchStore.Query(clientName = Some(client.name), isSubmitted = Some(false)))
           .flatMap { sketches =>
             batchGetCampaigns(sketches.map(_.campaignName))
               .flatMap { campaigns =>
@@ -137,7 +137,7 @@ final class PublicController @Inject()(storage: Storage, @Timezone timezone: Dat
   private def collectKeys(clientName: String, campaignName: String, group: Int): Future[Seq[String]] = {
     storage
       .sketches
-      .list(SketchQuery(campaignName = Some(campaignName), group = Some(group)))
+      .list(SketchStore.Query(campaignName = Some(campaignName), group = Some(group)))
       .map(sketches => sketches.sortBy(_.clientName).map(sketch => sketch.publicKey))
   }
 }

@@ -64,8 +64,8 @@ abstract class CampaignStoreSpec extends StoreSpec {
     Await.result(storage.campaigns.batchGet(Seq("campaign1", "campaign2"))) should contain theSameElementsInOrderAs Seq(Some(campaign1), Some(campaign2))
 
     Await.result(storage.campaigns.list()) shouldBe Seq(campaign2, campaign1)
-    Await.result(storage.campaigns.list(CampaignQuery(isActive = Some(true)))) should contain theSameElementsInOrderAs Seq(campaign2)
-    Await.result(storage.campaigns.list(CampaignQuery(isActive = Some(false)))) should contain theSameElementsInOrderAs Seq(campaign1)
+    Await.result(storage.campaigns.list(CampaignStore.Query(isActive = Some(true)))) should contain theSameElementsInOrderAs Seq(campaign2)
+    Await.result(storage.campaigns.list(CampaignStore.Query(isActive = Some(false)))) should contain theSameElementsInOrderAs Seq(campaign1)
 
     val newCampaign1 = campaign1.copy(startTime = Some(now().minus(5000)))
     Await.result(storage.campaigns.replace(newCampaign1)) shouldBe true
@@ -73,7 +73,7 @@ abstract class CampaignStoreSpec extends StoreSpec {
     Await.result(storage.campaigns.get("campaign2")) shouldBe Some(campaign2)
 
     Await.result(storage.campaigns.list()) shouldBe Seq(campaign2, newCampaign1)
-    Await.result(storage.campaigns.list(CampaignQuery(isActive = Some(true)))) should contain theSameElementsInOrderAs Seq(campaign2, newCampaign1)
-    Await.result(storage.campaigns.list(CampaignQuery(isActive = Some(false)))) should have size 0
+    Await.result(storage.campaigns.list(CampaignStore.Query(isActive = Some(true)))) should contain theSameElementsInOrderAs Seq(campaign2, newCampaign1)
+    Await.result(storage.campaigns.list(CampaignStore.Query(isActive = Some(false)))) should have size 0
   }
 }

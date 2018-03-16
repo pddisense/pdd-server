@@ -26,7 +26,7 @@ import org.joda.time.Instant
 import org.quartz.{Job, JobExecutionContext}
 import ucl.pdd.api.{Aggregation, AggregationStats, Campaign, Sketch}
 import ucl.pdd.config.Timezone
-import ucl.pdd.storage.{CampaignQuery, SketchQuery, Storage}
+import ucl.pdd.storage.{CampaignStore, SketchStore, Storage}
 
 final class AggregateSketchesJob @Inject()(storage: Storage, @Timezone timezone: DateTimeZone)
   extends Job with Logging {
@@ -36,7 +36,7 @@ final class AggregateSketchesJob @Inject()(storage: Storage, @Timezone timezone:
 
     val now = new Instant(jobExecutionContext.getFireTime.getTime).toDateTime(timezone)
     val f = storage.campaigns
-      .list(CampaignQuery(isActive = Some(true)))
+      .list(CampaignStore.Query(isActive = Some(true)))
       .flatMap(results => Future.join(results.map(handleCampaign(now, _))))
     Await.result(f)
 
@@ -57,7 +57,7 @@ final class AggregateSketchesJob @Inject()(storage: Storage, @Timezone timezone:
   private def handleCampaign(day: Int, campaign: Campaign): Future[Unit] = {
     storage
       .sketches
-      .list(SketchQuery(campaignName = Some(campaign.name)))
+      .list(SketchStore.Query(campaignName = Some(campaign.name)))
       .flatMap { sketches =>
         val f = createAggregation(sketches, day, campaign)
         f.flatMap { _ =>

@@ -24,15 +24,15 @@ trait CampaignStore {
 
   def replace(campaign: Campaign): Future[Boolean]
 
-  def list(query: CampaignQuery = CampaignQuery()): Future[Seq[Campaign]]
+  def list(query: CampaignStore.Query = CampaignStore.Query()): Future[Seq[Campaign]]
 
   def get(name: String): Future[Option[Campaign]]
 
   def batchGet(names: Seq[String]): Future[Seq[Option[Campaign]]] = Future.collect(names.map(get))
 }
 
-case class CampaignQuery(isActive: Option[Boolean] = None) {
-  def matches(campaign: Campaign): Boolean = {
-    isActive.forall(campaign.isActive == _)
-  }
+object CampaignStore {
+
+  case class Query(isActive: Option[Boolean] = None)
+
 }

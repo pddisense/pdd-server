@@ -26,7 +26,7 @@ import org.joda.time.Instant
 import org.quartz.{Job, JobExecutionContext}
 import ucl.pdd.api._
 import ucl.pdd.config.Timezone
-import ucl.pdd.storage.{CampaignQuery, ClientQuery, Storage}
+import ucl.pdd.storage.{CampaignStore, ClientStore, Storage}
 import ucl.pdd.strategy.{Strategy, StrategyAttrs}
 
 import scala.util.Random
@@ -46,10 +46,10 @@ final class CreateSketchesJob @Inject()(
 
   override def execute(jobExecutionContext: JobExecutionContext): Unit = {
     logger.info(s"Starting ${getClass.getSimpleName}")
-    
+
     val now = new Instant(jobExecutionContext.getFireTime.getTime).toDateTime(timezone)
     val f = storage.campaigns
-      .list(CampaignQuery(isActive = Some(true)))
+      .list(CampaignStore.Query(isActive = Some(true)))
       .flatMap(results => Future.join(results.map(handleCampaign(now, _))))
     Await.result(f)
 
@@ -71,7 +71,7 @@ final class CreateSketchesJob @Inject()(
   private def handleCampaign(day: Int, campaign: Campaign): Future[Unit] = {
     storage
       .clients
-      .list(ClientQuery(hasLeft = Some(false)))
+      .list(ClientStore.Query(hasLeft = Some(false)))
       .flatMap { clients =>
         val sampledClients = campaign.samplingRate match {
           case None => clients

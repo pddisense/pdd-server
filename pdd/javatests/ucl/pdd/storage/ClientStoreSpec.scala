@@ -46,8 +46,8 @@ abstract class ClientStoreSpec extends StoreSpec {
     Await.result(storage.clients.get("client2")) shouldBe Some(client2)
 
     Await.result(storage.clients.list()) shouldBe Seq(client2, client1)
-    Await.result(storage.clients.list(ClientQuery(hasLeft = Some(true)))) should contain theSameElementsInOrderAs Seq(client2)
-    Await.result(storage.clients.list(ClientQuery(hasLeft = Some(false)))) should contain theSameElementsInOrderAs Seq(client1)
+    Await.result(storage.clients.list(ClientStore.Query(hasLeft = Some(true)))) should contain theSameElementsInOrderAs Seq(client2)
+    Await.result(storage.clients.list(ClientStore.Query(hasLeft = Some(false)))) should contain theSameElementsInOrderAs Seq(client1)
 
     val newClient1 = client1.copy(leaveTime = Some(now()))
     Await.result(storage.clients.replace(newClient1)) shouldBe true
@@ -55,7 +55,7 @@ abstract class ClientStoreSpec extends StoreSpec {
     Await.result(storage.clients.get("client2")) shouldBe Some(client2)
 
     Await.result(storage.clients.list()) shouldBe Seq(client2, newClient1)
-    Await.result(storage.clients.list(ClientQuery(hasLeft = Some(true)))) should contain theSameElementsInOrderAs Seq(client2, newClient1)
-    Await.result(storage.clients.list(ClientQuery(hasLeft = Some(false)))) should have size 0
+    Await.result(storage.clients.list(ClientStore.Query(hasLeft = Some(true)))) should contain theSameElementsInOrderAs Seq(client2, newClient1)
+    Await.result(storage.clients.list(ClientStore.Query(hasLeft = Some(false)))) should have size 0
   }
 }

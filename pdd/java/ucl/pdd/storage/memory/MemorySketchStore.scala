@@ -20,28 +20,36 @@ import java.util.concurrent.ConcurrentHashMap
 
 import com.twitter.util.Future
 import ucl.pdd.api.Sketch
-import ucl.pdd.storage.{SketchQuery, SketchStore}
+import ucl.pdd.storage.SketchStore
 
 import scala.collection.JavaConverters._
 
 private[memory] final class MemorySketchStore extends SketchStore {
   private[this] val index = new ConcurrentHashMap[String, Sketch]().asScala
 
-  override def create(sketch: Sketch): Future[Boolean] = {
-    Future.value(index.putIfAbsent(sketch.name, sketch).isEmpty)
+  override def create(sketch: Sketch): Future[Boolean] = Future {
+    index.putIfAbsent(sketch.name, sketch).isEmpty
   }
 
-  override def replace(sketch: Sketch): Future[Boolean] = {
-    Future.value(index.replace(sketch.name, sketch).isDefined)
+  override def replace(sketch: Sketch): Future[Boolean] = Future {
+    index.replace(sketch.name, sketch).isDefined
   }
 
-  override def delete(name: String): Future[Boolean] = {
-    Future.value(index.remove(name).isDefined)
+  override def delete(name: String): Future[Boolean] = Future {
+    index.remove(name).isDefined
   }
 
-  override def list(query: SketchQuery = SketchQuery()): Future[Seq[Sketch]] = {
-    Future.value(index.values.filter(query.matches).toSeq)
+  override def list(query: SketchStore.Query = SketchStore.Query()): Future[Seq[Sketch]] = Future {
+    index.values.filter(matches(query, _)).toSeq
   }
 
   override def get(name: String): Future[Option[Sketch]] = Future.value(index.get(name))
+
+  private def matches(query: SketchStore.Query, sketch: Sketch): Boolean = {
+    query.clientName.forall(sketch.clientName == _) &&
+      query.campaignName.forall(sketch.campaignName == _) &&
+      query.group.forall(sketch.group == _) &&
+      query.day.forall(sketch.day == _) &&
+      query.isSubmitted.forall(sketch.isSubmitted == _)
+  }
 }

@@ -17,10 +17,7 @@
 package ucl.pdd.storage
 
 import com.twitter.util.Await
-import org.joda.time.{DateTime, Instant}
-import org.scalatest.BeforeAndAfterEach
-import ucl.pdd.api.{Aggregation, AggregationStats, Campaign, Client, Vocabulary, VocabularyQuery}
-import ucl.testing.UnitSpec
+import ucl.pdd.api.{Aggregation, AggregationStats}
 
 abstract class AggregationStoreSpec extends StoreSpec {
   it should "manage aggregations" in {
@@ -46,14 +43,14 @@ abstract class AggregationStoreSpec extends StoreSpec {
       rawValues = Seq(0, 1),
       stats = AggregationStats(2, 1, 1))
 
-    Await.result(storage.aggregations.list(AggregationQuery(campaignName = "campaign1"))) should have size 0
+    Await.result(storage.aggregations.list(AggregationStore.Query(campaignName = "campaign1"))) should have size 0
 
     Await.result(storage.aggregations.create(agg1)) shouldBe true
     Await.result(storage.aggregations.create(agg2)) shouldBe true
     Await.result(storage.aggregations.create(agg3)) shouldBe true
     Await.result(storage.aggregations.create(agg1)) shouldBe false
 
-    Await.result(storage.aggregations.list(AggregationQuery(campaignName = "campaign1"))) should contain theSameElementsInOrderAs Seq(agg2, agg1)
-    Await.result(storage.aggregations.list(AggregationQuery(campaignName = "campaign2"))) should contain theSameElementsInOrderAs Seq(agg3)
+    Await.result(storage.aggregations.list(AggregationStore.Query(campaignName = "campaign1"))) should contain theSameElementsInOrderAs Seq(agg2, agg1)
+    Await.result(storage.aggregations.list(AggregationStore.Query(campaignName = "campaign2"))) should contain theSameElementsInOrderAs Seq(agg3)
   }
 }

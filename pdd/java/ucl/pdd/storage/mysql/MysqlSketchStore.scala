@@ -19,7 +19,7 @@ package ucl.pdd.storage.mysql
 import com.twitter.finagle.mysql.{OK, Parameter, Row, ServerError, Client => MysqlClient}
 import com.twitter.util.Future
 import ucl.pdd.api.Sketch
-import ucl.pdd.storage.{SketchQuery, SketchStore}
+import ucl.pdd.storage.SketchStore
 
 import scala.collection.mutable
 
@@ -83,7 +83,7 @@ private[mysql] final class MysqlSketchStore(mysql: MysqlClient) extends SketchSt
       }
   }
 
-  override def list(query: SketchQuery): Future[Seq[Sketch]] = {
+  override def list(query: SketchStore.Query): Future[Seq[Sketch]] = {
     val where = mutable.ListBuffer.empty[String]
     val params = mutable.ListBuffer.empty[Parameter]
     query.campaignName.foreach { campaignName =>

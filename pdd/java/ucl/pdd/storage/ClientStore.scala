@@ -24,13 +24,11 @@ trait ClientStore {
 
   def replace(client: Client): Future[Boolean]
 
-  def list(query: ClientQuery = ClientQuery()): Future[Seq[Client]]
+  def list(query: ClientStore.Query = ClientStore.Query()): Future[Seq[Client]]
 
   def get(name: String): Future[Option[Client]]
 }
 
-case class ClientQuery(hasLeft: Option[Boolean] = None) {
-  def matches(client: Client): Boolean = {
-    hasLeft.forall(client.hasLeft == _)
-  }
+object ClientStore {
+  case class Query(hasLeft: Option[Boolean] = None)
 }

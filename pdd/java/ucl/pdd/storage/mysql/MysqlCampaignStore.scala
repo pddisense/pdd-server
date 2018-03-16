@@ -19,7 +19,7 @@ package ucl.pdd.storage.mysql
 import com.twitter.finagle.mysql.{OK, Row, ServerError, Client => MysqlClient}
 import com.twitter.util.Future
 import ucl.pdd.api.{Campaign, Vocabulary, VocabularyQuery}
-import ucl.pdd.storage.{CampaignQuery, CampaignStore}
+import ucl.pdd.storage.CampaignStore
 
 import scala.collection.mutable
 
@@ -27,7 +27,7 @@ private[mysql] final class MysqlCampaignStore(mysql: MysqlClient) extends Campai
 
   import MysqlStore._
 
-  override def list(query: CampaignQuery): Future[Seq[Campaign]] = {
+  override def list(query: CampaignStore.Query): Future[Seq[Campaign]] = {
     val where = mutable.ListBuffer.empty[String]
     query.isActive.foreach {
       case true => where += "startTime is not null and startTime <= now() and (endTime is null or endTime > now())"

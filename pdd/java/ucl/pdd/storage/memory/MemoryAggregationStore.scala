@@ -20,18 +20,25 @@ import java.util.concurrent.ConcurrentHashMap
 
 import com.twitter.util.Future
 import ucl.pdd.api.Aggregation
-import ucl.pdd.storage.{AggregationQuery, AggregationStore}
+import ucl.pdd.storage.AggregationStore
 
 import scala.collection.JavaConverters._
 
 private[memory] final class MemoryAggregationStore extends AggregationStore {
   private[this] val index = new ConcurrentHashMap[String, Aggregation]().asScala
 
-  override def create(aggregation: Aggregation): Future[Boolean] = {
-    Future.value(index.putIfAbsent(aggregation.name, aggregation).isEmpty)
+  override def create(aggregation: Aggregation): Future[Boolean] = Future {
+    index.putIfAbsent(aggregation.name, aggregation).isEmpty
   }
 
-  override def list(query: AggregationQuery): Future[Seq[Aggregation]] = {
-    Future.value(index.values.filter(query.matches).toSeq.sortBy(_.day).reverse)
+  override def list(query: AggregationStore.Query): Future[Seq[Aggregation]] = Future {
+    index.values
+      .filter(matches(query, _))
+      .toSeq
+      .sortWith { case (a, b) => a.day.compareTo(b.day) >= 0 }
+  }
+
+  private def matches(query: AggregationStore.Query, aggregation: Aggregation): Boolean = {
+    query.campaignName == aggregation.campaignName
   }
 }

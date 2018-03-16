@@ -19,25 +19,34 @@ package ucl.pdd.storage.memory
 import java.util.concurrent.ConcurrentHashMap
 
 import com.twitter.util.Future
-import ucl.pdd.api.{Campaign, instantOrdering}
-import ucl.pdd.storage.{CampaignQuery, CampaignStore}
+import ucl.pdd.api.Campaign
+import ucl.pdd.storage.CampaignStore
 
 import scala.collection.JavaConverters._
 
 private[memory] final class MemoryCampaignStore extends CampaignStore {
   private[this] val index = new ConcurrentHashMap[String, Campaign]().asScala
 
-  override def create(campaign: Campaign): Future[Boolean] = {
-    Future.value(index.putIfAbsent(campaign.name, campaign).isEmpty)
+  override def create(campaign: Campaign): Future[Boolean] = Future {
+    index.putIfAbsent(campaign.name, campaign).isEmpty
   }
 
-  override def replace(campaign: Campaign): Future[Boolean] = {
-    Future.value(index.replace(campaign.name, campaign).isDefined)
+  override def replace(campaign: Campaign): Future[Boolean] = Future {
+    index.replace(campaign.name, campaign).isDefined
   }
 
-  override def list(query: CampaignQuery): Future[Seq[Campaign]] = {
-    Future.value(index.values.filter(query.matches).toSeq.sortBy(_.createTime).reverse)
+  override def list(query: CampaignStore.Query): Future[Seq[Campaign]] = Future {
+    index.values
+      .filter(matches(query, _))
+      .toSeq
+      .sortWith { case (a, b) => a.createTime.compareTo(b.createTime) >= 0 }
   }
 
-  override def get(name: String): Future[Option[Campaign]] = Future.value(index.get(name))
+  override def get(name: String): Future[Option[Campaign]] = Future {
+    index.get(name)
+  }
+
+  private def matches(query: CampaignStore.Query, campaign: Campaign): Boolean = {
+    query.isActive.forall(campaign.isActive == _)
+  }
 }

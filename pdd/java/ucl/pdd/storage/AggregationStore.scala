@@ -22,11 +22,11 @@ import ucl.pdd.api.Aggregation
 trait AggregationStore {
   def create(aggregation: Aggregation): Future[Boolean]
 
-  def list(query: AggregationQuery): Future[Seq[Aggregation]]
+  def list(query: AggregationStore.Query): Future[Seq[Aggregation]]
 }
 
-case class AggregationQuery(campaignName: String) {
-  def matches(aggregation: Aggregation): Boolean = {
-    aggregation.campaignName == campaignName
-  }
+object AggregationStore {
+
+  case class Query(campaignName: String)
+
 }

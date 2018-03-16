@@ -26,23 +26,18 @@ trait SketchStore {
 
   def delete(name: String): Future[Boolean]
 
-  def list(query: SketchQuery = SketchQuery()): Future[Seq[Sketch]]
+  def list(query: SketchStore.Query = SketchStore.Query()): Future[Seq[Sketch]]
 
   def get(name: String): Future[Option[Sketch]]
 }
 
-case class SketchQuery(
-  clientName: Option[String] = None,
-  campaignName: Option[String] = None,
-  group: Option[Int] = None,
-  day: Option[Int] = None,
-  isSubmitted: Option[Boolean] = None) {
+object SketchStore {
 
-  def matches(sketch: Sketch): Boolean = {
-    clientName.forall(sketch.clientName == _) &&
-      campaignName.forall(sketch.campaignName == _) &&
-      group.forall(sketch.group == _) &&
-      day.forall(sketch.day == _) &&
-      isSubmitted.forall(sketch.isSubmitted == _)
-  }
+  case class Query(
+    clientName: Option[String] = None,
+    campaignName: Option[String] = None,
+    group: Option[Int] = None,
+    day: Option[Int] = None,
+    isSubmitted: Option[Boolean] = None)
+
 }

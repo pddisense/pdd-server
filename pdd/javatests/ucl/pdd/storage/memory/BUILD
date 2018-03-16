@@ -22,5 +22,6 @@ scala_test(
     "//pdd/javatests/ucl/testing",
     "//pdd/javatests/ucl/pdd/storage",
     "//3rdparty/jvm/com/github/nscala_time",
+    "//3rdparty/jvm/com/twitter:util_core",
   ]
 )
