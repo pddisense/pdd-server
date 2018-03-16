@@ -20,13 +20,10 @@ import com.github.nscala_time.time.Imports._
 import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.{Inject, Singleton}
 import org.quartz._
-import ucl.pdd.config.{DayDuration, Timezone}
+import ucl.pdd.config.Timezone
 
 @Singleton
-final class CronManager @Inject()(
-  scheduler: Scheduler,
-  @DayDuration dayDuration: Duration,
-  @Timezone timezone: DateTimeZone)
+final class CronManager @Inject()(scheduler: Scheduler, @Timezone timezone: DateTimeZone)
   extends AbstractIdleService {
 
   override protected def startUp(): Unit = {
@@ -48,11 +45,7 @@ final class CronManager @Inject()(
       .newTrigger
       .withIdentity(jobClass.getSimpleName + "Trigger")
       .startAt(DateBuilder.tomorrowAt(0, minute, 0))
-      .withSchedule(
-        SimpleScheduleBuilder
-          .simpleSchedule
-          .withIntervalInMilliseconds(dayDuration.millis)
-          .repeatForever())
+      .withSchedule(SimpleScheduleBuilder.simpleSchedule.withIntervalInHours(24).repeatForever())
       .build
     scheduler.scheduleJob(jobDetail, trigger)
   }

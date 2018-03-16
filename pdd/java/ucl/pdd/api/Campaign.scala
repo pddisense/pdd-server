@@ -17,7 +17,6 @@
 package ucl.pdd.api
 
 import com.github.nscala_time.time.Imports._
-import com.twitter.finatra.validation.{Min, NotEmpty}
 import org.joda.time.Instant
 
 /**

@@ -25,11 +25,11 @@ import com.twitter.finatra.request.RouteParam
 import com.twitter.util.Future
 import org.joda.time.Instant
 import ucl.pdd.api._
-import ucl.pdd.config.DayDuration
+import ucl.pdd.config.Timezone
 import ucl.pdd.storage.{SketchQuery, Storage}
 
 @Singleton
-final class PublicController @Inject()(storage: Storage, @DayDuration dayDuration: Duration)
+final class PublicController @Inject()(storage: Storage, @Timezone timezone: DateTimeZone)
   extends Controller {
 
   post("/api/clients") { req: CreateClientRequest =>
@@ -66,13 +66,13 @@ final class PublicController @Inject()(storage: Storage, @DayDuration dayDuratio
                   val campaign = campaigns(sketch.campaignName)
                   collectKeys(client.name, sketch.campaignName, sketch.group)
                     .map { publicKeys =>
-                      val startTime = campaign.startTime.get + (dayDuration * sketch.day)
-                      val endTime = startTime + dayDuration
-                      val round = 1 // TODO.
+                      val startTime = campaign.startTime.get.toDateTime(timezone).withTimeAtStartOfDay + sketch.day.days
+                      val endTime = startTime + 1.day
+                      val round = sketch.day
                       SubmitSketchCommand(
                         sketchName = sketch.name,
-                        startTime = startTime,
-                        endTime = endTime,
+                        startTime = startTime.toInstant,
+                        endTime = endTime.toInstant,
                         vocabulary = Some(campaign.vocabulary),
                         publicKeys = publicKeys,
                         collectRaw = campaign.collectRaw,
@@ -84,10 +84,8 @@ final class PublicController @Inject()(storage: Storage, @DayDuration dayDuratio
               }
           }
           .map { submit =>
-            val now = DateTime.now()
-            val toNextDay = dayDuration.millis - (now.getMillis % dayDuration.millis)
-            val nextPingTime = (now + toNextDay).toInstant
-            PingResponse(submit, Some(nextPingTime))
+            val nextPingTime = DateTime.now(timezone).plusDays(1).withTimeAtStartOfDay.plusHours(1)
+            PingResponse(submit, Some(nextPingTime.toInstant))
           }
     }
   }
