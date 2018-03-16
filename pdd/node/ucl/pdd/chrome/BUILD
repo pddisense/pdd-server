@@ -14,6 +14,7 @@
 
 package(default_visibility = ["//visibility:public"])
 
+#load("@build_bazel_rules_nodejs//:defs.bzl", "jasmine_node_test")
 load("//tools/build_rules/node:node_build.bzl", "node_build")
 load("//tools/build_rules/pkg:pkg.bzl", "pkg_zip")
 
@@ -50,3 +51,15 @@ pkg_zip(
     "manifest.json",
   ] + glob(["images/**"]),
 )
+
+#jasmine_node_test(
+#  name = "unit_test",
+#  srcs = [":unit_test_lib"],
+#  node_modules = "//3rdparty:node_modules",
+#)
+#
+#node_build(
+#  name = "unit_test_lib",
+#  entry = ["crypto/index.spec.js"],
+#  srcs = glob(["**/*.js", "**/*.css"]),
+#)

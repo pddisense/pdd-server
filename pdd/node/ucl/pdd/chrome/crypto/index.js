@@ -1,4 +1,3 @@
-// @flow
 /*
  * Copyright 2017-2018 UCL / Vincent Primault <v.primault@ucl.ac.uk>
  *
@@ -19,35 +18,33 @@ import Elliptic from 'elliptic';
 import BN from 'bn.js';
 import crypto from 'crypto';
 
-import type { KeyPair } from '../types';
-
 const curve = new Elliptic.ec('ed25519');
 
-function exportKeyPair(pair): KeyPair {
+function exportKeyPair(pair) {
   return {
     publicKey: pair.getPublic('hex'),
     privateKey: pair.getPrivate('hex'),
   };
 }
 
-function importKeyPair(struct: KeyPair): any {
+function importKeyPair(struct) {
   const pair = curve.keyFromPrivate(struct.privateKey, 'hex');
   pair.pub = importKey(struct.publicKey);
   return pair;
 }
 
-function importKey(str): any {
+function importKey(str) {
   return curve.keyFromPublic(str, 'hex').pub;
 }
 
-function hash(data: any): string {
+function hash(data) {
   return crypto.createHash('sha256').update(data).digest('hex');
 }
 
 /**
  * Generate a pair of cryptographic keys.
  */
-export function generateKeyPair(): KeyPair {
+export function generateKeyPair() {
   return exportKeyPair(curve.genKeyPair());
 }
 
@@ -59,7 +56,7 @@ export function generateKeyPair(): KeyPair {
  * @param keyPair
  * @param counters
  */
-export function encryptCounters(publicKeys: Array<string>, round: number, keyPair: KeyPair, counters: Array<number>): Array<string> {
+export function encryptCounters(publicKeys, round, keyPair, counters) {
   // Import client's key and check it is present within the group.
   const key = importKeyPair(keyPair);
   const clientIndex = publicKeys.findIndex(pkey => pkey === keyPair.publicKey);
@@ -80,7 +77,7 @@ export function encryptCounters(publicKeys: Array<string>, round: number, keyPai
   return encrypted.map(n => n.toString());
 }
 
-function generateBlindingFactors(publicKeys: Array<string>, key: any, clientIndex: number, L: number, round: number): Array<BN> {
+function generateBlindingFactors(publicKeys, key, clientIndex, L, round) {
   const factors = [];
   for (let l = 0; l < L; l++) {
     let K_il = curve.curve.zero.fromRed(); // TODO: We are not working on Red's?
