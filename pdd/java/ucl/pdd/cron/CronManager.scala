@@ -16,38 +16,36 @@
 
 package ucl.pdd.cron
 
-import com.github.nscala_time.time.Imports._
-import com.google.inject.{Inject, Singleton}
-import com.twitter.util.Future
-import org.quartz._
+import java.util.concurrent.TimeUnit
+
+import com.google.inject.Singleton
+import com.twitter.inject.Injector
+import com.twitter.util.{Duration, Future, Time, Timer}
+import org.joda.time.{DateTime, DateTimeZone, Instant, ReadableInstant}
 import ucl.pdd.config.Timezone
 import ucl.pdd.util.Service
 
 @Singleton
-final class CronManager @Inject()(scheduler: Scheduler, @Timezone timezone: DateTimeZone)
+final class CronManager(timer: Timer, @Timezone timezone: DateTimeZone, injector: Injector)
   extends Service {
 
+  import CronManager._
+
   override def startUp(): Future[Unit] = Future {
-    scheduler.start()
-    scheduleDaily(scheduler, classOf[AggregateSketchesJob], 0)
-    scheduleDaily(scheduler, classOf[CreateSketchesJob], 30)
+    val nextDay = DateTime.now(timezone).plusDays(1).withTimeAtStartOfDay
+    timer.schedule(nextDay.plusHours(1), Duration.fromTimeUnit(1, TimeUnit.DAYS)) {
+      injector.instance[CreateSketchesJob].execute(Instant.now())
+    }
+    timer.schedule(nextDay.plusMinutes(15), Duration.fromTimeUnit(1, TimeUnit.DAYS)) {
+      injector.instance[AggregateSketchesJob].execute(Instant.now())
+    }
   }
 
   override def shutDown(): Future[Unit] = Future {
-    scheduler.shutdown()
+    timer.stop()
   }
+}
 
-  private def scheduleDaily(scheduler: Scheduler, jobClass: Class[_ <: Job], minute: Int): Unit = {
-    val jobDetail = JobBuilder
-      .newJob(jobClass)
-      .withIdentity(jobClass.getSimpleName, "PddJob")
-      .build
-    val trigger = TriggerBuilder
-      .newTrigger
-      .withIdentity(jobClass.getSimpleName + "Trigger")
-      .startAt(DateBuilder.tomorrowAt(0, minute, 0))
-      .withSchedule(SimpleScheduleBuilder.simpleSchedule.withIntervalInHours(24).repeatForever())
-      .build
-    scheduler.scheduleJob(jobDetail, trigger)
-  }
+object CronManager {
+  implicit def instantToTime(instant: ReadableInstant): Time = Time.fromMilliseconds(instant.getMillis)
 }

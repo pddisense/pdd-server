@@ -18,22 +18,15 @@ package ucl.pdd.cron
 
 import com.google.inject.{Provides, Singleton}
 import com.twitter.inject.{Injector, TwitterModule}
-import com.twitter.util.Await
-import org.quartz._
-import org.quartz.impl.StdSchedulerFactory
-import org.quartz.spi.JobFactory
+import com.twitter.util.{Await, JavaTimer}
+import org.joda.time.DateTimeZone
+import ucl.pdd.config.Timezone
 
 object CronModule extends TwitterModule {
-  override def configure(): Unit = {
-    bind[JobFactory].to[GuiceJobFactory]
-  }
-
   @Provides
   @Singleton
-  def providesScheduler(jobFactory: JobFactory): Scheduler = {
-    val scheduler = StdSchedulerFactory.getDefaultScheduler
-    scheduler.setJobFactory(jobFactory)
-    scheduler
+  def providesCronManager(@Timezone timezone: DateTimeZone, injector: Injector): CronManager = {
+    new CronManager(new JavaTimer, timezone, injector)
   }
 
   override def singletonStartup(injector: Injector): Unit = {

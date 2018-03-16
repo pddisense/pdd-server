@@ -67,7 +67,7 @@ class CreateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach {
     val clients = Seq.tabulate(5)(idx => createClient(idx ))
     Await.result(Future.collect(Seq(storage.campaigns.create(campaign1), storage.campaigns.create(campaign2)) ++ clients.map(storage.clients.create)))
 
-    job.execute(new FakeJobExecutionContext(now.toDateTime(timezone).plusDays(2).toInstant))
+    job.execute(now.toDateTime(timezone).plusDays(2).toInstant)
     val sketches = Await.result(storage.sketches.list())
 
     sketches should have size 10 // 5 clients * 2 campaigns = 10 sketches.
@@ -96,7 +96,7 @@ class CreateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach {
     val clients = Seq.tabulate(5)(idx => createClient(idx))
     Await.result(Future.collect(Seq(storage.campaigns.create(campaign1), storage.campaigns.create(campaign2)) ++ clients.map(storage.clients.create)))
 
-    job.execute(new FakeJobExecutionContext(now.toDateTime(timezone).plusDays(2).toInstant))
+    job.execute(now.toDateTime(timezone).plusDays(2).toInstant)
     val sketches = Await.result(storage.sketches.list())
 
     sketches.filter(_.campaignName == "campaign1").groupBy(_.group).map(_._2.size).toSeq.sorted should contain theSameElementsInOrderAs Seq(1, 2, 2)
@@ -108,7 +108,7 @@ class CreateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach {
     val clients = Seq.tabulate(5)(idx => createClient(idx ))
     Await.result(Future.collect(Seq(storage.campaigns.create(campaign1), storage.campaigns.create(campaign2)) ++ clients.map(storage.clients.create)))
 
-    job.execute(new FakeJobExecutionContext(now.toDateTime(timezone).plusDays(2).toInstant))
+    job.execute(now.toDateTime(timezone).plusDays(2).toInstant)
     val sketches = Await.result(storage.sketches.list())
 
     sketches should have size 5 // Only one active campaign.
@@ -119,7 +119,7 @@ class CreateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach {
     val clients = Seq.tabulate(3)(idx => createClient(idx)) ++ Seq.tabulate(2)(idx => createClient(idx + 3, active = false))
     Await.result(Future.collect(storage.campaigns.create(campaign1) +: clients.map(storage.clients.create)))
 
-    job.execute(new FakeJobExecutionContext(now.toDateTime(timezone).plusDays(2).toInstant))
+    job.execute(now.toDateTime(timezone).plusDays(2).toInstant)
     val sketches = Await.result(storage.sketches.list())
 
     sketches should have size 3 // Only three active clients.

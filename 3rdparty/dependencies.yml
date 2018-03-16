@@ -25,10 +25,6 @@ dependencies:
     nscala-time:
       version: 2.18.0
       lang: scala
-  com.google.guava:
-    guava:
-      version: "19.0"
-      lang: java
   com.twitter:
     finagle:
       version: 18.2.0
@@ -52,10 +48,6 @@ dependencies:
       lang: java
     logback-core:
       version: 1.2.3
-      lang: java
-  org.quartz-scheduler:
-    quartz:
-      version: "2.3.0"
       lang: java
   io.sentry:
     sentry:

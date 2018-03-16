@@ -23,18 +23,17 @@ import com.google.inject.Inject
 import com.twitter.inject.Logging
 import com.twitter.util.{Await, Future}
 import org.joda.time.Instant
-import org.quartz.{Job, JobExecutionContext}
 import ucl.pdd.api.{Aggregation, AggregationStats, Campaign, Sketch}
 import ucl.pdd.config.Timezone
 import ucl.pdd.storage.{CampaignStore, SketchStore, Storage}
 
 final class AggregateSketchesJob @Inject()(storage: Storage, @Timezone timezone: DateTimeZone)
-  extends Job with Logging {
+  extends Logging {
 
-  override def execute(jobExecutionContext: JobExecutionContext): Unit = {
+  def execute(at: Instant): Unit = {
     logger.info(s"Starting ${getClass.getSimpleName}")
 
-    val now = new Instant(jobExecutionContext.getFireTime.getTime).toDateTime(timezone)
+    val now = at.toDateTime(timezone)
     val f = storage.campaigns
       .list(CampaignStore.Query(isActive = Some(true)))
       .flatMap(results => Future.join(results.map(handleCampaign(now, _))))
