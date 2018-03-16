@@ -16,10 +16,20 @@
 
 package ucl.pdd.strategy
 
-import ucl.pdd.api.Client
+import com.google.inject.Module
+import com.twitter.inject.CreateTwitterInjector
+import ucl.testing.UnitSpec
 
-final class RoundRobinStrategy extends Strategy {
-  override def apply(clients: Seq[Client], attrs: StrategyAttrs): Seq[Seq[Client]] = {
-    clients.grouped(attrs.groupSize).toSeq
+/**
+ * Unit tests for [[StrategyModule]].
+ */
+class StrategyModuleSpec extends UnitSpec with CreateTwitterInjector {
+  behavior of "StrategyModule"
+
+  override protected def modules: Seq[Module] = Seq(StrategyModule)
+
+  it should "provide a strategy" in {
+    val injector = createInjector()
+    injector.instance[Strategy] shouldBe a[Strategy]
   }
 }

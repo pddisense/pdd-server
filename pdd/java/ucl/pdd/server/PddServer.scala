@@ -26,11 +26,12 @@ import ucl.pdd.cron.CronModule
 import ucl.pdd.jackson.PddJacksonModule
 import ucl.pdd.slf4j.LoggingConfigurator
 import ucl.pdd.storage.install.StorageModule
+import ucl.pdd.strategy.StrategyModule
 
 object PddServerMain extends PddServer
 
 class PddServer extends HttpServer with LoggingConfigurator {
-  override def modules = Seq(ConfigModule, StorageModule, CronModule, StatsReceiverModule)
+  override def modules = Seq(ConfigModule, StorageModule, CronModule, StrategyModule, StatsReceiverModule)
 
   override def defaultFinatraHttpPort: String = ":8000"
 

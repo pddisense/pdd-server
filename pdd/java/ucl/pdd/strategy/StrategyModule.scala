@@ -16,10 +16,10 @@
 
 package ucl.pdd.strategy
 
-import ucl.pdd.api.Client
+import com.twitter.inject.TwitterModule
 
-final class RoundRobinStrategy extends Strategy {
-  override def apply(clients: Seq[Client], attrs: StrategyAttrs): Seq[Seq[Client]] = {
-    clients.grouped(attrs.groupSize).toSeq
+object StrategyModule extends TwitterModule {
+  override def configure(): Unit = {
+    bind[Strategy].to[RoundRobinStrategy]
   }
 }

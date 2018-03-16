@@ -21,6 +21,7 @@ scala_binary(
     "//pdd/java/ucl/pdd/config",
     "//pdd/java/ucl/pdd/config:annotations",
     "//pdd/java/ucl/pdd/jackson",
+    "//pdd/java/ucl/pdd/strategy",
     "//pdd/java/ucl/pdd/slf4j",
     "//pdd/java/ucl/pdd/storage",
     "//pdd/java/ucl/pdd/storage/install",

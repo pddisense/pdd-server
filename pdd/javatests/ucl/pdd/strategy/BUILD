@@ -12,15 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-package(default_visibility = ["//visibility:public"])
-
-scala_library(
+scala_test(
   name = "strategy",
   srcs = glob(["*.scala"]),
+  size = "small",
   deps = [
-    "//pdd/java/ucl/pdd/api",
-    "//pdd/java/ucl/pdd/storage",
-    "//3rdparty/jvm/com/github/nscala_time",
-    "//3rdparty/jvm/com/twitter:inject_core",
-  ],
+    "//pdd/java/ucl/pdd/strategy",
+    "//pdd/javatests/ucl/testing",
+    "//pdd/javatests/com/twitter/inject",
+     "//3rdparty/jvm/com/twitter:inject_core",
+  ]
 )
