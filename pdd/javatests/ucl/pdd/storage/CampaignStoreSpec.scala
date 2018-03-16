@@ -19,9 +19,12 @@ package ucl.pdd.storage
 import com.twitter.util.Await
 import ucl.pdd.api.{Campaign, Vocabulary, VocabularyQuery}
 
+/**
+ * Common unit tests for implementations of [[CampaignStore]].
+ */
 abstract class CampaignStoreSpec extends StoreSpec {
-  it should "manage campaigns" in {
-    val campaign1 = Campaign(
+  private[this] val campaigns = Seq(
+    Campaign(
       name = "campaign1",
       createTime = now(),
       vocabulary = Vocabulary(),
@@ -34,8 +37,8 @@ abstract class CampaignStoreSpec extends StoreSpec {
       delay = 0,
       graceDelay = 0,
       groupSize = 0,
-      samplingRate = None)
-    val campaign2 = Campaign(
+      samplingRate = None),
+    Campaign(
       name = "campaign2",
       createTime = now().plus(1000),
       vocabulary = Vocabulary(queries = Seq(VocabularyQuery(exact = Some("foo")), VocabularyQuery(exact = Some("bar")), VocabularyQuery(terms = Some(Seq("a", "b"))))),
@@ -48,32 +51,35 @@ abstract class CampaignStoreSpec extends StoreSpec {
       delay = 1,
       graceDelay = 2,
       groupSize = 5,
-      samplingRate = Some(.5))
+      samplingRate = Some(.5)))
 
+  it should "create and retrieve campaigns" in {
     Await.result(storage.campaigns.get("campaign1")) shouldBe None
     Await.result(storage.campaigns.list()) shouldBe Seq.empty
-    Await.result(storage.campaigns.replace(campaign1)) shouldBe false
+    Await.result(storage.campaigns.replace(campaigns.head)) shouldBe false
 
-    Await.result(storage.campaigns.create(campaign1)) shouldBe true
-    Await.result(storage.campaigns.create(campaign2)) shouldBe true
-    Await.result(storage.campaigns.create(campaign1)) shouldBe false
+    campaigns.foreach(campaign => Await.result(storage.campaigns.create(campaign)) shouldBe true)
+    Await.result(storage.campaigns.create(campaigns.head)) shouldBe false
 
-    Await.result(storage.campaigns.get("campaign1")) shouldBe Some(campaign1)
-    Await.result(storage.campaigns.get("campaign2")) shouldBe Some(campaign2)
+    Await.result(storage.campaigns.get("campaign1")) shouldBe Some(campaigns(0))
+    Await.result(storage.campaigns.get("campaign2")) shouldBe Some(campaigns(1))
 
-    Await.result(storage.campaigns.batchGet(Seq("campaign1", "campaign2"))) should contain theSameElementsInOrderAs Seq(Some(campaign1), Some(campaign2))
+    Await.result(storage.campaigns.batchGet(Seq("campaign1", "campaign2"))) should contain theSameElementsInOrderAs Seq(Some(campaigns(0)), Some(campaigns(1)))
 
-    Await.result(storage.campaigns.list()) shouldBe Seq(campaign2, campaign1)
-    Await.result(storage.campaigns.list(CampaignStore.Query(isActive = Some(true)))) should contain theSameElementsInOrderAs Seq(campaign2)
-    Await.result(storage.campaigns.list(CampaignStore.Query(isActive = Some(false)))) should contain theSameElementsInOrderAs Seq(campaign1)
+    Await.result(storage.campaigns.list()) should contain theSameElementsInOrderAs Seq(campaigns(1), campaigns(0))
+    Await.result(storage.campaigns.list(CampaignStore.Query(isActive = Some(true)))) should contain theSameElementsInOrderAs Seq(campaigns(1))
+    Await.result(storage.campaigns.list(CampaignStore.Query(isActive = Some(false)))) should contain theSameElementsInOrderAs Seq(campaigns(0))
+  }
 
-    val newCampaign1 = campaign1.copy(startTime = Some(now().minus(5000)))
+  it should "replace campaigns" in {
+    Await.result(storage.campaigns.replace(campaigns.head)) shouldBe false
+
+    campaigns.foreach(campaign => Await.result(storage.campaigns.create(campaign)) shouldBe true)
+
+    val newCampaign1 = campaigns(0).copy(startTime = Some(now().minus(5000)))
     Await.result(storage.campaigns.replace(newCampaign1)) shouldBe true
     Await.result(storage.campaigns.get("campaign1")) shouldBe Some(newCampaign1)
-    Await.result(storage.campaigns.get("campaign2")) shouldBe Some(campaign2)
-
-    Await.result(storage.campaigns.list()) shouldBe Seq(campaign2, newCampaign1)
-    Await.result(storage.campaigns.list(CampaignStore.Query(isActive = Some(true)))) should contain theSameElementsInOrderAs Seq(campaign2, newCampaign1)
-    Await.result(storage.campaigns.list(CampaignStore.Query(isActive = Some(false)))) should have size 0
+    Await.result(storage.campaigns.get("campaign2")) shouldBe Some(campaigns(1))
+    Await.result(storage.campaigns.list()) should contain theSameElementsInOrderAs Seq(campaigns(1), newCampaign1)
   }
 }

@@ -19,6 +19,9 @@ package ucl.pdd.storage
 import com.twitter.util.Await
 import ucl.pdd.api.Sketch
 
+/**
+ * Common unit tests for implementations of [[SketchStore]].
+ */
 abstract class SketchStoreSpec extends StoreSpec {
   private[this] val sketches = Seq(
     Sketch(
@@ -66,6 +69,7 @@ abstract class SketchStoreSpec extends StoreSpec {
     Await.result(storage.sketches.list()) should have size 0
 
     sketches.foreach(sketch => Await.result(storage.sketches.create(sketch)) shouldBe true)
+    Await.result(storage.sketches.create(sketches.head)) shouldBe false
 
     Await.result(storage.sketches.list(SketchStore.Query(campaignName = Some("campaign1")))) should contain theSameElementsAs Seq(sketches(0), sketches(1), sketches(2))
     Await.result(storage.sketches.list(SketchStore.Query(clientName = Some("client1")))) should contain theSameElementsAs Seq(sketches(0), sketches(1))

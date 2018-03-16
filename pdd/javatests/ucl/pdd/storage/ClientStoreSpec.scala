@@ -19,43 +19,57 @@ package ucl.pdd.storage
 import com.twitter.util.Await
 import ucl.pdd.api.Client
 
+/**
+ * Common unit tests for implementations of [[ClientStore]].
+ */
 abstract class ClientStoreSpec extends StoreSpec {
-  it should "manage clients" in {
-    val client1 = Client(
+  private[this] val clients = Seq(
+    Client(
       name = "client1",
       createTime = now(),
       browser = "scalatest",
-      publicKey = "foobar==")
-    val client2 = Client(
+      publicKey = "foobar=="),
+    Client(
       name = "client2",
       createTime = now().plus(1000),
       browser = "scalatest",
       publicKey = "foobar==",
       externalName = Some("foo"),
-      leaveTime = Some(now().plus(10000)))
+      leaveTime = Some(now().plus(10000))))
 
+  it should "create and retrieve clients" in {
     Await.result(storage.clients.get("client1")) shouldBe None
     Await.result(storage.clients.list()) shouldBe Seq.empty
-    Await.result(storage.clients.replace(client1)) shouldBe false
 
-    Await.result(storage.clients.create(client1)) shouldBe true
-    Await.result(storage.clients.create(client2)) shouldBe true
-    Await.result(storage.clients.create(client1)) shouldBe false
+    clients.foreach(client => Await.result(storage.clients.create(client)) shouldBe true)
+    Await.result(storage.clients.create(clients.head)) shouldBe false
 
-    Await.result(storage.clients.get("client1")) shouldBe Some(client1)
-    Await.result(storage.clients.get("client2")) shouldBe Some(client2)
+    Await.result(storage.clients.get("client1")) shouldBe Some(clients(0))
+    Await.result(storage.clients.get("client2")) shouldBe Some(clients(1))
 
-    Await.result(storage.clients.list()) shouldBe Seq(client2, client1)
-    Await.result(storage.clients.list(ClientStore.Query(hasLeft = Some(true)))) should contain theSameElementsInOrderAs Seq(client2)
-    Await.result(storage.clients.list(ClientStore.Query(hasLeft = Some(false)))) should contain theSameElementsInOrderAs Seq(client1)
+    Await.result(storage.clients.list()) shouldBe Seq(clients(1), clients(0))
+    Await.result(storage.clients.list(ClientStore.Query(hasLeft = Some(true)))) should contain theSameElementsInOrderAs Seq(clients(1))
+    Await.result(storage.clients.list(ClientStore.Query(hasLeft = Some(false)))) should contain theSameElementsInOrderAs Seq(clients(0))
 
-    val newClient1 = client1.copy(leaveTime = Some(now()))
+    val newClient1 = clients(0).copy(leaveTime = Some(now()))
     Await.result(storage.clients.replace(newClient1)) shouldBe true
     Await.result(storage.clients.get("client1")) shouldBe Some(newClient1)
-    Await.result(storage.clients.get("client2")) shouldBe Some(client2)
+    Await.result(storage.clients.get("client2")) shouldBe Some(clients(1))
 
-    Await.result(storage.clients.list()) shouldBe Seq(client2, newClient1)
-    Await.result(storage.clients.list(ClientStore.Query(hasLeft = Some(true)))) should contain theSameElementsInOrderAs Seq(client2, newClient1)
+    Await.result(storage.clients.list()) shouldBe Seq(clients(1), newClient1)
+    Await.result(storage.clients.list(ClientStore.Query(hasLeft = Some(true)))) should contain theSameElementsInOrderAs Seq(clients(1), newClient1)
     Await.result(storage.clients.list(ClientStore.Query(hasLeft = Some(false)))) should have size 0
+  }
+
+  it should "replace clients" in {
+    Await.result(storage.clients.replace(clients(0))) shouldBe false
+
+    clients.foreach(client => Await.result(storage.clients.create(client)) shouldBe true)
+
+    val newClient1 = clients(0).copy(leaveTime = Some(now()))
+    Await.result(storage.clients.replace(newClient1)) shouldBe true
+    Await.result(storage.clients.get("client1")) shouldBe Some(newClient1)
+    Await.result(storage.clients.get("client2")) shouldBe Some(clients(1))
+    Await.result(storage.clients.list()) should contain theSameElementsAs Seq(clients(1), newClient1)
   }
 }
