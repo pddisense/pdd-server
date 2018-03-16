@@ -20,6 +20,7 @@ scala_library(
   deps = [
     "//pdd/java/ucl/pdd/api",
     "//pdd/java/ucl/pdd/storage",
+    "//pdd/java/ucl/pdd/util",
     "//3rdparty/jvm/com/twitter:util_core",
   ]
 )

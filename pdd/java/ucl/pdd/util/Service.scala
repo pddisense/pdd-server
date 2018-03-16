@@ -14,23 +14,12 @@
  * limitations under the License.
  */
 
-package ucl.pdd.storage.memory
+package ucl.pdd.util
 
 import com.twitter.util.Future
-import ucl.pdd.storage._
 
-final class MemoryStorage extends Storage {
-  override val clients: ClientStore = new MemoryClientStore
+trait Service {
+  def startUp(): Future[Unit]
 
-  override val campaigns: CampaignStore = new MemoryCampaignStore
-
-  override val aggregations: AggregationStore = new MemoryAggregationStore
-
-  override val sketches: SketchStore = new MemorySketchStore
-
-  override def startUp(): Future[Unit] = Future.Done
-
-  override def shutDown(): Future[Unit] = Future.Done
+  def shutDown(): Future[Unit]
 }
-
-

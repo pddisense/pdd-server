@@ -16,12 +16,11 @@
 
 package ucl.pdd.storage.mysql
 
-import com.google.common.util.concurrent.AbstractIdleService
 import com.twitter.finagle.mysql.{ServerError, Client => MysqlClient}
-import com.twitter.util.{Await, Future}
+import com.twitter.util.Future
 import ucl.pdd.storage._
 
-final class MysqlStorage(mysql: MysqlClient) extends AbstractIdleService with Storage {
+final class MysqlStorage(mysql: MysqlClient) extends Storage {
   override val clients = new MysqlClientStore(mysql)
 
   override val campaigns = new MysqlCampaignStore(mysql)
@@ -30,7 +29,7 @@ final class MysqlStorage(mysql: MysqlClient) extends AbstractIdleService with St
 
   override val sketches = new MysqlSketchStore(mysql)
 
-  override def startUp(): Unit = {
+  override def startUp(): Future[Unit] = {
     val tables = MysqlClientStore.CreateSchemaDDL ++ MysqlCampaignStore.CreateSchemaDDL ++
       MysqlAggregationStore.CreateSchemaDDL ++ MysqlSketchStore.CreateSchemaDDL
     val fs = tables.map { case (tableName, ddl) =>
@@ -41,10 +40,10 @@ final class MysqlStorage(mysql: MysqlClient) extends AbstractIdleService with St
           case ServerError(1146, _, _) => mysql.query(ddl).unit
         }
     }.toSeq
-    Await.result(Future.join(fs))
+    Future.join(fs)
   }
 
-  override def shutDown(): Unit = {
-    Await.ready(mysql.close())
+  override def shutDown(): Future[Unit] = {
+    mysql.close()
   }
 }

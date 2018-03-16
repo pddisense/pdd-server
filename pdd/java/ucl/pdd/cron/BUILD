@@ -22,6 +22,7 @@ scala_library(
     "//pdd/java/ucl/pdd/storage",
     "//pdd/java/ucl/pdd/strategy",
     "//pdd/java/ucl/pdd/config:annotations",
+    "//pdd/java/ucl/pdd/util",
     "//3rdparty/jvm/com/twitter:util_core",
     "//3rdparty/jvm/com/twitter:inject_core",
     "//3rdparty/jvm/com/twitter:inject_slf4j",

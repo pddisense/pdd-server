@@ -16,7 +16,7 @@
 
 package ucl.pdd.storage
 
-import com.google.common.util.concurrent.Service
+import ucl.pdd.util.Service
 
 trait Storage extends Service {
   def clients: ClientStore

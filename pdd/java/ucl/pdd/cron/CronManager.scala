@@ -17,22 +17,23 @@
 package ucl.pdd.cron
 
 import com.github.nscala_time.time.Imports._
-import com.google.common.util.concurrent.AbstractIdleService
 import com.google.inject.{Inject, Singleton}
+import com.twitter.util.Future
 import org.quartz._
 import ucl.pdd.config.Timezone
+import ucl.pdd.util.Service
 
 @Singleton
 final class CronManager @Inject()(scheduler: Scheduler, @Timezone timezone: DateTimeZone)
-  extends AbstractIdleService {
+  extends Service {
 
-  override protected def startUp(): Unit = {
+  override def startUp(): Future[Unit] = Future {
     scheduler.start()
     scheduleDaily(scheduler, classOf[AggregateSketchesJob], 0)
     scheduleDaily(scheduler, classOf[CreateSketchesJob], 30)
   }
 
-  override protected def shutDown(): Unit = {
+  override def shutDown(): Future[Unit] = Future {
     scheduler.shutdown()
   }
 

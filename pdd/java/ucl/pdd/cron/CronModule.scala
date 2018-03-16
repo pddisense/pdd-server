@@ -18,6 +18,7 @@ package ucl.pdd.cron
 
 import com.google.inject.{Provides, Singleton}
 import com.twitter.inject.{Injector, TwitterModule}
+import com.twitter.util.Await
 import org.quartz._
 import org.quartz.impl.StdSchedulerFactory
 import org.quartz.spi.JobFactory
@@ -36,10 +37,10 @@ object CronModule extends TwitterModule {
   }
 
   override def singletonStartup(injector: Injector): Unit = {
-    injector.instance[CronManager].startAsync().awaitRunning()
+    Await.ready(injector.instance[CronManager].startUp())
   }
 
   override def singletonShutdown(injector: Injector): Unit = {
-    injector.instance[CronManager].stopAsync().awaitTerminated()
+    Await.ready(injector.instance[CronManager].shutDown())
   }
 }

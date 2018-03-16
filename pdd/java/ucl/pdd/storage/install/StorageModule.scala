@@ -18,6 +18,7 @@ package ucl.pdd.storage.install
 
 import com.google.inject.{Provider, Singleton}
 import com.twitter.inject.{Injector, TwitterModule}
+import com.twitter.util.Await
 import ucl.pdd.storage.Storage
 import ucl.pdd.storage.memory.MemoryStorage
 import ucl.pdd.storage.mysql.{MysqlClientFactory, MysqlStorage}
@@ -55,10 +56,10 @@ object StorageModule extends TwitterModule {
   }
 
   override def singletonStartup(injector: Injector): Unit = {
-    injector.instance[Storage].startAsync().awaitRunning()
+    Await.ready(injector.instance[Storage].startUp())
   }
 
   override def singletonShutdown(injector: Injector): Unit = {
-    injector.instance[Storage].stopAsync().awaitTerminated()
+    Await.ready(injector.instance[Storage].shutDown())
   }
 }
