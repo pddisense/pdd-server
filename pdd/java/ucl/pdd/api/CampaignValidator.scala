@@ -41,6 +41,23 @@ object CampaignValidator {
     if (obj.samplingRate.exists(samplingRate => samplingRate < 0 || samplingRate > 1)) {
       errors += ErrorCause("should be between 0 and 1", "samplingRate")
     }
+    obj.email.zipWithIndex.foreach { case (email, idx) =>
+      validateTerm(s"email.$idx", email, errors)
+    }
+    obj.vocabulary.queries.zipWithIndex.foreach { case (query, idx) =>
+      query match {
+        case VocabularyQuery(Some(exact), None) =>
+          validateTerm(s"vocabulary.queries.$idx.exact", exact, errors)
+        case VocabularyQuery(None, Some(terms)) =>
+          terms.zipWithIndex.foreach { case (term, idx2) =>
+            validateTerm(s"vocabulary.queries.$idx.terms.$idx2", term, errors)
+          }
+        case VocabularyQuery(None, None) =>
+          errors += ErrorCause("should specify a query", s"vocabulary.queries.$idx")
+        case VocabularyQuery(Some(_), Some(_)) =>
+          errors += ErrorCause("should specify either an exact or terms query, not both", s"vocabulary.queries.$idx")
+      }
+    }
     if (errors.isEmpty) ValidationResult.Valid else ValidationResult.Invalid(errors.toList)
   }
 
@@ -79,5 +96,19 @@ object CampaignValidator {
 
     val result = if (errors.isEmpty) ValidationResult.Valid else ValidationResult.Invalid(errors.toList)
     result ++ validate(obj)
+  }
+
+  private def validateTerm(field: String, term: String, errors: mutable.ListBuffer[ErrorCause]): Unit = {
+    if (term.trim.isEmpty) {
+      errors += ErrorCause("should not be empty", field)
+    }
+    // The comma and line break is both forbidden because they may be used to differentiate between
+    // elements of the same list (outside of a JSON context).
+    if (term.contains(',')) {
+      errors += ErrorCause("cannot contain a comma (reserved character)", field)
+    }
+    if (term.contains('\n')) {
+      errors += ErrorCause("cannot contain a line break (reserved character)", field)
+    }
   }
 }
