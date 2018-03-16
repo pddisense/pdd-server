@@ -16,29 +16,33 @@
 
 package ucl.pdd.cron
 
-import java.util.concurrent.TimeUnit
-
-import com.google.inject.Singleton
+import com.google.inject.{Inject, Singleton}
+import com.twitter.conversions.time._
 import com.twitter.inject.Injector
-import com.twitter.util.{Duration, Future, Time, Timer}
+import com.twitter.util.{Future, Time, Timer}
 import org.joda.time.{DateTime, DateTimeZone, Instant, ReadableInstant}
-import ucl.pdd.config.Timezone
+import ucl.pdd.config.{TestingMode, Timezone}
 import ucl.pdd.util.Service
 
 @Singleton
-final class CronManager(timer: Timer, @Timezone timezone: DateTimeZone, injector: Injector)
+final class CronManager @Inject()(
+  timer: Timer,
+  injector: Injector,
+  @Timezone timezone: DateTimeZone,
+  @TestingMode testingMode: Boolean)
   extends Service {
 
   import CronManager._
 
   override def startUp(): Future[Unit] = Future {
-    val nextDay = DateTime.now(timezone).plusDays(1).withTimeAtStartOfDay
-    timer.schedule(nextDay.plusHours(1), Duration.fromTimeUnit(1, TimeUnit.DAYS)) {
+    val period = if (testingMode) 5.minutes else 1.day
+    val nextDay = if (testingMode) DateTime.now(timezone).plusDays(1).withTimeAtStartOfDay else DateTime.now()
+    timer.schedule(if (testingMode) nextDay.plusHours(1) else nextDay, period) {
       injector.instance[CreateSketchesJob].execute(Instant.now())
     }
-    timer.schedule(nextDay.plusMinutes(15), Duration.fromTimeUnit(1, TimeUnit.DAYS)) {
+    /*timer.schedule(nextDay.plusMinutes(15), period) {
       injector.instance[AggregateSketchesJob].execute(Instant.now())
-    }
+    }*/
   }
 
   override def shutDown(): Future[Unit] = Future {

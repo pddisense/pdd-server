@@ -16,8 +16,6 @@
 
 package ucl.pdd.cron
 
-import java.util.UUID
-
 import com.github.nscala_time.time.Imports._
 import com.google.inject.Inject
 import com.twitter.inject.Logging
@@ -30,10 +28,10 @@ import ucl.pdd.storage.{CampaignStore, SketchStore, Storage}
 final class AggregateSketchesJob @Inject()(storage: Storage, @Timezone timezone: DateTimeZone)
   extends Logging {
 
-  def execute(at: Instant): Unit = {
+  def execute(fireTime: Instant): Unit = {
     logger.info(s"Starting ${getClass.getSimpleName}")
 
-    val now = at.toDateTime(timezone)
+    val now = fireTime.toDateTime(timezone)
     val f = storage.campaigns
       .list(CampaignStore.Query(isActive = Some(true)))
       .flatMap(results => Future.join(results.map(handleCampaign(now, _))))

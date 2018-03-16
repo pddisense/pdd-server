@@ -14,21 +14,17 @@
  * limitations under the License.
  */
 
-package ucl.pdd.cron
+package ucl.pdd.config;
 
-import com.google.inject.Provides
-import com.twitter.inject.{Injector, TwitterModule}
-import com.twitter.util.{Await, JavaTimer, Timer}
+import com.google.inject.BindingAnnotation;
 
-object CronModule extends TwitterModule {
-  @Provides
-  def providesTimer: Timer = new JavaTimer
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-  override def singletonStartup(injector: Injector): Unit = {
-    Await.ready(injector.instance[CronManager].startUp())
-  }
-
-  override def singletonShutdown(injector: Injector): Unit = {
-    Await.ready(injector.instance[CronManager].shutDown())
-  }
+@BindingAnnotation
+@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface TestingMode {
 }
