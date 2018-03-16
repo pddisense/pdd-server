@@ -33,6 +33,7 @@ private[mysql] trait MysqlStore {
       case StringValue("") => None
       case StringValue(s) => Some(s)
       case NullValue => None
+      case v => throw new IllegalArgumentException(s"Not a string: $v")
     }
 
   protected final def toInt(row: Row, field: String): Int = getInt(row, field).getOrElse(0)
@@ -41,6 +42,7 @@ private[mysql] trait MysqlStore {
     row(field).flatMap {
       case IntValue(i) => Some(i)
       case NullValue => None
+      case v => throw new IllegalArgumentException(s"Not an int: $v")
     }
 
   protected final def toLong(row: Row, field: String): Long = getLong(row, field).getOrElse(0)
@@ -50,6 +52,7 @@ private[mysql] trait MysqlStore {
       case IntValue(i) => Some(i.toLong)
       case LongValue(l) => Some(l)
       case NullValue => None
+      case v => throw new IllegalArgumentException(s"Not a long: $v")
     }
 
   protected final def toLongs(row: Row, field: String): Seq[Long] = {
@@ -76,6 +79,7 @@ private[mysql] trait MysqlStore {
     row(field).flatMap {
       case DoubleValue(d) => Some(d)
       case NullValue => None
+      case v => throw new IllegalArgumentException(s"Not a double: $v")
     }
 
   protected final def toInstant(row: Row, field: String): Instant = getInstant(row, field).getOrElse(new Instant(0))
@@ -84,6 +88,7 @@ private[mysql] trait MysqlStore {
     row(field).flatMap {
       case timestampValue(timestamp) => Some(new Instant(timestamp.getTime))
       case NullValue => None
+      case v => throw new IllegalArgumentException(s"Not a timestamp: $v")
     }
 
   protected final def toBoolean(row: Row, field: String): Boolean = getBoolean(row, field).getOrElse(false)
@@ -93,6 +98,7 @@ private[mysql] trait MysqlStore {
       case IntValue(i) => Some(i != 0)
       case ByteValue(b) => Some(b != 0)
       case NullValue => None
+      case v => throw new IllegalArgumentException(s"Not a boolean: $v")
     }
 }
 
