@@ -57,7 +57,7 @@ class ViewCampaign extends React.Component {
 
         <div className="attr-row">
           <div className="attr-name">Sampling rate</div>
-          <div className="attr-value">{campaign.samplingRate}</div>
+          <div className="attr-value">{campaign.samplingRate * 100}&nbsp;%</div>
         </div>
 
         <div className="attr-row">

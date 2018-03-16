@@ -16,9 +16,9 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { noop } from 'lodash';
-import { Switch, NumericInput } from '@blueprintjs/core';
-import { DateInput } from '@blueprintjs/datetime';
+import {noop} from 'lodash';
+import {NumericInput, Switch} from '@blueprintjs/core';
+import {DateInput} from '@blueprintjs/datetime';
 import autobind from 'autobind-decorator';
 
 import FormGroup from '../form/FormGroup';
@@ -32,7 +32,7 @@ function attrsToState(campaign) {
     collectRaw: campaign.collectRaw,
     collectEncrypted: campaign.collectEncrypted,
     groupSize: campaign.groupSize,
-    samplingRate: campaign.samplingRate ? campaign.samplingRate : 1,
+    samplingRate: campaign.samplingRate ? campaign.samplingRate * 100 : 100,
   };
 }
 
@@ -45,7 +45,7 @@ function stateToAttrs(state) {
     collectRaw: state.collectRaw,
     collectEncrypted: state.collectEncrypted,
     groupSize: state.groupSize,
-    samplingRate: state.samplingRate,
+    samplingRate: state.samplingRate / 100,
   };
 }
 
@@ -57,48 +57,48 @@ class StrategyForm extends React.Component {
 
   @autobind
   handleStartTimeChange(startTime) {
-    this.setState({ startTime });
+    this.setState({startTime});
   }
 
   @autobind
   handleEndTimeChange(endTime) {
-    this.setState({ endTime });
+    this.setState({endTime});
   }
 
   @autobind
   handleDelayChange(delay) {
-    this.setState({ delay });
+    this.setState({delay});
   }
 
   @autobind
   handleGraceDelayChange(graceDelay) {
-    this.setState({ graceDelay });
+    this.setState({graceDelay});
   }
 
   @autobind
   handleGroupSizeChange(groupSize) {
-    this.setState({ groupSize });
+    this.setState({groupSize});
   }
 
   @autobind
   handleSamplingRateChange(samplingRate) {
-    this.setState({ samplingRate });
+    this.setState({samplingRate});
   }
 
   @autobind
   handleCollectRawClick() {
-    this.setState({ collectRaw: !this.state.collectRaw });
+    this.setState({collectRaw: !this.state.collectRaw});
   }
 
   @autobind
   handleCollectEncryptedClick() {
-    this.setState({ collectEncrypted: !this.state.collectEncrypted });
+    this.setState({collectEncrypted: !this.state.collectEncrypted});
   }
 
   @autobind
   handleSubmit(e) {
     e.preventDefault();
-    const obj = { ...this.props.campaign, ...stateToAttrs(this.state) };
+    const obj = {...this.props.campaign, ...stateToAttrs(this.state)};
     this.props.onSubmit(obj);
   }
 
@@ -134,7 +134,7 @@ class StrategyForm extends React.Component {
           <NumericInput
             value={this.state.delay}
             onValueChange={this.handleDelayChange}
-            min={0} />
+            min={0}/>
         </FormGroup>
 
         <FormGroup
@@ -145,7 +145,7 @@ class StrategyForm extends React.Component {
           <NumericInput
             value={this.state.graceDelay}
             onValueChange={this.handleGraceDelayChange}
-            min={0} />
+            min={0}/>
         </FormGroup>
 
         <div className="pt-form-group">
@@ -170,18 +170,18 @@ class StrategyForm extends React.Component {
             <NumericInput
               value={this.state.groupSize}
               onValueChange={this.handleGroupSizeChange}
-              min={2} />
+              min={2}/>
           </FormGroup> : null}
 
         <FormGroup
-          title="Sampling rate"
+          title="Sampling rate (%)"
           help="Proportion of users to sample every day.">
           <NumericInput
             value={this.state.samplingRate}
             onValueChange={this.handleSamplingRateChange}
             min={0}
-            max={1}
-            step={0.1}/>
+            max={100}
+            stepSize={5}/>
         </FormGroup>
 
         <button type="submit" className="pt-button pt-intent-primary">Submit</button>
