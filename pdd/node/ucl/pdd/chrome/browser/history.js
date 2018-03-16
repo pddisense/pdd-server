@@ -17,7 +17,7 @@
 import URL from 'url-parse';
 import moment from 'moment';
 
-function findIndices(q: string, vocabulary: Vocabulary): Array<number> {
+function findIndices(q, vocabulary) {
   return vocabulary.queries.map((query, idx) => {
     if (query.exact) {
       return q === query.exact ? idx : -1;
@@ -30,7 +30,7 @@ function findIndices(q: string, vocabulary: Vocabulary): Array<number> {
   }).filter(idx => -1 !== idx);
 }
 
-export function searchHistory(startTime: number, endTime: number, vocabulary: ?Vocabulary = null): Promise<Array<WebSearch>> {
+export function searchHistory(startTime, endTime, vocabulary) {
   return new Promise((resolve, reject) => {
     // Chrome documentation does not indicate that chrome.history.search may fail, so the promise
     // always resolves.
@@ -77,7 +77,7 @@ export function searchHistory(startTime: number, endTime: number, vocabulary: ?V
   });
 }
 
-export function aggregateHistory(startTime: number, endTime: number, vocabulary: Vocabulary): Promise<Array<number>> {
+export function aggregateHistory(startTime, endTime, vocabulary) {
   return searchHistory(startTime, endTime, vocabulary).then(searches => {
     const counters = [];
     counters.fill(0, 0, vocabulary.queries.length);
