@@ -30,7 +30,7 @@ function findIndices(q: string, vocabulary: Vocabulary): Array<number> {
   }).filter(idx => -1 !== idx);
 }
 
-function search(startTime: number, endTime: number, vocabulary: ?Vocabulary = null): Promise<Array<WebSearch>> {
+export function searchHistory(startTime: number, endTime: number, vocabulary: ?Vocabulary = null): Promise<Array<WebSearch>> {
   return new Promise((resolve, reject) => {
     // Chrome documentation does not indicate that chrome.history.search may fail, so the promise
     // always resolves.
@@ -45,48 +45,43 @@ function search(startTime: number, endTime: number, vocabulary: ?Vocabulary = nu
       endTime: moment(endTime).valueOf(),
     };
     chrome.history.search(query, (items) => {
-      const searches = items
-        .map((item) => {
-          const url = new URL(item.url, true);
-          // Because the above `text` filter is only a plain text query, we need to ensure that
-          // returned results actually correspond to a Google search. This is why we check again
-          // the domain name and path.
-          if (!url.host.startsWith('www.google.') || url.pathname !== '/search') {
-            return {};
-          }
+      const searches = {};
+      items.forEach((item) => {
+        const url = new URL(item.url, true);
+        // Because the above `text` filter is only a plain text query, we need to ensure that
+        // returned results actually correspond to a Google search. This is why we check again
+        // the domain name and path.
+        if (!url.host.startsWith('www.google.') || url.pathname !== '/search') {
+          return {};
+        }
+        if (url.query.q in searches) {
+          const search = searches[url.query.q];
+          search.count += item.visitCount;
+          search.lastVisitTime = Math.max(search.lastVisitTime, item.lastVisitTime);
+        } else {
           // Moreover, if a vocabulary to search against was provided, we validate that the query
           // matches this vocabulary.
           const indices = vocabulary ? findIndices(url.query.q, vocabulary) : [];
-          if (vocabulary && indices.length === 0) {
-            return {};
+          if (!vocabulary || indices.length > 0) {
+            searches[url.query.q] = {
+              indices,
+              query: url.query.q,
+              lastTime: item.lastVisitTime,
+              count: item.visitCount,
+            };
           }
-          return {
-            indices,
-            query: url.query.q,
-            lastTime: item.lastVisitTime,
-            count: item.visitCount,
-          };
-        })
-        .filter(item => {
-          // Because arrays have no flatMap method, we return an empty object above if we want to
-          // delete it, which we eventually do here.
-          return Object.keys(item).length > 0
-        });
-      resolve(searches);
+        }
+      });
+      resolve(Object.values(searches));
     });
   });
 }
 
-function aggregate(startTime: number, endTime: number, vocabulary: Vocabulary): Promise<Array<number>> {
-  return search(startTime, endTime, vocabulary).then(searches => {
+export function aggregateHistory(startTime: number, endTime: number, vocabulary: Vocabulary): Promise<Array<number>> {
+  return searchHistory(startTime, endTime, vocabulary).then(searches => {
     const counters = [];
     counters.fill(0, 0, vocabulary.queries.length);
     searches.forEach(search => search.indices.forEach(idx => counters[idx] += 1));
     return counters;
   });
 }
-
-export default {
-  search,
-  aggregate,
-};

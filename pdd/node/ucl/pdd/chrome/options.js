@@ -20,7 +20,6 @@ import Raven from 'raven-js';
 
 import OptionsPage from './components/OptionsPage';
 import RavenBoundary from './components/RavenBoundary';
-import { Storage } from './browser';
 
 // Import stylesheets.
 import 'normalize.css/normalize.css';

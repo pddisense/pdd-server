@@ -22,7 +22,7 @@ config_setting(name = "production", define_values = {"env": "production"})
 
 devel_env = {
   "NODE_ENV": "devel",
-  "API_URL": "http://localhost:8080",
+  "API_URL": "http://localhost:8000",
 }
 
 production_env = {

@@ -16,9 +16,8 @@
 
 import React from 'react';
 import moment from 'moment';
-import { flatMap } from 'lodash';
 
-import { History, Storage } from '../browser';
+import { searchHistory } from '../browser/history';
 import HistorySection from './HistorySection';
 
 export default class HistorySectionContainer extends React.Component {
@@ -39,10 +38,8 @@ export default class HistorySectionContainer extends React.Component {
       startTime = now.startOf('day');
     }
     const endTime = startTime.clone().endOf('day');
-    const vocabulary = flatMap(Storage.getAll(), item => {
-      return item.vocabulary.filter((v, idx) => item.activeQueries[idx]);
-    });
-    History.search(startTime, endTime, vocabulary).then(data => this.setState({ data }));
+    // TODO: which vocabulary to use?
+    searchHistory(startTime, endTime).then(data => this.setState({ data }));
   }
 
   render() {

@@ -17,7 +17,8 @@
 import Raven from 'raven-js';
 import moment from 'moment';
 
-import { history, storage } from './browser';
+import storage from './browser/storage';
+import { aggregateHistory } from './browser/history';
 import xhr from './util/xhr';
 import { encryptCounters, generateKeyPair } from './crypto';
 
@@ -115,8 +116,7 @@ function registerClient() {
 function submitSketch(client, command) {
   const startTime = moment(command.startTime).valueOf();
   const endTime = moment(command.startTime).valueOf();
-  return history
-    .aggregate(startTime, endTime, command.vocabulary)
+  return aggregateHistory(startTime, endTime, command.vocabulary)
     .then(rawValues => {
       const encryptedValues = command.collectEncrypted
         ? encryptCounters(command.publicKeys, command.round, client.keyPair, rawValues)
