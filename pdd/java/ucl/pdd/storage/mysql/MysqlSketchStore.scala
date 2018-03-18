@@ -99,7 +99,7 @@ private[mysql] final class MysqlSketchStore(mysql: MysqlClient) extends SketchSt
       params += day
     }
     query.group.foreach { group =>
-      where += "group = ?"
+      where += "`group` = ?"
       params += group
     }
     query.isSubmitted.foreach {

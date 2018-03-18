@@ -39,10 +39,11 @@ class PddServer extends HttpServer with LoggingConfigurator {
 
   override def configureHttp(router: HttpRouter): Unit = {
     router
+      .filter[CorsFilter]
       .filter[LoggingMDCFilter[Request, Response]]
       .filter[TraceIdMDCFilter[Request, Response]]
       .filter[CommonFilters]
       .add[AuthFilter, AdminController]
-      .add[CorsFilter, PublicController]
+      .add[PublicController]
   }
 }

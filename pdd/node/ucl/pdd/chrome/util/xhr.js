@@ -15,6 +15,7 @@
  */
 
 const status = (response) => {
+  //TODO: will fail if json body is empty.
   if (response.status >= 200 && response.status < 300) {
     return Promise.resolve(json(response));
   } else if (response.status === 500 || response.status === 404 || response.status === 204) {

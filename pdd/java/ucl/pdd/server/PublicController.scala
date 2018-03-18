@@ -20,6 +20,7 @@ import java.util.UUID
 
 import com.github.nscala_time.time.Imports._
 import com.google.inject.{Inject, Singleton}
+import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
 import com.twitter.finatra.request.RouteParam
 import com.twitter.util.Future
@@ -34,6 +35,8 @@ final class PublicController @Inject()(
   @Timezone timezone: DateTimeZone,
   @TestingMode testingMode: Boolean)
   extends Controller {
+
+  options("/api/:*") { _: Request => response.ok }
 
   post("/api/clients") { req: CreateClientRequest =>
     val client = Client(

@@ -53,17 +53,22 @@ function write(key, item) {
   });
 }
 
-function getClient() {
+/**
+ *
+ * @returns PromiseLike<object>
+ */
+export function getClient() {
   return reload().then(() => localClient);
 }
 
-function setClient(client) {
+/**
+ *
+ * @param client
+ * @returns PromiseLike<object>
+ */
+export function setClient(client) {
   return write(CLIENT_KEY, client).then(() => {
     localClient = client;
+    return client;
   });
 }
-
-export default {
-  getClient,
-  setClient,
-};

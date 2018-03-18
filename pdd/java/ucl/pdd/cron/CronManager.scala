@@ -36,8 +36,8 @@ final class CronManager @Inject()(
 
   override def startUp(): Future[Unit] = Future {
     val period = if (testingMode) 5.minutes else 1.day
-    val nextDay = if (testingMode) DateTime.now(timezone).plusDays(1).withTimeAtStartOfDay else DateTime.now()
-    timer.schedule(if (testingMode) nextDay.plusHours(1) else nextDay, period) {
+    val nextDay = if (testingMode) DateTime.now() else DateTime.now(timezone).plusDays(1).withTimeAtStartOfDay
+    timer.schedule(if (testingMode) nextDay.plusMinutes(1) else nextDay.plusHours(1), period) {
       injector.instance[CreateSketchesJob].execute(Instant.now())
     }
     /*timer.schedule(nextDay.plusMinutes(15), period) {

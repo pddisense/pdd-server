@@ -17,13 +17,13 @@
 import Raven from 'raven-js';
 import moment from 'moment';
 
-import storage from './browser/storage';
-import { aggregateHistory } from './browser/history';
+import {getClient, setClient} from './browser/storage';
+import {aggregateHistory} from './browser/history';
 import xhr from './util/xhr';
-import { encryptCounters, generateKeyPair } from './crypto';
+import {encryptCounters, generateKeyPair} from './crypto';
 
 // Configure Sentry reporting. The environment variables are provided at build time.
-Raven.config(process.env.SENTRY_DSN, { environment: process.env.NODE_ENV }).install();
+Raven.config(process.env.SENTRY_DSN, {environment: process.env.NODE_ENV}).install();
 
 const API_URL = process.env.API_URL || 'https://api.ppd.cs.ucl.ac.uk';
 
@@ -56,10 +56,11 @@ chrome.alarms.onAlarm.addListener(alarm => {
 // We schedule a first ping in 2 minutes. Normally, scheduling it the next day would be sufficient,
 // but for testing purposes the duration of a "day" may be reduced at first. So we prefer to do a
 // first useless ping query, that will give us the next ping time.
-chrome.alarms.create('ping', { when: moment().add(2, 'minutes').valueOf() });
+chrome.alarms.create('ping', {when: moment().add(2, 'minutes').valueOf()});
 
 function ping(client) {
   console.log(`Pinging the server for client ${client.name}...`);
+  //TODO: re-register in case of 404.
   xhr(`${API_URL}/api/clients/${client.name}/ping`)
     .then(resp => {
       // Submit each sketch that was requested.
@@ -71,7 +72,7 @@ function ping(client) {
       const nextPingTime = resp.nextPingTime
         ? moment(resp.nextPingTime)
         : moment().add(1, 'day').hours(1);
-      chrome.alarms.create('ping', { when: nextPingTime.valueOf() });
+      chrome.alarms.create('ping', {when: nextPingTime.valueOf()});
     });
 }
 
@@ -81,7 +82,7 @@ function ping(client) {
  * @returns PromiseLike<Client>
  */
 function getOrRegisterClient() {
-  return storage.getClient().then(client => {
+  return getClient().then(client => {
     return client || registerClient();
   });
 }
@@ -89,7 +90,7 @@ function getOrRegisterClient() {
 /**
  * Register a new client.
  *
- * @returns Promise<Client>
+ * @returns PromiseLike<Client>
  */
 function registerClient() {
   console.log('Registering client...');
@@ -99,8 +100,8 @@ function registerClient() {
     browser: 'chrome',
     externalName: null,
   };
-  return xhr(`${API_URL}/api/clients`, { method: 'POST', body: JSON.stringify(attrs) })
-    .then(client => storage.setClient({
+  return xhr(`${API_URL}/api/clients`, {method: 'POST', body: JSON.stringify(attrs)})
+    .then(client => setClient({
       keyPair,
       name: client.name,
       createTime: client.createTime,
@@ -121,10 +122,10 @@ function submitSketch(client, command) {
       const encryptedValues = command.collectEncrypted
         ? encryptCounters(command.publicKeys, command.round, client.keyPair, rawValues)
         : [];
-      const sketch = { rawValues, encryptedValues };
+      const sketch = {rawValues, encryptedValues};
       return xhr(
         `${API_URL}/api/sketches/${command.sketchName}`,
-        { method: 'PATCH', body: JSON.stringify(sketch) }
+        {method: 'PATCH', body: JSON.stringify(sketch)}
       );
     });
 }
