@@ -14,22 +14,29 @@
  * limitations under the License.
  */
 
-const status = (response) => {
-  //TODO: will fail if json body is empty.
+function status(response) {
   if (response.status >= 200 && response.status < 300) {
     return Promise.resolve(json(response));
-  } else if (response.status === 500 || response.status === 404 || response.status === 204) {
-    return Promise.reject({});
   } else {
     return Promise.reject(json(response));
   }
-};
+}
 
-const json = (response) => response.json();
+function json(response) {
+  return response.json().catch(() => {
+    // This `catch` is here to handle the case where the content length is 0, in which case the
+    // JSON deserialization fails with "Unexpected end of input". However, it seems impossible to
+    // get the content length from the fetch response object (in particular the "Content-Length"
+    // header is undefined). So we end up using this catch block, which is far from ideal as it
+    // will also hide legitimate JSON deserialization errors...
+    // Cf. https://stackoverflow.com/questions/48266678/how-to-get-the-content-length-of-the-response-from-a-request-with-fetch#comment83517087_48266842
+    return {};
+  });
+}
 
 export default function xhr(url, params = {}) {
   params = {
-    headers: {'Content-Type': 'application/json'},
+    headers: { 'Content-Type': 'application/json' },
     credentials: 'same-origin',
     method: 'GET',
     ...params
