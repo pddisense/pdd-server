@@ -17,6 +17,7 @@ def maven_dependencies(callback = declare_maven):
 # - io.sentry:sentry-logback:1.6.4 wanted version 1.2.1
 # - ch.qos.logback:logback-classic:1.2.3 wanted version 1.2.3
     callback({"artifact": "ch.qos.logback:logback-core:1.2.3", "lang": "java", "sha1": "864344400c3d4d92dfeb0a305dc87d953677c03c", "repository": "http://central.maven.org/maven2/", "name": "ch_qos_logback_logback_core", "actual": "@ch_qos_logback_logback_core//jar", "bind": "jar/ch/qos/logback/logback_core"})
+    callback({"artifact": "com.datadoghq:java-dogstatsd-client:2.5", "lang": "java", "sha1": "a9380127a42855a76af7787840a3a04b9fc4ce20", "repository": "http://central.maven.org/maven2/", "name": "com_datadoghq_java_dogstatsd_client", "actual": "@com_datadoghq_java_dogstatsd_client//jar", "bind": "jar/com/datadoghq/java_dogstatsd_client"})
 # duplicates in com.fasterxml.jackson.core:jackson-annotations promoted to 2.8.4
 # - com.twitter:inject-slf4j_2.11:18.2.0 wanted version 2.8.4
 # - com.fasterxml.jackson.core:jackson-databind:2.8.4 wanted version 2.8.0
