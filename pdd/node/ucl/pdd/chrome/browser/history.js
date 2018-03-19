@@ -52,12 +52,12 @@ export function searchHistory(startTime, endTime, vocabulary) {
         // returned results actually correspond to a Google search. This is why we check again
         // the domain name and path.
         if (!url.host.startsWith('www.google.') || url.pathname !== '/search') {
-          return {};
+          return;
         }
         if (url.query.q in searches) {
           const search = searches[url.query.q];
           search.count += item.visitCount;
-          search.lastVisitTime = Math.max(search.lastVisitTime, item.lastVisitTime);
+          search.lastTime = Math.max(search.lastTime, item.lastVisitTime);
         } else {
           // Moreover, if a vocabulary to search against was provided, we validate that the query
           // matches this vocabulary.
@@ -79,9 +79,9 @@ export function searchHistory(startTime, endTime, vocabulary) {
 
 export function aggregateHistory(startTime, endTime, vocabulary) {
   return searchHistory(startTime, endTime, vocabulary).then(searches => {
-    const counters = [];
-    counters.fill(0, 0, vocabulary.queries.length);
-    searches.forEach(search => search.indices.forEach(idx => counters[idx] += 1));
+    const counters = Array(vocabulary.queries.length);
+    counters.fill(0);
+    searches.forEach(search => search.indices.forEach(idx => counters[idx] += search.count));
     return counters;
   });
 }

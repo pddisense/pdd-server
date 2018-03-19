@@ -17,13 +17,13 @@
 import Raven from 'raven-js';
 import moment from 'moment';
 
-import {getClient, setClient} from './browser/storage';
-import {aggregateHistory} from './browser/history';
+import { getClient, setClient } from './browser/storage';
+import { aggregateHistory } from './browser/history';
 import xhr from './util/xhr';
-import {encryptCounters, generateKeyPair} from './crypto';
+import { encryptCounters, generateKeyPair } from './crypto';
 
 // Configure Sentry reporting. The environment variables are provided at build time.
-Raven.config(process.env.SENTRY_DSN, {environment: process.env.NODE_ENV}).install();
+Raven.config(process.env.SENTRY_DSN, { environment: process.env.NODE_ENV }).install();
 
 const API_URL = process.env.API_URL || 'https://api.ppd.cs.ucl.ac.uk';
 
@@ -53,10 +53,10 @@ chrome.alarms.onAlarm.addListener(alarm => {
     getOrRegisterClient().then(client => ping(client));
   }
 });
-// We schedule a first ping in 2 minutes. Normally, scheduling it the next day would be sufficient,
+// We schedule a first ping in 1 minute. Normally, scheduling it the next day would be sufficient,
 // but for testing purposes the duration of a "day" may be reduced at first. So we prefer to do a
 // first useless ping query, that will give us the next ping time.
-chrome.alarms.create('ping', {when: moment().add(2, 'minutes').valueOf()});
+chrome.alarms.create('ping', { when: moment().add(1, 'minute').valueOf() });
 
 function ping(client) {
   console.log(`Pinging the server for client ${client.name}...`);
@@ -65,14 +65,14 @@ function ping(client) {
     .then(resp => {
       // Submit each sketch that was requested.
       resp.submit.forEach(command => submitSketch(client, command));
-
+      
       // Schedule next ping time. Normally, the response comes with a suggested time. If for any
       // reason it is not present, we still schedule one for the next day (otherwise the extension
       // will simply stop sending data).
       const nextPingTime = resp.nextPingTime
         ? moment(resp.nextPingTime)
         : moment().add(1, 'day').hours(1);
-      chrome.alarms.create('ping', {when: nextPingTime.valueOf()});
+      chrome.alarms.create('ping', { when: nextPingTime.valueOf() });
     });
 }
 
@@ -100,32 +100,33 @@ function registerClient() {
     browser: 'chrome',
     externalName: null,
   };
-  return xhr(`${API_URL}/api/clients`, {method: 'POST', body: JSON.stringify(attrs)})
-    .then(client => setClient({
-      keyPair,
-      name: client.name,
-      createTime: client.createTime,
-      browser: client.browser,
-      externalName: client.externalName,
-    }))
-    .then(client => {
-      console.log(`Registered as client ${client.name}`);
-      return client;
-    });
+  return xhr(
+    `${API_URL}/api/clients`,
+    { method: 'POST', body: JSON.stringify(attrs) }
+  ).then(created => setClient({
+    keyPair,
+    name: created.name,
+    createTime: created.createTime,
+    browser: created.browser,
+    externalName: created.externalName,
+  })).then(client => {
+    console.log(`Registered as client ${client.name}`);
+    return client;
+  });
 }
 
 function submitSketch(client, command) {
-  const startTime = moment(command.startTime).valueOf();
-  const endTime = moment(command.startTime).valueOf();
+  const startTime = moment(command.startTime);
+  const endTime = moment(command.endTime);
   return aggregateHistory(startTime, endTime, command.vocabulary)
     .then(rawValues => {
       const encryptedValues = command.collectEncrypted
         ? encryptCounters(command.publicKeys, command.round, client.keyPair, rawValues)
         : [];
-      const sketch = {rawValues, encryptedValues};
+      const sketch = { rawValues, encryptedValues };
       return xhr(
         `${API_URL}/api/sketches/${command.sketchName}`,
-        {method: 'PATCH', body: JSON.stringify(sketch)}
+        { method: 'PATCH', body: JSON.stringify(sketch) }
       );
     });
 }

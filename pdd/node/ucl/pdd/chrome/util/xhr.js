@@ -31,6 +31,8 @@ function json(response) {
     // will also hide legitimate JSON deserialization errors...
     // Cf. https://stackoverflow.com/questions/48266678/how-to-get-the-content-length-of-the-response-from-a-request-with-fetch#comment83517087_48266842
     return {};
+  }).then(data => {
+    return { status: response.status, ...data };
   });
 }
 
