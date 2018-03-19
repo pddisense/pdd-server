@@ -52,7 +52,7 @@ class CreateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach {
 
   override def beforeEach(): Unit = {
     storage = new MemoryStorage
-    job = new CreateSketchesJob(storage, new RoundRobinStrategy, timezone)
+    job = new CreateSketchesJob(storage, new RoundRobinStrategy, timezone, testingMode = false)
     super.beforeEach()
   }
 
