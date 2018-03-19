@@ -21,7 +21,7 @@ import com.twitter.finatra.http.HttpServer
 import com.twitter.finatra.http.filters.{CommonFilters, LoggingMDCFilter, TraceIdMDCFilter}
 import com.twitter.finatra.http.routing.HttpRouter
 import ucl.pdd.jackson.PddJacksonModule
-import ucl.pdd.slf4j.LoggingConfigurator
+import ucl.pdd.util.slf4j.LoggingConfigurator
 
 object PddDashboardMain extends PddDashboard
 

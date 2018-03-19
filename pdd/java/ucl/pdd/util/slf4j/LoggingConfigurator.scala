@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ucl.pdd.slf4j
+package ucl.pdd.util.slf4j
 
 import ch.qos.logback.classic.LoggerContext
 import ch.qos.logback.classic.joran.JoranConfigurator

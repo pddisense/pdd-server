@@ -18,7 +18,7 @@ scala_binary(
   deps = [
     "//pdd/java/ucl/pdd/api",
     "//pdd/java/ucl/pdd/jackson",
-    "//pdd/java/ucl/pdd/slf4j",
+    "//pdd/java/ucl/pdd/util/slf4j",
     "//3rdparty/jvm/com/twitter:finatra_http",
     "//3rdparty/jvm/com/twitter:finatra_httpclient",
     "//3rdparty/jvm/ch/qos/logback:logback_core",
