@@ -13,10 +13,17 @@
 # limitations under the License.
 
 def _pkg_zip_impl(ctx):
+  dir = ctx.actions.declare_directory(ctx.label.name, sibling=ctx.outputs.out)
+
+  commands = []
+  commands.append("mkdir -p " + dir.path)
+  commands.extend(["cp " + dep.path + " " + dir.path + "/" + dep.basename for dep in ctx.files.srcs])
+  commands.append("zip -rj " + ctx.outputs.out.path + " " + dir.path)
   ctx.actions.run_shell(
-    command = "zip -j " + ctx.outputs.out.path + " " + " ".join([dep.path for dep in ctx.files.srcs]),
+    #command = "zip -j " + ctx.outputs.out.path + " " + " ".join([dep.path for dep in ctx.files.srcs]),
+    command = " && ".join(commands),
     inputs = ctx.files.srcs,
-    outputs = [ctx.outputs.out],
+    outputs = [dir, ctx.outputs.out],
     progress_message = "Creating .zip archive",
     mnemonic = "Zip",
   )
