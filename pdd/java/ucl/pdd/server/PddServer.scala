@@ -24,7 +24,7 @@ import com.twitter.inject.modules.StatsReceiverModule
 import ucl.pdd.config.ConfigModule
 import ucl.pdd.cron.CronModule
 import ucl.pdd.jackson.PddJacksonModule
-import ucl.pdd.util.slf4j.LoggingConfigurator
+import ucl.pdd.observability.logging.LoggingConfigurator
 import ucl.pdd.storage.install.StorageModule
 import ucl.pdd.strategy.StrategyModule
 

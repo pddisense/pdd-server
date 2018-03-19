@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-package ucl.pdd.util.datadog
+package ucl.pdd.observability.datadog
 
 import java.util.concurrent.ConcurrentHashMap
 
-import com.timgroup.statsd.NonBlockingStatsDClient
+import com.timgroup.statsd.{NonBlockingStatsDClient, StatsDClient}
 import com.twitter.finagle.stats._
 
 import scala.collection.JavaConverters._
 
-final class DataDogStatsReceiver extends StatsReceiver {
-  private[this] val client = new NonBlockingStatsDClient("app", "localhost", 8125)
+final class DataDogStatsReceiver(client: StatsDClient) extends StatsReceiver {
   private[this] val verbosity = new ConcurrentHashMap[Seq[String], Verbosity].asScala
   private[this] val gauges = new ConcurrentHashMap[Seq[String], () => Float].asScala
+
+  /**
+   * Constructor without argument, to be loadable as a service.
+   */
+  def this() = this(new NonBlockingStatsDClient(DataDogStatsReceiver.prefix, "localhost", 8125, DataDogStatsReceiver.constantTags: _*))
 
   override def repr: DataDogStatsReceiver = this
 
@@ -57,4 +61,10 @@ final class DataDogStatsReceiver extends StatsReceiver {
   }
 
   private def toMetricName(name: Seq[String]) = name.map(_.replaceAll("[^\\w]", "_")).mkString(".")
+}
+
+object DataDogStatsReceiver {
+  private def prefix = s"app.${sys.env.getOrElse("ROLE", "pdd")}"
+
+  private def constantTags = Seq(s"environment:${sys.env.getOrElse("ENVIRONMENT", "devel")}")
 }
