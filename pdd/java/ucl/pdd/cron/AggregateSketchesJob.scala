@@ -16,6 +16,8 @@
 
 package ucl.pdd.cron
 
+import java.util.concurrent.locks.ReentrantLock
+
 import com.github.nscala_time.time.Imports._
 import com.google.inject.Inject
 import com.twitter.inject.Logging
@@ -23,48 +25,57 @@ import com.twitter.util.{Await, Future}
 import org.joda.time.Instant
 import ucl.pdd.api.{Aggregation, AggregationStats, Campaign, Sketch}
 import ucl.pdd.config.Timezone
-import ucl.pdd.storage.{CampaignStore, SketchStore, Storage}
+import ucl.pdd.storage.{SketchStore, Storage}
 
 final class AggregateSketchesJob @Inject()(storage: Storage, @Timezone timezone: DateTimeZone)
   extends Logging {
 
+  private[this] val lock = new ReentrantLock()
+
   def execute(fireTime: Instant): Unit = {
-    logger.info(s"Starting ${getClass.getSimpleName}")
-
-    val now = fireTime.toDateTime(timezone)
-    val f = storage.campaigns
-      .list(CampaignStore.Query(isActive = Some(true)))
-      .flatMap(results => Future.join(results.map(handleCampaign(now, _))))
-    Await.result(f)
-
-    logger.info(s"Completed ${getClass.getSimpleName}")
-  }
-
-  private def handleCampaign(now: DateTime, campaign: Campaign): Future[Unit] = {
-    // On a given day `d`, we aggregate the sketches for day `d - 1`.
-    // Note: If a campaign is active, its `startTime` is defined.
-    val actualDay = (campaign.startTime.get.toDateTime(timezone).withTimeAtStartOfDay to now).duration.days.toInt
-    if (actualDay <= 0) {
-      Future.Done
-    } else {
-      handleCampaign(actualDay - 1, campaign)
+    lock.lock()
+    try {
+      logger.info(s"Starting ${getClass.getSimpleName}")
+      val now = fireTime.toDateTime(timezone)
+      val f = storage.campaigns
+        .list()
+        .flatMap(results => Future.join(results.map(handleCampaign(now, _))))
+      Await.result(f)
+    } finally {
+      lock.unlock()
+      logger.info(s"Completed ${getClass.getSimpleName}")
     }
   }
 
-  private def handleCampaign(day: Int, campaign: Campaign): Future[Unit] = {
-    storage
-      .sketches
-      .list(SketchStore.Query(campaignName = Some(campaign.name)))
+  private def handleCampaign(now: DateTime, campaign: Campaign): Future[Unit] = {
+    // On a given day `d`, we aggregate the sketches from day `d - 1 - campaign.delay - campaign.graceDelay`
+    // to `d - 1 - campaign.delay`.
+    campaign.startTime match {
+      case None =>
+        // This campaign was never started, nothing to do.
+        Future.Done
+      case Some(startTime) =>
+        val actualDay = (startTime.toDateTime(timezone).withTimeAtStartOfDay to now).duration.days.toInt
+        if (actualDay <= 0) {
+          Future.Done
+        } else {
+          val days = (actualDay - 1 - campaign.delay - campaign.graceDelay) to (actualDay - 1 - campaign.delay)
+          Future.join(days.map(aggregate(_, campaign)))
+        }
+    }
+  }
+
+  private def aggregate(day: Int, campaign: Campaign): Future[Unit] = {
+    storage.sketches
+      .list(SketchStore.Query(campaignName = Some(campaign.name), day = Some(day), isSubmitted = Some(true)))
       .flatMap { sketches =>
-        val f = createAggregation(sketches, day, campaign)
-        f.flatMap { _ =>
-          val fs = sketches.map(sketch => storage.sketches.delete(sketch.name))
-          Future.join(fs)
+        aggregate(day, campaign, sketches).flatMap { _ =>
+          Future.join(sketches.map(sketch => storage.sketches.delete(sketch.name)))
         }
       }
   }
 
-  private def createAggregation(sketches: Seq[Sketch], day: Int, campaign: Campaign): Future[Unit] = {
+  private def aggregate(day: Int, campaign: Campaign, sketches: Seq[Sketch]): Future[Unit] = {
     val rawValues = if (campaign.collectRaw) {
       foldRaw(sketches.map(_.rawValues.toSeq.flatten))
     } else {
@@ -86,24 +97,32 @@ final class AggregateSketchesJob @Inject()(storage: Storage, @Timezone timezone:
       activeCount = sketches.size,
       submittedCount = sketches.count(_.isSubmitted),
       decryptedCount = decryptedCount)
-    val aggregation = Aggregation(
-      name = s"${campaign.name}-$day",
-      campaignName = campaign.name,
-      day = day,
-      decryptedValues = decryptedValues,
-      rawValues = rawValues,
-      stats = stats)
-    storage.aggregations.create(aggregation).unit
+
+    storage.aggregations
+      .get(s"${campaign.name}-$day")
+      .map {
+        case Some(previous) => merge(previous, decryptedValues, rawValues, stats)
+        case None =>
+          Aggregation(
+            name = s"${campaign.name}-$day",
+            campaignName = campaign.name,
+            day = day,
+            decryptedValues = decryptedValues,
+            rawValues = rawValues,
+            stats = stats)
+      }
+      .flatMap(storage.aggregations.create)
+      .unit
   }
 
-  private def merge(agg: Aggregation, decryptedValues: Seq[Long], rawValues: Seq[Long], stats: AggregationStats) =
-    agg.copy(
-      decryptedValues = foldRaw(Seq(agg.decryptedValues, decryptedValues)),
-      rawValues = foldRaw(Seq(agg.rawValues, rawValues)),
+  private def merge(previous: Aggregation, decryptedValues: Seq[Long], rawValues: Seq[Long], stats: AggregationStats) =
+    previous.copy(
+      decryptedValues = foldRaw(Seq(previous.decryptedValues, decryptedValues)),
+      rawValues = foldRaw(Seq(previous.rawValues, rawValues)),
       stats = AggregationStats(
-        activeCount = agg.stats.activeCount + stats.activeCount,
-        submittedCount = agg.stats.submittedCount + stats.submittedCount,
-        decryptedCount = agg.stats.decryptedCount + stats.decryptedCount))
+        activeCount = previous.stats.activeCount + stats.activeCount,
+        submittedCount = previous.stats.submittedCount + stats.submittedCount,
+        decryptedCount = previous.stats.decryptedCount + stats.decryptedCount))
 
 
   private def foldRaw(values: Iterable[Seq[Long]]): Seq[Long] = {
