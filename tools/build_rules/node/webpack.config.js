@@ -20,6 +20,7 @@ const webpack = require('webpack');
 const context = path.resolve(process.env.PWD, process.env._INPUT_DIR);
 const output = path.resolve(process.env.PWD, process.env._OUTPUT_DIR);
 const modules = process.env._PATH.split(',').map(dir => path.resolve(process.env.PWD, dir));
+const isHeadless = process.env._HEADLESS === 'true';
 
 const entry = {};
 process.env._ENTRY.split(',').forEach(file => {
@@ -39,6 +40,7 @@ module.exports = {
     path: output,
     filename: '[name].bundle.js',
   },
+  target: isHeadless ? 'node' : 'web',
   module: {
     loaders: [
       {
@@ -52,11 +54,11 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        loader: 'style-loader!css-loader',
+        loader: isHeadless ? 'null-loader' : 'style-loader!css-loader',
       },
       {
         test: /\.(woff|woff2|eot|ttf|png|jpg|jpeg|svg)$/,
-        loader: 'url-loader',
+        loader: isHeadless ? 'null-loader' : 'url-loader',
       },
     ],
   },
