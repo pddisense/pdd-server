@@ -21,17 +21,33 @@ import ucl.pdd.api.Aggregation
 
 trait AggregationStore {
   /**
-   * Save an aggregation. If the aggregation does not exist, it will be created. If an aggregation
-   * with the same name already exists, it will be updated.
+   * Persist a new aggregation, if no other aggregation with the same name exists.
    *
-   * @param aggregation An aggregation to save.
+   * @param aggregation An aggregation to create.
+   * @return Whether the aggregation was successfully created.
    */
-  def save(aggregation: Aggregation): Future[Unit]
+  def create(aggregation: Aggregation): Future[Boolean]
 
   /**
-   * Retrieve aggregations, according to a query.
+   * Replace an existing aggregation with a new one, if such an aggregation with the same name
+   * already exists. All fields will be modified according to the values of the new aggregation.
    *
-   * @param query A query used to filter aggregations.
+   * @param aggregation An aggregation to update.
+   * @return Whether the aggregation was successfully replaced.
+   */
+  def replace(aggregation: Aggregation): Future[Boolean]
+
+  /**
+   * Retrieve a single aggregation by its name, if it exists.
+   *
+   * @param name An aggregation name.
+   */
+  def get(name: String): Future[Option[Aggregation]]
+
+  /**
+   * Retrieve several aggregations according to a query, ordered by increasing `day`.
+   *
+   * @param query A query to filter aggregations.
    */
   def list(query: AggregationStore.Query): Future[Seq[Aggregation]]
 }

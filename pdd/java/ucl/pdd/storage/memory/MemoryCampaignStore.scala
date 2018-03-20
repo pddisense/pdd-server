@@ -46,6 +46,10 @@ private[memory] final class MemoryCampaignStore extends CampaignStore {
     index.get(name)
   }
 
+  override def batchGet(names: Seq[String]): Future[Seq[Option[Campaign]]] = {
+    Future.value(names.map(index.get))
+  }
+
   private def matches(query: CampaignStore.Query, campaign: Campaign): Boolean = {
     query.isActive.forall(campaign.isActive == _)
   }

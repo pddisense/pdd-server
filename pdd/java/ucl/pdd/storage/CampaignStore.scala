@@ -20,19 +20,53 @@ import com.twitter.util.Future
 import ucl.pdd.api.Campaign
 
 trait CampaignStore {
+  /**
+   * Persist a new campaign, if no other campaign with the same name exists.
+   *
+   * @param campaign A campaign to create.
+   * @return Whether the campaign was successfully created.
+   */
   def create(campaign: Campaign): Future[Boolean]
 
+  /**
+   * Replace an existing campaign with a new one, if such an campaign with the same name
+   * already exists. All fields will be modified according to the values of the new campaign.
+   *
+   * @param campaign A campaign to update.
+   * @return Whether the campaign was successfully replaced.
+   */
   def replace(campaign: Campaign): Future[Boolean]
 
-  def list(query: CampaignStore.Query = CampaignStore.Query()): Future[Seq[Campaign]]
-
+  /**
+   * Retrieve a single campaign by its name, if it exists.
+   *
+   * @param name A campaign name.
+   */
   def get(name: String): Future[Option[Campaign]]
 
-  def batchGet(names: Seq[String]): Future[Seq[Option[Campaign]]] = Future.collect(names.map(get))
+  /**
+   * Retrieve several campaigns by their names, if they exist.
+   *
+   * @param names A list of campaign names.
+   */
+  def batchGet(names: Seq[String]): Future[Seq[Option[Campaign]]]
+
+  /**
+   * Retrieve several campaigns according to a query, ordered by decreasing `createTime` (the most
+   * recent campaign is returned first).
+   *
+   * @param query A query to filter campaigns.
+   */
+  def list(query: CampaignStore.Query = CampaignStore.Query()): Future[Seq[Campaign]]
 }
 
 object CampaignStore {
 
+  /**
+   * A query used to filter campaigns.
+   *
+   * @param isActive Return only (in)active campaigns.
+   */
   case class Query(isActive: Option[Boolean] = None)
 
 }

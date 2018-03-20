@@ -56,15 +56,12 @@ abstract class CampaignStoreSpec extends StoreSpec {
   it should "create and retrieve campaigns" in {
     Await.result(storage.campaigns.get("campaign1")) shouldBe None
     Await.result(storage.campaigns.list()) shouldBe Seq.empty
-    Await.result(storage.campaigns.replace(campaigns.head)) shouldBe false
 
     campaigns.foreach(campaign => Await.result(storage.campaigns.create(campaign)) shouldBe true)
     Await.result(storage.campaigns.create(campaigns.head)) shouldBe false
 
     Await.result(storage.campaigns.get("campaign1")) shouldBe Some(campaigns(0))
     Await.result(storage.campaigns.get("campaign2")) shouldBe Some(campaigns(1))
-
-    Await.result(storage.campaigns.batchGet(Seq("campaign1", "campaign2"))) should contain theSameElementsInOrderAs Seq(Some(campaigns(0)), Some(campaigns(1)))
 
     Await.result(storage.campaigns.list()) should contain theSameElementsInOrderAs Seq(campaigns(1), campaigns(0))
     Await.result(storage.campaigns.list(CampaignStore.Query(isActive = Some(true)))) should contain theSameElementsInOrderAs Seq(campaigns(1))
@@ -81,5 +78,11 @@ abstract class CampaignStoreSpec extends StoreSpec {
     Await.result(storage.campaigns.get("campaign1")) shouldBe Some(newCampaign1)
     Await.result(storage.campaigns.get("campaign2")) shouldBe Some(campaigns(1))
     Await.result(storage.campaigns.list()) should contain theSameElementsInOrderAs Seq(campaigns(1), newCampaign1)
+  }
+
+  it should "retrieve campaigns in batch" in {
+    campaigns.foreach(campaign => Await.result(storage.campaigns.create(campaign)) shouldBe true)
+
+    Await.result(storage.campaigns.batchGet(Seq("campaign42", "campaign1", "campaign2"))) should contain theSameElementsInOrderAs Seq(None, Some(campaigns(0)), Some(campaigns(1)))
   }
 }

@@ -49,17 +49,27 @@ abstract class AggregationStoreSpec extends StoreSpec {
   it should "create and retrieve aggregations" in {
     Await.result(storage.aggregations.list(AggregationStore.Query(campaignName = "campaign1"))) should have size 0
 
-    aggregations.foreach(agg => Await.result(storage.aggregations.save(agg)))
+    aggregations.foreach(agg => Await.result(storage.aggregations.create(agg)) shouldBe true)
+    Await.result(storage.aggregations.create(aggregations.head)) shouldBe false
+
+    Await.result(storage.aggregations.get("agg1")) shouldBe Some(aggregations(0))
+    Await.result(storage.aggregations.get("agg2")) shouldBe Some(aggregations(1))
+    Await.result(storage.aggregations.get("agg3")) shouldBe Some(aggregations(2))
 
     Await.result(storage.aggregations.list(AggregationStore.Query(campaignName = "campaign1"))) should contain theSameElementsInOrderAs Seq(aggregations(1), aggregations(0))
     Await.result(storage.aggregations.list(AggregationStore.Query(campaignName = "campaign2"))) should contain theSameElementsInOrderAs Seq(aggregations(2))
   }
 
   it should "replace aggregations" in {
-    aggregations.foreach(agg => Await.result(storage.aggregations.save(agg)))
-    val newAgg1 = aggregations(0).copy(day = 2)
-    Await.result(storage.aggregations.save(newAgg1))
+    Await.result(storage.aggregations.replace(aggregations.head)) shouldBe false
 
+    aggregations.foreach(agg => Await.result(storage.aggregations.create(agg)) shouldBe true)
+
+    val newAgg1 = aggregations(0).copy(day = 2)
+    Await.result(storage.aggregations.replace(newAgg1)) shouldBe true
+    Await.result(storage.aggregations.get("agg1")) shouldBe Some(newAgg1)
+    Await.result(storage.aggregations.get("agg2")) shouldBe Some(aggregations(1))
+    Await.result(storage.aggregations.get("agg3")) shouldBe Some(aggregations(2))
     Await.result(storage.aggregations.list(AggregationStore.Query(campaignName = "campaign1"))) should contain theSameElementsInOrderAs Seq(newAgg1, aggregations(1))
   }
 }

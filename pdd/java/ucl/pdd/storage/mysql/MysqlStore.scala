@@ -109,6 +109,8 @@ object MysqlStore {
 
   implicit def wrapInstant(instant: Option[Instant]): Parameter = instant.map(wrapInstant).getOrElse(Parameter.NullParameter)
 
+  implicit def wrapString(str: String): Parameter = Parameter.wrap(str)
+  
   implicit def wrapString(str: Option[String]): Parameter = Parameter.wrap(str.getOrElse(""))
 
   implicit def wrapStrings(strs: Seq[String]): Parameter = Parameter.wrap(strs.mkString("\n"))

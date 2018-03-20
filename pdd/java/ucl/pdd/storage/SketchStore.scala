@@ -20,19 +20,58 @@ import com.twitter.util.Future
 import ucl.pdd.api.Sketch
 
 trait SketchStore {
+  /**
+   * Persist a new sketch, if no other sketch with the same name exists.
+   *
+   * @param sketch A sketch to create.
+   * @return Whether the sketch was successfully created.
+   */
   def create(sketch: Sketch): Future[Boolean]
 
+  /**
+   * Replace an existing sketch with a new one, if such an sketch with the same name
+   * already exists. All fields will be modified according to the values of the new sketch.
+   *
+   * @param sketch A sketch to update.
+   * @return Whether the sketch was successfully replaced.
+   */
   def replace(sketch: Sketch): Future[Boolean]
 
-  def delete(name: String): Future[Boolean]
+  /**
+   * Retrieve a single sketch by its name, if it exists.
+   *
+   * @param name A sketch name.
+   */
+  def get(name: String): Future[Option[Sketch]]
 
+  /**
+   * Retrieve several sketches according to a query. No specific order is enforced, the order in
+   * which sketches are returned may be implementation-dependant.
+   *
+   * @param query A query to filter sketches.
+   */
   def list(query: SketchStore.Query = SketchStore.Query()): Future[Seq[Sketch]]
 
-  def get(name: String): Future[Option[Sketch]]
+  /**
+   * Delete an existing sketch, if it exists.
+   *
+   * @param name A sketch name.
+   * @return Whether the sketch was successfully deleted.
+   */
+  def delete(name: String): Future[Boolean]
 }
 
 object SketchStore {
 
+  /**
+   * A query used to filter sketches.
+   *
+   * @param clientName   Return only sketches belonging to a given client.
+   * @param campaignName Return only sketches belonging to a given campaign.
+   * @param group        Return only sketches associated with a given group.
+   * @param day          Return only sketches associated with a given day.
+   * @param isSubmitted  Return only sketches that have (or not) been submitted.
+   */
   case class Query(
     clientName: Option[String] = None,
     campaignName: Option[String] = None,

@@ -48,6 +48,17 @@ private[mysql] final class MysqlCampaignStore(mysql: MysqlClient) extends Campai
       .map(_.headOption)
   }
 
+  override def batchGet(names: Seq[String]): Future[Seq[Option[Campaign]]] = {
+    if (names.isEmpty) {
+      Future.value(Seq.empty)
+    } else {
+      mysql
+        .prepare(s"select * from campaigns where name in (${Seq.fill(names.size)("?").mkString(",")})")
+        .select(names.map(wrapString): _*)(hydrate)
+        .map(campaigns => names.map(name => campaigns.find(_.name == name)))
+    }
+  }
+
   override def create(campaign: Campaign): Future[Boolean] = {
     val sql = "insert into campaigns(name, createTime, displayName, email, vocabulary, startTime, " +
       "endTime, collectRaw, collectEncrypted, delay, graceDelay, groupSize, samplingRate) " +

@@ -93,8 +93,18 @@ final class AggregateSketchesJob @Inject()(storage: Storage, @Timezone timezone:
       decryptedValues = decryptedValues,
       rawValues = rawValues,
       stats = stats)
-    storage.aggregations.save(aggregation).unit
+    storage.aggregations.create(aggregation).unit
   }
+
+  private def merge(agg: Aggregation, decryptedValues: Seq[Long], rawValues: Seq[Long], stats: AggregationStats) =
+    agg.copy(
+      decryptedValues = foldRaw(Seq(agg.decryptedValues, decryptedValues)),
+      rawValues = foldRaw(Seq(agg.rawValues, rawValues)),
+      stats = AggregationStats(
+        activeCount = agg.stats.activeCount + stats.activeCount,
+        submittedCount = agg.stats.submittedCount + stats.submittedCount,
+        decryptedCount = agg.stats.decryptedCount + stats.decryptedCount))
+
 
   private def foldRaw(values: Iterable[Seq[Long]]): Seq[Long] = {
     if (values.isEmpty) {

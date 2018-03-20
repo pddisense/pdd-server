@@ -27,8 +27,12 @@ import scala.collection.JavaConverters._
 private[memory] final class MemoryAggregationStore extends AggregationStore {
   private[this] val index = new ConcurrentHashMap[String, Aggregation]().asScala
 
-  override def save(aggregation: Aggregation): Future[Unit] = Future {
-    index.put(aggregation.name, aggregation)
+  override def create(aggregation: Aggregation): Future[Boolean] = Future {
+    index.putIfAbsent(aggregation.name, aggregation).isEmpty
+  }
+
+  override def replace(aggregation: Aggregation): Future[Boolean] = Future {
+    index.replace(aggregation.name, aggregation).isDefined
   }
 
   override def list(query: AggregationStore.Query): Future[Seq[Aggregation]] = Future {
@@ -36,6 +40,10 @@ private[memory] final class MemoryAggregationStore extends AggregationStore {
       .filter(matches(query, _))
       .toSeq
       .sortWith { case (a, b) => a.day.compareTo(b.day) >= 0 }
+  }
+
+  override def get(name: String): Future[Option[Aggregation]] = Future {
+    index.get(name)
   }
 
   private def matches(query: AggregationStore.Query, aggregation: Aggregation): Boolean = {

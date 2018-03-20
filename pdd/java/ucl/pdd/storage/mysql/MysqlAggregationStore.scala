@@ -16,7 +16,7 @@
 
 package ucl.pdd.storage.mysql
 
-import com.twitter.finagle.mysql.{Row, ServerError, Client => MysqlClient}
+import com.twitter.finagle.mysql.{OK, Row, ServerError, Client => MysqlClient}
 import com.twitter.util.Future
 import ucl.pdd.api.{Aggregation, AggregationStats}
 import ucl.pdd.storage.AggregationStore
@@ -25,7 +25,7 @@ private[mysql] final class MysqlAggregationStore(mysql: MysqlClient) extends Agg
 
   import MysqlStore._
 
-  override def save(aggregation: Aggregation): Future[Unit] = {
+  override def create(aggregation: Aggregation): Future[Boolean] = {
     mysql
       .prepare("insert into aggregations(name, campaignName, day, decryptedValues, rawValues, " +
         "activeCount, submittedCount, decryptedCount) " +
@@ -39,24 +39,38 @@ private[mysql] final class MysqlAggregationStore(mysql: MysqlClient) extends Agg
         aggregation.stats.activeCount,
         aggregation.stats.submittedCount,
         aggregation.stats.decryptedCount)
+      .map(_ => true)
       .rescue {
         // Error code 1062 corresponds to a duplicate entry, which means the object already exists.
-        case ServerError(1062, _, _) =>
-          mysql
-            .prepare("update aggregations set campaignName = ?, day = ?, decryptedValues = ?, " +
-              "rawValues = ?, activeCount = ?, submittedCount = ?, decryptedCount = ? " +
-              "where name = ?")
-            .apply(
-              aggregation.campaignName,
-              aggregation.day,
-              aggregation.decryptedValues,
-              aggregation.rawValues,
-              aggregation.stats.activeCount,
-              aggregation.stats.submittedCount,
-              aggregation.stats.decryptedCount,
-              aggregation.name)
+        case ServerError(1062, _, _) => Future.value(false)
       }
-      .unit
+  }
+
+  override def replace(aggregation: Aggregation): Future[Boolean] = {
+    mysql
+      .prepare("update aggregations set campaignName = ?, day = ?, decryptedValues = ?, " +
+        "rawValues = ?, activeCount = ?, submittedCount = ?, decryptedCount = ? " +
+        "where name = ?")
+      .apply(
+        aggregation.campaignName,
+        aggregation.day,
+        aggregation.decryptedValues,
+        aggregation.rawValues,
+        aggregation.stats.activeCount,
+        aggregation.stats.submittedCount,
+        aggregation.stats.decryptedCount,
+        aggregation.name)
+      .map {
+        case ok: OK => ok.affectedRows == 1
+        case _ => false
+      }
+  }
+
+  override def get(name: String): Future[Option[Aggregation]] = {
+    mysql
+      .prepare("select * from aggregations where name = ? limit 1")
+      .select(name)(hydrate)
+      .map(_.headOption)
   }
 
   override def list(query: AggregationStore.Query): Future[Seq[Aggregation]] = {
