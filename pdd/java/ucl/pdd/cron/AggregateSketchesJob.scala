@@ -24,10 +24,13 @@ import com.twitter.inject.Logging
 import com.twitter.util.{Await, Future}
 import org.joda.time.Instant
 import ucl.pdd.api.{Aggregation, AggregationStats, Campaign, Sketch}
-import ucl.pdd.config.Timezone
+import ucl.pdd.config.{TestingMode, Timezone}
 import ucl.pdd.storage.{SketchStore, Storage}
 
-final class AggregateSketchesJob @Inject()(storage: Storage, @Timezone timezone: DateTimeZone)
+final class AggregateSketchesJob @Inject()(
+  storage: Storage,
+  @Timezone timezone: DateTimeZone,
+  @TestingMode testingMode: Boolean)
   extends Logging {
 
   private[this] val lock = new ReentrantLock()
@@ -56,10 +59,11 @@ final class AggregateSketchesJob @Inject()(storage: Storage, @Timezone timezone:
         Future.Done
       case Some(startTime) =>
         val actualDay = (startTime.toDateTime(timezone).withTimeAtStartOfDay to now).duration.days.toInt
-        if (actualDay <= 0) {
+        if (actualDay - campaign.delay <= 0) {
           Future.Done
         } else {
-          val days = (actualDay - 1 - campaign.delay - campaign.graceDelay) to (actualDay - 1 - campaign.delay)
+          val startDay = actualDay - 1 - campaign.delay - campaign.graceDelay
+          val days = math.max(0, startDay) to (actualDay - 1 - campaign.delay)
           Future.join(days.map(aggregate(_, campaign)))
         }
     }
@@ -67,63 +71,46 @@ final class AggregateSketchesJob @Inject()(storage: Storage, @Timezone timezone:
 
   private def aggregate(day: Int, campaign: Campaign): Future[Unit] = {
     storage.sketches
-      .list(SketchStore.Query(campaignName = Some(campaign.name), day = Some(day), isSubmitted = Some(true)))
-      .flatMap { sketches =>
-        aggregate(day, campaign, sketches).flatMap { _ =>
-          Future.join(sketches.map(sketch => storage.sketches.delete(sketch.name)))
-        }
-      }
+      .list(SketchStore.Query(campaignName = Some(campaign.name), day = Some(day)))
+      .flatMap(sketches => aggregate(day, campaign, sketches))
   }
 
   private def aggregate(day: Int, campaign: Campaign, sketches: Seq[Sketch]): Future[Unit] = {
     val rawValues = if (campaign.collectRaw) {
-      foldRaw(sketches.map(_.rawValues.toSeq.flatten))
+      foldRaw(sketches.filter(_.rawValues.isDefined).map(_.rawValues.toSeq.flatten))
     } else {
       Seq.empty
     }
     val (decryptedValues, decryptedCount) = if (campaign.collectEncrypted) {
-      val groupValues = sketches.groupBy(_.group).map { case (_, groupSketches) =>
-        if (groupSketches.forall(_.isSubmitted)) {
-          foldEncrypted(groupSketches.map(_.encryptedValues.toSeq.flatten))
-        } else {
-          Seq.empty
-        }
+      // TODO: raise a warning if submitted but no encrypted values?
+      val decryptedByGroup = sketches.groupBy(_.group).values.filter(_.forall(s => s.isSubmitted && s.encryptedValues.isDefined))
+      val groupValues = decryptedByGroup.map { groupSketches =>
+        foldEncrypted(groupSketches.map(_.encryptedValues.toSeq.flatten))
       }
       (foldRaw(groupValues), groupValues.map(_.size).sum.toLong)
     } else {
       (Seq.empty, 0L)
     }
-    val stats = AggregationStats(
-      activeCount = sketches.size,
-      submittedCount = sketches.count(_.isSubmitted),
-      decryptedCount = decryptedCount)
+
+    val aggregation = Aggregation(
+      name = s"${campaign.name}-$day",
+      campaignName = campaign.name,
+      day = day,
+      decryptedValues = decryptedValues,
+      rawValues = rawValues,
+      stats = AggregationStats(
+        activeCount = sketches.size,
+        submittedCount = sketches.count(_.isSubmitted),
+        decryptedCount = decryptedCount))
 
     storage.aggregations
       .get(s"${campaign.name}-$day")
       .map {
-        case Some(previous) => merge(previous, decryptedValues, rawValues, stats)
-        case None =>
-          Aggregation(
-            name = s"${campaign.name}-$day",
-            campaignName = campaign.name,
-            day = day,
-            decryptedValues = decryptedValues,
-            rawValues = rawValues,
-            stats = stats)
+        case Some(_) => storage.aggregations.replace(aggregation)
+        case None => storage.aggregations.create(aggregation)
       }
-      .flatMap(storage.aggregations.create)
       .unit
   }
-
-  private def merge(previous: Aggregation, decryptedValues: Seq[Long], rawValues: Seq[Long], stats: AggregationStats) =
-    previous.copy(
-      decryptedValues = foldRaw(Seq(previous.decryptedValues, decryptedValues)),
-      rawValues = foldRaw(Seq(previous.rawValues, rawValues)),
-      stats = AggregationStats(
-        activeCount = previous.stats.activeCount + stats.activeCount,
-        submittedCount = previous.stats.submittedCount + stats.submittedCount,
-        decryptedCount = previous.stats.decryptedCount + stats.decryptedCount))
-
 
   private def foldRaw(values: Iterable[Seq[Long]]): Seq[Long] = {
     if (values.isEmpty) {

@@ -34,14 +34,14 @@ class CreateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach {
   private[this] var job: CreateSketchesJob = _
   private[this] var storage: Storage = _
   private[this] val timezone = DateTimeZone.forID("Europe/London")
-  private[this] val now = DateTime.now(timezone).withHourOfDay(12).withMinuteOfHour(15).toInstant
+  private[this] val now = DateTime.now(timezone).minusDays(1).withHourOfDay(12).toInstant
   private[this] val campaign1 = Campaign(
     name = "campaign1",
     createTime = now,
     displayName = "a campaign",
     email = Seq.empty,
     vocabulary = Vocabulary(Seq(VocabularyQuery(exact = Some("foo")))),
-    startTime = Some(now.minus(1000)),
+    startTime = Some(now),
     endTime = None,
     collectRaw = true,
     collectEncrypted = true,
@@ -64,7 +64,7 @@ class CreateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach {
 
   it should "create sketches for several campaigns" in {
     val campaign2 = campaign1.copy(name = "campaign2")
-    val clients = Seq.tabulate(5)(idx => createClient(idx ))
+    val clients = Seq.tabulate(5)(idx => createClient(idx))
     Await.result(Future.collect(Seq(storage.campaigns.create(campaign1), storage.campaigns.create(campaign2)) ++ clients.map(storage.clients.create)))
 
     job.execute(now.toDateTime(timezone).plusDays(2).toInstant)
@@ -105,7 +105,7 @@ class CreateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach {
 
   it should "ignore inactive campaigns" in {
     val campaign2 = campaign1.copy(name = "campaign2", endTime = Some(now.minus(24 * 3600000)))
-    val clients = Seq.tabulate(5)(idx => createClient(idx ))
+    val clients = Seq.tabulate(5)(idx => createClient(idx))
     Await.result(Future.collect(Seq(storage.campaigns.create(campaign1), storage.campaigns.create(campaign2)) ++ clients.map(storage.clients.create)))
 
     job.execute(now.toDateTime(timezone).plusDays(2).toInstant)
