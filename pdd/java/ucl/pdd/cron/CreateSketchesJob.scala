@@ -35,7 +35,7 @@ import scala.util.Random
  *
  * @param storage     Storage.
  * @param strategy    Groups strategy.
- * @param timezone    Timezone.
+ * @param timezone    Current timezone.
  * @param testingMode Is the testing mode enabled?
  */
 final class CreateSketchesJob @Inject()(

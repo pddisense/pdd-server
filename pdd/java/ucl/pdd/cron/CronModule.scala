@@ -17,10 +17,18 @@
 package ucl.pdd.cron
 
 import com.google.inject.Provides
-import com.twitter.inject.{Injector, TwitterModule}
+import com.twitter.inject.{Injector, TwitterPrivateModule}
 import com.twitter.util.{Await, JavaTimer, Timer}
 
-object CronModule extends TwitterModule {
+/**
+ * Guice module providing crons.
+ */
+object CronModule extends TwitterPrivateModule {
+  override def configure(): Unit = {
+    bind[CronManager] // Must explicitly bind a class before exposing it.
+    expose[CronManager]
+  }
+
   @Provides
   def providesTimer: Timer = new JavaTimer
 

@@ -24,6 +24,14 @@ import org.joda.time.{DateTime, DateTimeZone, Instant, ReadableInstant}
 import ucl.pdd.config.{TestingMode, Timezone}
 import ucl.pdd.util.Service
 
+/**
+ * Register and launch cron jobs.
+ *
+ * @param timer       Timer (owned by the cron manager).
+ * @param injector    Guice injector.
+ * @param timezone    Current timezone.
+ * @param testingMode Is the testing mode enabled?
+ */
 @Singleton
 final class CronManager @Inject()(
   timer: Timer,
@@ -35,11 +43,15 @@ final class CronManager @Inject()(
   import CronManager._
 
   override def startUp(): Future[Unit] = Future {
+    // In testing mode, jobs run every five minutes, and start 1 minute after launching the application.
+    // In production mode, jobs run every day, and start a few hours after launching the application.
     val period = if (testingMode) 5.minutes else 1.day
     val nextDay = if (testingMode) DateTime.now() else DateTime.now(timezone).plusDays(1).withTimeAtStartOfDay
+
     timer.schedule(if (testingMode) nextDay.plusMinutes(1) else nextDay.plusHours(1), period) {
       injector.instance[CreateSketchesJob].execute(Instant.now())
     }
+
     timer.schedule(if (testingMode) nextDay.plusMinutes(1) else nextDay.plusMinutes(30), period) {
       injector.instance[AggregateSketchesJob].execute(Instant.now())
     }

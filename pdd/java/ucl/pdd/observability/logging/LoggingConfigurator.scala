@@ -33,16 +33,21 @@ trait LoggingConfigurator {
   }
 
   private def initSentry(): Unit = {
-    // Used to differentiate between libraries and our own code.
-    // https://docs.sentry.io/clients/java/config/#in-application-stack-frames
-    sys.props("sentry.stacktrace.app.packages") = "ucl.pdd"
+    // We do not configure sentry if the DSN is not defined, to avoid showing a warning in that
+    // case (we may want no to report to Sentry, e.g., during development). It also mean that we
+    // enforce using an environment-based configuration of Sentry (no Java properties).
+    if (sys.env.contains("SENTRY_DSN")) {
+      // Used to differentiate between libraries and our own code.
+      // https://docs.sentry.io/clients/java/config/#in-application-stack-frames
+      sys.props("sentry.stacktrace.app.packages") = "ucl.pdd"
 
-    // Configure the environment and tags.
-    sys.props("sentry.environment") = sys.env.getOrElse("ENVIRONMENT", "devel")
-    sys.props("sentry.tags") = s"role:${sys.env.getOrElse("ROLE", "pdd")}"
+      // Configure the environment and tags.
+      sys.props("sentry.environment") = sys.env.getOrElse("ENVIRONMENT", "devel")
+      sys.props("sentry.tags") = s"role:${sys.env.getOrElse("ROLE", "pdd")}"
 
-    // This will initialize Sentry by looking for the `SENTRY_DSN` environment variable.
-    Sentry.init()
+      // This will initialize Sentry by looking for the `SENTRY_DSN` environment variable.
+      Sentry.init()
+    }
   }
 
   private def initLogback(): Unit = {
