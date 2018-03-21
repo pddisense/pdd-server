@@ -77,7 +77,7 @@ final class AggregateSketchesJob @Inject()(
 
   private def aggregate(day: Int, campaign: Campaign, sketches: Seq[Sketch]): Future[Unit] = {
     val rawValues = if (campaign.collectRaw) {
-      foldRaw(sketches.filter(_.rawValues.isDefined).map(_.rawValues.toSeq.flatten))
+      foldRaw(sketches.map(_.rawValues.toSeq.flatten))
     } else {
       Seq.empty
     }
@@ -116,7 +116,7 @@ final class AggregateSketchesJob @Inject()(
     if (values.isEmpty) {
       Seq.empty
     } else {
-      values.reduce[Seq[Long]] { case (a, b) =>
+      values.filter(_.nonEmpty).reduce[Seq[Long]] { case (a, b) =>
         a.zip(b).map { case (n1, n2) => n1 + n2 }
       }
     }
@@ -127,6 +127,7 @@ final class AggregateSketchesJob @Inject()(
       Seq.empty
     } else {
       values
+        .filter(_.nonEmpty)
         .map(_.map(BigInt.apply))
         .reduce[Seq[BigInt]] { case (a, b) => a.zip(b).map { case (n1, n2) => n1 + n2 } }
         .map(_.toLong)

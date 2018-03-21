@@ -158,5 +158,9 @@ class AggregateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach {
     aggregations1.head.decryptedValues shouldBe Seq(2, 1, 5)
 
     val aggregations2 = Await.result(storage.aggregations.list(AggregationStore.Query(campaignName = "campaign2")))
+    aggregations2 should have size 1
+    aggregations2.head.day shouldBe 0
+    aggregations2.head.rawValues shouldBe Seq(1, 2, 2)
+    aggregations2.head.decryptedValues shouldBe Seq(1, 2, 2)
   }
 }
