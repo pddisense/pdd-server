@@ -20,12 +20,15 @@ import java.util.concurrent.ConcurrentHashMap
 
 import com.timgroup.statsd.{NonBlockingStatsDClient, StatsDClient}
 import com.twitter.finagle.stats._
+import com.twitter.inject.Logging
 
 import scala.collection.JavaConverters._
 
-final class DataDogStatsReceiver(client: StatsDClient) extends StatsReceiver {
+final class DataDogStatsReceiver(client: StatsDClient) extends StatsReceiver with Logging {
   private[this] val verbosity = new ConcurrentHashMap[Seq[String], Verbosity].asScala
   private[this] val gauges = new ConcurrentHashMap[Seq[String], () => Float].asScala
+
+  logger.info("Reporting to DataDog agent on localhost:8125")
 
   /**
    * Constructor without argument, to be loadable as a service.

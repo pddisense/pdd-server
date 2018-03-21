@@ -20,6 +20,7 @@ scala_library(
   deps = [
     "//3rdparty/jvm/com/datadoghq:java_dogstatsd_client",
     "//3rdparty/jvm/com/twitter:util_stats",
+    "//3rdparty/jvm/com/twitter:inject_slf4j",
   ],
   resources = glob(["META-INF/**"]),
   resource_strip_prefix = "pdd/java/ucl/pdd/observability/datadog",
