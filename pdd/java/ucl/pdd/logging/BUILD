@@ -23,5 +23,4 @@ scala_library(
     "//3rdparty/jvm/io/sentry:sentry_logback",
     "//3rdparty/jvm/com/twitter:inject_app",
   ],
-  resources = ["logback.xml"],
 )

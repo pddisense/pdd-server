@@ -24,7 +24,7 @@ import ucl.pdd.storage.memory.MemoryStorage
 import ucl.pdd.storage.mysql.{MysqlClientFactory, MysqlStorage}
 
 object StorageModule extends TwitterModule {
-  private[this] val typeFlag = flag[String](s"storage.type", "memory", "Storage type ('memory', 'mysql' or 'zk')")
+  private[this] val typeFlag = flag[String](s"storage.type", "memory", "Storage type ('memory', or 'mysql')")
 
   // MySQL options.
   private[this] val mysqlServerFlag = flag("storage.mysql.server", "127.0.0.1:3306", "Address to MySQL server")

@@ -18,12 +18,10 @@ scala_binary(
   deps = [
     "//pdd/java/ucl/pdd/api",
     "//pdd/java/ucl/pdd/jackson",
-    "//pdd/java/ucl/pdd/observability/logging",
+    "//pdd/java/ucl/pdd/logging",
+    "//pdd/java/ucl/pdd/metrics",
     "//3rdparty/jvm/com/twitter:finatra_http",
     "//3rdparty/jvm/com/twitter:finatra_httpclient",
-  ],
-  runtime_deps = [
-    "//pdd/java/ucl/pdd/observability/datadog",
   ],
   resources = [
     "//pdd/node/ucl/pdd/dashboard:index.bundle.js",

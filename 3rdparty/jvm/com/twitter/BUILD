@@ -165,6 +165,7 @@ java_library(
 java_library(
     name = "finagle_netty3_http_2_11",
     exports = [
+        "//3rdparty/jvm/commons_lang:commons_lang",
         "//external:jar/com/twitter/finagle_netty3_http_2_11"
     ],
     visibility = [
@@ -194,7 +195,8 @@ java_library(
 java_library(
     name = "finagle_netty4_http_2_11",
     exports = [
-        "//external:jar/com/twitter/finagle_netty4_http_2_11"
+        "//external:jar/com/twitter/finagle_netty4_http_2_11",
+        ":finagle_netty4_2_11"
     ],
     visibility = [
         "//visibility:public"
@@ -203,15 +205,27 @@ java_library(
 
 
 
-java_library(
-    name = "finagle_stats_2_11",
+scala_import(
+    name = "finagle_stats",
     exports = [
-        "//external:jar/com/twitter/finagle_stats_2_11",
+        "//3rdparty/jvm/com/fasterxml/jackson/core:jackson_core",
+        "//3rdparty/jvm/com/fasterxml/jackson/core:jackson_databind",
+        "//3rdparty/jvm/com/fasterxml/jackson/module:jackson_module_scala_2_11",
+        "//3rdparty/jvm/org/scala_lang:scala_library",
+        ":finagle_core",
+        ":finagle_http_2_11",
+        ":finagle_toggle_2_11",
         ":finagle_tunable_2_11",
         ":util_app_2_11",
+        ":util_core",
         ":util_lint_2_11",
+        ":util_logging_2_11",
         ":util_registry_2_11",
+        ":util_stats",
         ":util_tunable_2_11"
+    ],
+    jars = [
+        "//external:jar/com/twitter/finagle_stats_2_11"
     ],
     visibility = [
         "//visibility:public"
@@ -411,7 +425,7 @@ scala_import(
 scala_import(
     name = "inject_server",
     exports = [
-        ":finagle_stats_2_11",
+        ":finagle_stats",
         ":inject_app",
         ":inject_modules",
         ":twitter_server_2_11"

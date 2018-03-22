@@ -29,7 +29,7 @@ dependencies:
     finagle:
       version: 18.2.0
       lang: scala
-      modules: [mysql]
+      modules: [mysql, stats]
     finatra:
       version: 18.2.0
       lang: scala

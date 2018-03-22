@@ -22,13 +22,11 @@ scala_binary(
     "//pdd/java/ucl/pdd/config:annotations",
     "//pdd/java/ucl/pdd/jackson",
     "//pdd/java/ucl/pdd/strategy",
-    "//pdd/java/ucl/pdd/observability/logging",
+    "//pdd/java/ucl/pdd/logging",
+    "//pdd/java/ucl/pdd/metrics",
     "//pdd/java/ucl/pdd/storage",
     "//pdd/java/ucl/pdd/storage/install",
     "//3rdparty/jvm/com/twitter:finatra_http",
-  ],
-  runtime_deps = [
-    "//pdd/java/ucl/pdd/observability/datadog",
   ],
   main_class = "ucl.pdd.server.PddServerMain",
 )

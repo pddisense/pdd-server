@@ -15,13 +15,12 @@
 package(default_visibility = ["//visibility:public"])
 
 scala_library(
-  name = "datadog",
+  name = "metrics",
   srcs = glob(["*.scala"]),
   deps = [
     "//3rdparty/jvm/com/datadoghq:java_dogstatsd_client",
     "//3rdparty/jvm/com/twitter:util_stats",
-    "//3rdparty/jvm/com/twitter:inject_slf4j",
+    "//3rdparty/jvm/com/twitter:finagle_stats",
+    "//3rdparty/jvm/com/twitter:inject_core",
   ],
-  resources = glob(["META-INF/**"]),
-  resource_strip_prefix = "pdd/java/ucl/pdd/observability/datadog",
 )

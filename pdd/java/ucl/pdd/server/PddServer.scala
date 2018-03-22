@@ -16,26 +16,29 @@
 
 package ucl.pdd.server
 
+import com.google.inject.Module
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finatra.http.HttpServer
 import com.twitter.finatra.http.filters.{CommonFilters, LoggingMDCFilter, TraceIdMDCFilter}
 import com.twitter.finatra.http.routing.HttpRouter
-import com.twitter.inject.modules.StatsReceiverModule
 import ucl.pdd.config.ConfigModule
 import ucl.pdd.cron.CronModule
 import ucl.pdd.jackson.PddJacksonModule
-import ucl.pdd.observability.logging.LoggingConfigurator
+import ucl.pdd.metrics.MetricsModule
+import ucl.pdd.logging.LoggingConfigurator
 import ucl.pdd.storage.install.StorageModule
 import ucl.pdd.strategy.StrategyModule
 
 object PddServerMain extends PddServer
 
 class PddServer extends HttpServer with LoggingConfigurator {
-  override def modules = Seq(ConfigModule, StorageModule, CronModule, StrategyModule, StatsReceiverModule)
+  override def modules = Seq(ConfigModule, StorageModule, CronModule, StrategyModule)
 
   override def defaultFinatraHttpPort: String = ":8000"
 
   override def jacksonModule = PddJacksonModule
+
+  override def statsReceiverModule: Module = MetricsModule
 
   override def configureHttp(router: HttpRouter): Unit = {
     router
