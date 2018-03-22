@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-scala_binary(
+load("@io_bazel_rules_docker//scala:image.bzl", "scala_image")
+load("@io_bazel_rules_docker//container:push.bzl", "container_push")
+
+scala_image(
   name = "dashboard",
   srcs = glob(["*.scala"]),
   deps = [
@@ -30,4 +33,14 @@ scala_binary(
   ],
   resource_strip_prefix = "pdd/node/ucl/pdd/dashboard",
   main_class = "ucl.pdd.dashboard.PddDashboardMain",
+)
+
+container_push(
+ name = "publish",
+ image = ":dashboard",
+ format = "Docker",
+ registry = "index.docker.io",
+ repository = "pddisense/pdd-dashboard",
+ tag = "latest",
+ stamp = True,
 )

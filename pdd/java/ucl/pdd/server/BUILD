@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-scala_binary(
+load("@io_bazel_rules_docker//scala:image.bzl", "scala_image")
+load("@io_bazel_rules_docker//container:push.bzl", "container_push")
+
+scala_image(
   name = "server",
   srcs = glob(["*.scala"]),
   deps = [
@@ -29,4 +32,14 @@ scala_binary(
     "//3rdparty/jvm/com/twitter:finatra_http",
   ],
   main_class = "ucl.pdd.server.PddServerMain",
+)
+
+container_push(
+ name = "publish",
+ image = ":server",
+ format = "Docker",
+ registry = "index.docker.io",
+ repository = "pddisense/pdd-server",
+ tag = "latest",
+ stamp = True,
 )
