@@ -13,6 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# This file has been largely copy/pasted from Kubernetes, published under the Apache License 2.0.
+# Cf. https://github.com/kubernetes/kubernetes
+
 set -o errexit
 set -o nounset
 set -o pipefail
