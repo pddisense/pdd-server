@@ -15,28 +15,39 @@
 load("@io_bazel_rules_docker//scala:image.bzl", "scala_image")
 load("@io_bazel_rules_docker//container:push.bzl", "container_push")
 
-scala_image(
+srcs = glob(["*.scala"])
+deps = [
+  "//pdd/java/ucl/pdd/api",
+  "//pdd/java/ucl/pdd/cron",
+  "//pdd/java/ucl/pdd/config",
+  "//pdd/java/ucl/pdd/config:annotations",
+  "//pdd/java/ucl/pdd/jackson",
+  "//pdd/java/ucl/pdd/strategy",
+  "//pdd/java/ucl/pdd/logging",
+  "//pdd/java/ucl/pdd/metrics",
+  "//pdd/java/ucl/pdd/storage",
+  "//pdd/java/ucl/pdd/storage/install",
+  "//3rdparty/jvm/com/twitter:finatra_http",
+]
+main_class = "ucl.pdd.server.PddServerMain"
+
+scala_binary(
   name = "server",
-  srcs = glob(["*.scala"]),
-  deps = [
-    "//pdd/java/ucl/pdd/api",
-    "//pdd/java/ucl/pdd/cron",
-    "//pdd/java/ucl/pdd/config",
-    "//pdd/java/ucl/pdd/config:annotations",
-    "//pdd/java/ucl/pdd/jackson",
-    "//pdd/java/ucl/pdd/strategy",
-    "//pdd/java/ucl/pdd/logging",
-    "//pdd/java/ucl/pdd/metrics",
-    "//pdd/java/ucl/pdd/storage",
-    "//pdd/java/ucl/pdd/storage/install",
-    "//3rdparty/jvm/com/twitter:finatra_http",
-  ],
-  main_class = "ucl.pdd.server.PddServerMain",
+  srcs = srcs,
+  deps = deps,
+  main_class = main_class,
+)
+
+scala_image(
+  name = "image",
+  srcs = srcs,
+  deps = deps,
+  main_class = main_class,
 )
 
 container_push(
  name = "publish",
- image = ":server",
+ image = ":image",
  format = "Docker",
  registry = "index.docker.io",
  repository = "pddisense/pdd-server",

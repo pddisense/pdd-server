@@ -15,29 +15,44 @@
 load("@io_bazel_rules_docker//scala:image.bzl", "scala_image")
 load("@io_bazel_rules_docker//container:push.bzl", "container_push")
 
-scala_image(
+srcs = glob(["*.scala"])
+deps = [
+  "//pdd/java/ucl/pdd/api",
+  "//pdd/java/ucl/pdd/jackson",
+  "//pdd/java/ucl/pdd/logging",
+  "//pdd/java/ucl/pdd/metrics",
+  "//3rdparty/jvm/com/twitter:finatra_http",
+  "//3rdparty/jvm/com/twitter:finatra_httpclient",
+]
+resources = [
+  "//pdd/node/ucl/pdd/dashboard:index.bundle.js",
+  "//pdd/node/ucl/pdd/dashboard:index.html",
+  "//pdd/node/ucl/pdd/dashboard:robots.txt",
+]
+resource_strip_prefix = "pdd/node/ucl/pdd/dashboard"
+main_class = "ucl.pdd.dashboard.PddDashboardMain"
+
+scala_binary(
   name = "dashboard",
-  srcs = glob(["*.scala"]),
-  deps = [
-    "//pdd/java/ucl/pdd/api",
-    "//pdd/java/ucl/pdd/jackson",
-    "//pdd/java/ucl/pdd/logging",
-    "//pdd/java/ucl/pdd/metrics",
-    "//3rdparty/jvm/com/twitter:finatra_http",
-    "//3rdparty/jvm/com/twitter:finatra_httpclient",
-  ],
-  resources = [
-    "//pdd/node/ucl/pdd/dashboard:index.bundle.js",
-    "//pdd/node/ucl/pdd/dashboard:index.html",
-    "//pdd/node/ucl/pdd/dashboard:robots.txt",
-  ],
-  resource_strip_prefix = "pdd/node/ucl/pdd/dashboard",
-  main_class = "ucl.pdd.dashboard.PddDashboardMain",
+  srcs = srcs,
+  deps = deps,
+  resources = resources,
+  resource_strip_prefix = resource_strip_prefix,
+  main_class = main_class,
+)
+
+scala_image(
+  name = "image",
+  srcs = srcs,
+  deps = deps,
+  resources = resources,
+  resource_strip_prefix = resource_strip_prefix,
+  main_class = main_class,
 )
 
 container_push(
  name = "publish",
- image = ":dashboard",
+ image = ":image",
  format = "Docker",
  registry = "index.docker.io",
  repository = "pddisense/pdd-dashboard",

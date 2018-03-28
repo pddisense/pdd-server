@@ -66,6 +66,7 @@ final class AggregateSketchesJob @Inject()(
           val days = math.max(0, startDay) to (actualDay - 1 - campaign.delay)
           Future.join(days.map(aggregate(_, campaign)))
         }
+        //TODO: clean old sketches.
     }
   }
 
