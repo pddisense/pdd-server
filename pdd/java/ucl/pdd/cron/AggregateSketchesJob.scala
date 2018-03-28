@@ -58,7 +58,11 @@ final class AggregateSketchesJob @Inject()(
         // This campaign was never started, nothing to do.
         Future.Done
       case Some(startTime) =>
-        val actualDay = (startTime.toDateTime(timezone).withTimeAtStartOfDay to now).duration.days.toInt
+        val actualDay = if (testingMode) {
+          (startTime.toDateTime(timezone) to now).duration.minutes.toInt / 5
+        } else {
+          (startTime.toDateTime(timezone).withTimeAtStartOfDay to now).duration.days.toInt
+        }
         if (actualDay - campaign.delay <= 0) {
           Future.Done
         } else {
@@ -66,6 +70,7 @@ final class AggregateSketchesJob @Inject()(
           val days = math.max(0, startDay) to (actualDay - 1 - campaign.delay)
           Future.join(days.map(aggregate(_, campaign)))
         }
+        //TODO: backfill.
         //TODO: clean old sketches.
     }
   }
@@ -114,21 +119,22 @@ final class AggregateSketchesJob @Inject()(
   }
 
   private def foldRaw(values: Iterable[Seq[Long]]): Seq[Long] = {
-    if (values.isEmpty) {
+    val nonEmptyValues = values.filter(_.nonEmpty)
+    if (nonEmptyValues.isEmpty) {
       Seq.empty
     } else {
-      values.filter(_.nonEmpty).reduce[Seq[Long]] { case (a, b) =>
+      nonEmptyValues.reduce[Seq[Long]] { case (a, b) =>
         a.zip(b).map { case (n1, n2) => n1 + n2 }
       }
     }
   }
 
   private def foldEncrypted(values: Iterable[Seq[String]]): Seq[Long] = {
-    if (values.isEmpty) {
+    val nonEmptyValues = values.filter(_.nonEmpty)
+    if (nonEmptyValues.isEmpty) {
       Seq.empty
     } else {
-      values
-        .filter(_.nonEmpty)
+      nonEmptyValues
         .map(_.map(BigInt.apply))
         .reduce[Seq[BigInt]] { case (a, b) => a.zip(b).map { case (n1, n2) => n1 + n2 } }
         .map(_.toLong)

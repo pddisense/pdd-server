@@ -95,7 +95,7 @@ final class PublicController @Inject()(
             val nextPingTime = if (testingMode) {
               DateTime.now(timezone).plusMinutes(5)
             } else {
-              DateTime.now(timezone).plusDays(1).withTimeAtStartOfDay.plusHours(1)
+              DateTime.now(timezone).plusDays(1).withTimeAtStartOfDay.plusHours(2)
             }
             PingResponse(submit, Some(nextPingTime.toInstant))
           }
