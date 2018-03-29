@@ -20,6 +20,7 @@ import { Tab, Tabs } from '@blueprintjs/core';
 import FaqSection from './FaqSection';
 import AboutSection from './AboutSection';
 import HistorySectionContainer from './HistorySectionContainer';
+import SettingsSectionContainer from './SettingsSectionContainer';
 
 export default class OptionsPage extends React.Component {
   render() {
@@ -28,6 +29,7 @@ export default class OptionsPage extends React.Component {
         <Tabs id="tabs" renderActiveTabPanelOnly={true}>
           <Tab id="about" title="About PDD" panel={<AboutSection/>}/>
           <Tab id="history" title="Search history" panel={<HistorySectionContainer/>}/>
+          <Tab id="settings" title="Settings" panel={<SettingsSectionContainer/>}/>
           <Tab id="faq" title="FAQ" panel={<FaqSection/>}/>
           <Tabs.Expander/>
         </Tabs>

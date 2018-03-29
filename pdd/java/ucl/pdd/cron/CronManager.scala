@@ -46,7 +46,7 @@ final class CronManager @Inject()(
     // In testing mode, jobs run every five minutes, and start 1 minute after launching the application.
     // In production mode, jobs run every day, and start a few hours after launching the application.
     val period = if (testingMode) 5.minutes else 1.day
-    val nextDay = if (testingMode) DateTime.now() else DateTime.now(timezone).plusDays(1).withTimeAtStartOfDay
+    val nextDay = if (testingMode) DateTime.now(timezone) else DateTime.now(timezone).plusDays(1).withTimeAtStartOfDay
 
     timer.schedule(if (testingMode) nextDay.plusMinutes(1) else nextDay.plusHours(1), period) {
       injector.instance[CreateSketchesJob].execute(Instant.now())

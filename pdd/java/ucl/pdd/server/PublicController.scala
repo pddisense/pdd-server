@@ -29,6 +29,8 @@ import ucl.pdd.api._
 import ucl.pdd.config.{TestingMode, Timezone}
 import ucl.pdd.storage.{SketchStore, Storage}
 
+import scala.util.Random
+
 @Singleton
 final class PublicController @Inject()(
   storage: Storage,
@@ -55,6 +57,22 @@ final class PublicController @Inject()(
     }
   }
 
+  patch("/api/clients/:name") { req: UpdateClientRequest =>
+    storage.clients.get(req.name).flatMap {
+      case None => Future.value(response.notFound)
+      case Some(previous) =>
+        val client = previous.copy(externalName = req.externalName)
+        ClientValidator.validate(client) match {
+          case ValidationResult.Valid =>
+            storage.clients.replace(client).map {
+              case true => response.ok(client)
+              case false => response.notFound
+            }
+          case err: ValidationResult.Invalid => Future.value(response.badRequest(err))
+        }
+    }
+  }
+
   get("/api/clients/:name/ping") { req: PingClientRequest =>
     storage.clients.get(req.name).flatMap {
       case None => Future.value(response.notFound)
@@ -70,12 +88,15 @@ final class PublicController @Inject()(
                   collectKeys(client.name, sketch.campaignName, sketch.group)
                     .map { publicKeys =>
                       // Note: If a campaign is active, its `startTime` is defined.
-                      val startTime = if (testingMode) {
-                        campaign.startTime.get.toDateTime(timezone) + (sketch.day * 5).minutes
+                      val (startTime, endTime) = if (testingMode) {
+                        val startTime = campaign.startTime.get.toDateTime(timezone) + (sketch.day * 5).minutes
+                        val endTime = startTime + 5.minutes
+                        (startTime, endTime)
                       } else {
-                        campaign.startTime.get.toDateTime(timezone).withTimeAtStartOfDay + sketch.day.days
+                        val startTime = campaign.startTime.get.toDateTime(timezone).withTimeAtStartOfDay + sketch.day.days
+                        val endTime = startTime + 1.day
+                        (startTime, endTime)
                       }
-                      val endTime = startTime + 1.day
                       val round = sketch.day
                       SubmitSketchCommand(
                         sketchName = sketch.name,
@@ -95,7 +116,11 @@ final class PublicController @Inject()(
             val nextPingTime = if (testingMode) {
               DateTime.now(timezone).plusMinutes(5)
             } else {
-              DateTime.now(timezone).plusDays(1).withTimeAtStartOfDay.plusHours(2)
+              // The sketches are generated at 1:00, so we ask the clients to contact the server
+              // between 2:00 and 3:00 to get their instructions.
+              // We add some randomness to avoid all clients contacting the server at the same time.
+              // People are expected to be sleeping at 2:00, but their computer might still be on.
+              DateTime.now(timezone).plusDays(1).withTimeAtStartOfDay.plusHours(2).plusMinutes(Random.nextInt(60))
             }
             PingResponse(submit, Some(nextPingTime.toInstant))
           }
@@ -153,6 +178,10 @@ case class PingClientRequest(@RouteParam name: String)
 case class CreateClientRequest(
   publicKey: String,
   browser: String,
+  externalName: Option[String])
+
+case class UpdateClientRequest(
+  @RouteParam name: String,
   externalName: Option[String])
 
 case class DeleteClientRequest(@RouteParam name: String)

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+const API_URL = process.env.API_URL || 'https://api.ppd.cs.ucl.ac.uk';
+
 function status(response) {
   if (response.status >= 200 && response.status < 300) {
     return Promise.resolve(json(response));
@@ -43,5 +45,5 @@ export default function xhr(url, params = {}) {
     method: 'GET',
     ...params
   };
-  return fetch(url, params).then(status, e => Promise.reject(e));
+  return fetch(API_URL + url, params).then(status, e => Promise.reject(e));
 }

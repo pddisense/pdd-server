@@ -30,10 +30,7 @@ function reload() {
       if (chrome.runtime.lastError) {
         reject(chrome.runtime.lastError);
       } else {
-        let client = JSON.parse(items[CLIENT_KEY]);
-        if (Object.keys(client).length > 0) {
-          localClient = client;
-        }
+        localClient = JSON.parse(items[CLIENT_KEY]);
         loaded = true;
         resolve();
       }
@@ -68,6 +65,7 @@ export function getClient() {
  */
 export function setClient(client) {
   return write(CLIENT_KEY, client).then(() => {
+    console.log('Client data written to local storage', client);
     localClient = client;
     return client;
   });

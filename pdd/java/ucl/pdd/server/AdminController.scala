@@ -93,13 +93,10 @@ final class AdminController @Inject()(storage: Storage) extends Controller {
           samplingRate = req.samplingRate)
         CampaignValidator.validate(campaign) match {
           case ValidationResult.Valid =>
-            storage
-              .campaigns
-              .replace(campaign)
-              .map {
-                case true => response.ok(campaign)
-                case false => response.notFound
-              }
+            storage.campaigns.replace(campaign).map {
+              case true => response.ok(campaign)
+              case false => response.notFound
+            }
           case err: ValidationResult.Invalid => Future.value(response.badRequest(err))
         }
     }

@@ -25,8 +25,6 @@ import { encryptCounters, generateKeyPair } from './crypto';
 // Configure Sentry reporting. The environment variables are provided at build time.
 Raven.config(process.env.SENTRY_DSN, { environment: process.env.NODE_ENV }).install();
 
-const API_URL = process.env.API_URL || 'https://api.ppd.cs.ucl.ac.uk';
-
 // Open the options page just after the extension has been installed.
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === chrome.runtime.OnInstalledReason.INSTALL) {
@@ -62,7 +60,7 @@ chrome.alarms.create('ping', { when: moment().add(2, 'minutes').valueOf() });
 function ping(client) {
   console.log(`Pinging the server for client ${client.name}...`);
   // TODO: re-register in case of 404.
-  xhr(`${API_URL}/api/clients/${client.name}/ping`)
+  xhr(`/api/clients/${client.name}/ping`)
     .then(resp => {
       // Submit each sketch that was requested.
       resp.submit.forEach(command => submitSketch(client, command));
@@ -84,25 +82,31 @@ function ping(client) {
  */
 function getOrRegisterClient() {
   return getClient().then(client => {
-    return client || registerClient();
+    // If the client is registered, it has a name property.
+    if (client.name) {
+      return client;
+    } else {
+      return registerClient(client);
+    }
   });
 }
 
 /**
  * Register a new client.
  *
+ * @param data Client data in the storage (some fields might be defined, e.g., `externalName`).
  * @returns PromiseLike<Client>
  */
-function registerClient() {
+function registerClient(data) {
   console.log('Registering client...');
   const keyPair = generateKeyPair();
   const attrs = {
+    ...data,
     publicKey: keyPair.publicKey,
     browser: 'chrome',
-    externalName: null,
   };
   return xhr(
-    `${API_URL}/api/clients`,
+    `/api/clients`,
     { method: 'POST', body: JSON.stringify(attrs) }
   ).then(created => setClient({
     keyPair,
@@ -126,7 +130,7 @@ function submitSketch(client, command) {
         : [];
       const sketch = { rawValues, encryptedValues };
       return xhr(
-        `${API_URL}/api/sketches/${command.sketchName}`,
+        `/api/sketches/${command.sketchName}`,
         { method: 'PATCH', body: JSON.stringify(sketch) }
       );
     });
