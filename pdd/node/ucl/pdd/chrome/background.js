@@ -53,25 +53,26 @@ chrome.alarms.onAlarm.addListener(alarm => {
     getOrRegisterClient().then(client => ping(client));
   }
 });
-// We schedule a first ping in 1 minute. Normally, scheduling it the next day would be sufficient,
+
+// We schedule a first ping in 2 minutes. Normally, scheduling it the next day would be sufficient,
 // but for testing purposes the duration of a "day" may be reduced at first. So we prefer to do a
 // first useless ping query, that will give us the next ping time.
-chrome.alarms.create('ping', { when: moment().add(1, 'minute').valueOf() });
+chrome.alarms.create('ping', { when: moment().add(2, 'minutes').valueOf() });
 
 function ping(client) {
   console.log(`Pinging the server for client ${client.name}...`);
-  //TODO: re-register in case of 404.
+  // TODO: re-register in case of 404.
   xhr(`${API_URL}/api/clients/${client.name}/ping`)
     .then(resp => {
       // Submit each sketch that was requested.
       resp.submit.forEach(command => submitSketch(client, command));
-      
+
       // Schedule next ping time. Normally, the response comes with a suggested time. If for any
       // reason it is not present, we still schedule one for the next day (otherwise the extension
       // will simply stop sending data).
       const nextPingTime = resp.nextPingTime
         ? moment(resp.nextPingTime)
-        : moment().add(1, 'day').hours(1);
+        : moment().add(1, 'day').hours(2);
       chrome.alarms.create('ping', { when: nextPingTime.valueOf() });
     });
 }

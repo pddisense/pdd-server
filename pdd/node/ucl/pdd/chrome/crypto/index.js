@@ -87,7 +87,7 @@ function generateBlindingFactors(publicKeys, key, clientIndex, L, round) {
       const n = new BN(hash(share + l + round));
       if (idx < clientIndex) {
         K_il = K_il.add(n); //.toRed(BN.red()));
-      } else {
+      } else if (idx > clientIndex) {
         K_il = K_il.sub(n); //.toRed(BN.red()));
       }
     });
