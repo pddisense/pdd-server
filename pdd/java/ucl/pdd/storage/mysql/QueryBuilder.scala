@@ -16,48 +16,118 @@
 
 package ucl.pdd.storage.mysql
 
-import com.twitter.finagle.mysql.Parameter
+import com.twitter.finagle.mysql.{Client, Parameter, Result, Row}
+import com.twitter.util.Future
 
 import scala.collection.mutable
 
-private[mysql] abstract class QueryBuilder(from: String) {
-  private[this] val _where = mutable.ListBuffer.empty[String]
-  private[this] var _not = false
-  private[this] val _params = mutable.ListBuffer.empty[Parameter]
+private[mysql] class QueryBuilder[T](mysql: Client, table: String, hydrator: Row => T) {
 
-  def sql: String
+  def select: SelectQuery = new SelectQuery(table)
 
-  final def params: Seq[Parameter] = _params
+  def update: UpdateQuery = new UpdateQuery(table)
 
-  final def where(clause: String, params: Parameter*): this.type = {
-    _where += clause
-    _params ++= params
-    this
+  def insert: InsertQuery = new InsertQuery(table)
+
+  def delete: DeleteQuery = new DeleteQuery(table)
+
+  trait Query {
+    protected def build: (String, Seq[Parameter])
   }
 
-  final def not(): this.type = {
-    _not = true
-    this
-  }
+  trait AlterMixin {
+    this: Query =>
 
-  protected final def addWhere(sb: mutable.StringBuilder): Unit = {
-    if (_where.nonEmpty) {
-      sb ++= " where"
-      if (_not) {
-        sb ++= " not"
-      }
-      sb ++= " (( "
-      sb ++= _where.mkString(") and (")
-      sb ++= ")) "
+    def execute(): Future[Result] = {
+      val (sql, params) = build
+      mysql.prepare(sql).apply(params: _*)
     }
   }
-}
 
-object QueryBuilder {
+  trait WhereMixin {
+    this: Query =>
 
-  def select(from: String): Select = new Select(from)
+    private[this] val _where = mutable.ListBuffer.empty[(String, Seq[Parameter])]
+    private[this] var _not = false
 
-  final class Select(from: String) extends QueryBuilder(from) {
+    final def where(clause: String, params: Parameter*): this.type = {
+      _where += (clause -> params)
+      this
+    }
+
+    final def not(): this.type = {
+      _not = true
+      this
+    }
+
+    protected final def buildWhere(sb: mutable.StringBuilder, params: mutable.ListBuffer[Parameter]): Unit = {
+      if (_where.nonEmpty) {
+        sb ++= " where"
+        if (_not) {
+          sb ++= " not"
+        }
+        sb ++= " (( "
+        sb ++= _where.map(_._1).mkString(") and (")
+        sb ++= ")) "
+      }
+      params ++= _where.flatMap(_._2)
+    }
+  }
+
+  final class InsertQuery(table: String) extends Query with AlterMixin {
+    private[this] val _values = mutable.ListBuffer.empty[(String, Parameter)]
+
+    def set(field: String, value: Parameter): this.type = {
+      _values += (field -> value)
+      this
+    }
+
+    override protected def build: (String, Seq[Parameter]) = {
+      val sb = new mutable.StringBuilder()
+      sb ++= "insert into "
+      sb ++= table
+      sb ++= " ("
+      sb ++= _values.map(_._1).mkString(", ")
+      sb ++= ") values ("
+      sb ++= Seq.fill(_values.size)("?").mkString(", ")
+      sb += ')'
+      (sb.result(), _values.map(_._2))
+    }
+  }
+
+  final class UpdateQuery(table: String) extends Query with WhereMixin with AlterMixin {
+    private[this] val _values = mutable.ListBuffer.empty[(String, Parameter)]
+
+    def set(field: String, value: Parameter): this.type = {
+      _values += (field -> value)
+      this
+    }
+
+    override protected def build: (String, Seq[Parameter]) = {
+      val sb = new mutable.StringBuilder()
+      val params = mutable.ListBuffer.empty[Parameter]
+      sb ++= "update "
+      sb ++= table
+      sb ++= " set "
+      sb ++= _values.map { case (k, v) => s"$k = ?" }.mkString(", ")
+      params ++= _values.map(_._2)
+      buildWhere(sb, params)
+      (sb.result(), params)
+    }
+  }
+
+  final class DeleteQuery(table: String) extends Query with WhereMixin with AlterMixin {
+    override protected def build: (String, Seq[Parameter]) = {
+      val sb = new mutable.StringBuilder()
+      val params = mutable.ListBuffer.empty[Parameter]
+      sb ++= "delete from "
+      sb ++= table
+      buildWhere(sb, params)
+      (sb.result(), params)
+    }
+  }
+
+  final class SelectQuery(table: String) extends Query with WhereMixin {
     private[this] val _select = mutable.ListBuffer.empty[String]
     private[this] var _orderBy: Option[String] = None
     private[this] var _limit: Option[Int] = None
@@ -77,8 +147,14 @@ object QueryBuilder {
       this
     }
 
-    override def sql: String = {
+    def execute(): Future[Seq[T]] = {
+      val (sql, params) = build
+      mysql.prepare(sql).select(params: _*)(hydrator)
+    }
+
+    override protected def build: (String, Seq[Parameter]) = {
       val sb = new mutable.StringBuilder()
+      val params = mutable.ListBuffer.empty[Parameter]
       sb ++= "select "
       if (_select.isEmpty) {
         sb += '*'
@@ -86,8 +162,8 @@ object QueryBuilder {
         sb ++= _select.mkString(", ")
       }
       sb ++= " from "
-      sb ++= from
-      addWhere(sb)
+      sb ++= table
+      buildWhere(sb, params)
       _orderBy.foreach { orderBy =>
         sb ++= " order by "
         sb ++= orderBy
@@ -96,7 +172,7 @@ object QueryBuilder {
         sb ++= " limit "
         sb ++= limit.toString
       }
-      sb.result()
+      (sb.result(), params)
     }
   }
 

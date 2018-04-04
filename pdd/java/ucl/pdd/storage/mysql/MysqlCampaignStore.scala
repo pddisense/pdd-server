@@ -21,15 +21,16 @@ import com.twitter.util.Future
 import ucl.pdd.api.{Campaign, Vocabulary, VocabularyQuery}
 import ucl.pdd.storage.CampaignStore
 
-private[mysql] final class MysqlCampaignStore(mysql: MysqlClient) extends CampaignStore with MysqlStore {
+private[mysql] final class MysqlCampaignStore(mysql: MysqlClient)
+  extends CampaignStore with MysqlStore {
+
+  private[this] val query = new QueryBuilder(mysql, "campaigns", hydrate)
 
   import MysqlStore._
 
-  override def list(query: CampaignStore.Query): Future[Seq[Campaign]] = {
-    val qb = QueryBuilder
-      .select("campaigns")
-      .orderBy("createTime", "desc")
-    query.isActive.foreach { isActive =>
+  override def list(q: CampaignStore.Query): Future[Seq[Campaign]] = {
+    val qb = query.select.orderBy("createTime", "desc")
+    q.isActive.foreach { isActive =>
       qb.where("startTime is not null")
         .where("startTime <= now()")
         .where("endTime is null or endTime > now()")
@@ -37,53 +38,43 @@ private[mysql] final class MysqlCampaignStore(mysql: MysqlClient) extends Campai
         qb.not()
       }
     }
-    mysql
-      .prepare(qb.sql)
-      .select(qb.params: _*)(hydrate)
+    qb.execute()
   }
 
   override def get(name: String): Future[Option[Campaign]] = {
-    val qb = QueryBuilder
-      .select("campaigns")
-      .where("name = ?", name)
-      .limit(1)
-    mysql
-      .prepare(qb.sql)
-      .select(qb.params: _*)(hydrate)
-      .map(_.headOption)
+    val qb = query.select.where("name = ?", name).limit(1)
+    qb.execute().map(_.headOption)
   }
 
   override def batchGet(names: Seq[String]): Future[Seq[Option[Campaign]]] = {
     if (names.isEmpty) {
       Future.value(Seq.empty)
     } else {
-      mysql
-        .prepare(s"select * from campaigns where name in (${Seq.fill(names.size)("?").mkString(",")})")
-        .select(names.map(wrapString): _*)(hydrate)
+      query
+        .select
+        .where(s"name in (${Seq.fill(names.size)("?").mkString(",")})", names.map(wrapString): _*)
+        .execute()
         .map(campaigns => names.map(name => campaigns.find(_.name == name)))
     }
   }
 
   override def create(campaign: Campaign): Future[Boolean] = {
-    val sql = "insert into campaigns(name, createTime, displayName, email, vocabulary, startTime, " +
-      "endTime, collectRaw, collectEncrypted, delay, graceDelay, groupSize, samplingRate) " +
-      "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-    mysql
-      .prepare(sql)
-      .apply(
-        campaign.name,
-        campaign.createTime,
-        campaign.displayName,
-        encodeEmail(campaign.email),
-        encodeVocabulary(campaign.vocabulary),
-        campaign.startTime,
-        campaign.endTime,
-        campaign.collectRaw,
-        campaign.collectEncrypted,
-        campaign.delay,
-        campaign.graceDelay,
-        campaign.groupSize,
-        campaign.samplingRate)
+    query
+      .insert
+      .set("name", campaign.name)
+      .set("createTime", campaign.createTime)
+      .set("displayName", campaign.displayName)
+      .set("email", encodeEmail(campaign.email))
+      .set("vocabulary", encodeVocabulary(campaign.vocabulary))
+      .set("startTime", campaign.startTime)
+      .set("endTime", campaign.endTime)
+      .set("collectRaw", campaign.collectRaw)
+      .set("collectEncrypted", campaign.collectEncrypted)
+      .set("delay", campaign.delay)
+      .set("graceDelay", campaign.graceDelay)
+      .set("groupSize", campaign.groupSize)
+      .set("samplingRate", campaign.samplingRate)
+      .execute()
       .map(_ => true)
       .rescue {
         // Error code 1062 corresponds to a duplicate entry, which means the object already exists.
@@ -92,26 +83,22 @@ private[mysql] final class MysqlCampaignStore(mysql: MysqlClient) extends Campai
   }
 
   override def replace(campaign: Campaign): Future[Boolean] = {
-    val sql = "update campaigns " +
-      "set createTime = ?, displayName = ?, email = ?, vocabulary = ?, startTime = ?, endTime = ?, " +
-      "collectRaw = ?, collectEncrypted = ?, delay = ?, graceDelay = ?, groupSize = ?, samplingRate = ? " +
-      "where name = ?"
-    mysql
-      .prepare(sql)
-      .apply(
-        campaign.createTime,
-        campaign.displayName,
-        encodeEmail(campaign.email),
-        encodeVocabulary(campaign.vocabulary),
-        campaign.startTime,
-        campaign.endTime,
-        campaign.collectRaw,
-        campaign.collectEncrypted,
-        campaign.delay,
-        campaign.graceDelay,
-        campaign.groupSize,
-        campaign.samplingRate,
-        campaign.name)
+    query
+      .update
+      .where("name = ?", campaign.name)
+      .set("createTime", campaign.createTime)
+      .set("displayName", campaign.displayName)
+      .set("email", encodeEmail(campaign.email))
+      .set("vocabulary", encodeVocabulary(campaign.vocabulary))
+      .set("startTime", campaign.startTime)
+      .set("endTime", campaign.endTime)
+      .set("collectRaw", campaign.collectRaw)
+      .set("collectEncrypted", campaign.collectEncrypted)
+      .set("delay", campaign.delay)
+      .set("graceDelay", campaign.graceDelay)
+      .set("groupSize", campaign.groupSize)
+      .set("samplingRate", campaign.samplingRate)
+      .execute()
       .map {
         case ok: OK => ok.affectedRows == 1
         case _ => false
