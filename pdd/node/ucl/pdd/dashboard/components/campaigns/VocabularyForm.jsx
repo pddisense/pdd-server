@@ -71,9 +71,9 @@ class VocabularyForm extends React.Component {
               <button className="pt-button pt-intent-primary">Add query</button>
             </div>
             <div className="pt-form-helper-text">
-              Commas are used to separate keywords in a multi-terms query.
-              Spaces at the beginning and the end of each keyword will be ignored.
-              For example, "flu,influenza" will result in a multi-terms query tracking the keywords "flu" and "influenza", while "flu" will result in an exact query.
+              Commas are used to separate multiple terms.
+              Spaces at the beginning and the end of the query and each term will be ignored.<br/>
+              For example, "flu,influenza" will result in a terms query tracking the keywords "flu" and "influenza", while "flu" will result in an exact query.
             </div>
           </div>
         </div>

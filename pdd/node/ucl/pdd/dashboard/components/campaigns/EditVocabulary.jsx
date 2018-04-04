@@ -35,6 +35,13 @@ class EditVocabulary extends React.Component {
 
         <Tabs campaign={this.props.campaign}/>
 
+        <p className="pt-ui-text-large" style={{marginBottom: '25px'}}>
+          Each campaign allows to track a different set of queries.
+          Queries can be either <i>exact</i> queries, which means that users have to type the exact specified string to be counted,
+          or <i>terms</i> queries, which means that users have to type all of the terms to be counted
+          (but the order does not matter, and possible other terms appearing in the user's query are ignored).
+        </p>
+
         <VocabularyForm campaign={this.props.campaign} onSubmit={this.props.onSubmit}/>
         <VocabularyUpload campaign={this.props.campaign} onSubmit={this.props.onSubmit}/>
 

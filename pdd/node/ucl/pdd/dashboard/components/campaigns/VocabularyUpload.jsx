@@ -79,8 +79,8 @@ class VocabularyUpload extends React.Component {
           <FileInput inputProps={{ accept: '.csv,.txt' }} onInputChange={this.handleUpload}/>
           <div className="pt-form-helper-text">
             The selected file must be a CSV or TXT file containing one query per line.
-            Commas are used to separate keywords in a multi-terms query.
-            Spaces at the beginning and the end of each keyword will be ignored.
+            Commas are used to separate multiple terms.
+            Spaces at the beginning and the end of the query and each term will be ignored.
           </div>
         </div>
       </div>

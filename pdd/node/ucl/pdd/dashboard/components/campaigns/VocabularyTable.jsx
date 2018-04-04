@@ -67,6 +67,12 @@ class VocabularyTable extends React.Component {
       );
     });
     const shownQueries = rows.length;
+    let message;
+    if (shownQueries < totalQueries) {
+      message = `Displaying ${shownQueries} ${shownQueries === 1 ? 'query' : 'queries'} (out of ${totalQueries} total ${totalQueries === 1 ? 'query' : 'queries'})`;
+    } else {
+      message = `Displaying all of ${shownQueries} ${shownQueries === 1 ? 'query' : 'queries'}`
+    }
     return (
       <div>
         <div className="pt-control-group">
@@ -80,10 +86,7 @@ class VocabularyTable extends React.Component {
         </div>
 
         <div style={{ marginTop: '10px', marginBottom: '10px' }}>
-          <Callout intent={Intent.PRIMARY} icon={null}>
-            Displaying {shownQueries} {shownQueries === 1 ? 'query' : 'queries'} (out
-            of {totalQueries} total {totalQueries === 1 ? 'query' : 'queries'})
-          </Callout>
+          <Callout intent={Intent.PRIMARY} icon={null}>{message}</Callout>
         </div>
 
         <table className="pt-html-table pt-small pt-html-table-striped">
