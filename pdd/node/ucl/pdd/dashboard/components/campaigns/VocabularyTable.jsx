@@ -17,7 +17,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { some, noop } from 'lodash';
-import { Icon } from '@blueprintjs/core';
+import { Icon, Callout, Intent } from '@blueprintjs/core';
 import autobind from 'autobind-decorator';
 
 import TextInput from '../form/TextInput';
@@ -49,6 +49,15 @@ class VocabularyTable extends React.Component {
   }
 
   render() {
+    const totalQueries = this.props.campaign.vocabulary.queries.length;
+    if (totalQueries === 0) {
+      return (
+        <Callout intent={Intent.DANGER}>
+          No queries have been added to this campaign. Please add some queries.
+        </Callout>
+      );
+    }
+
     const rows = filterVocabulary(this.props.campaign, this.state).map(q => {
       return (
         <tr key={q.index} onClick={() => this.props.onClick ? this.props.onClick(q) : noop()}>
@@ -57,29 +66,35 @@ class VocabularyTable extends React.Component {
         </tr>
       );
     });
+    const shownQueries = rows.length;
     return (
       <div>
         <div className="pt-control-group">
           <div className="pt-input-group">
             <Icon iconName="search" iconSize="inherit"/>
             <TextInput
-              placeholder="Search by query..."
+              placeholder="Filter queries..."
               value={this.state.filter}
-              onChange={this.handleFilterChange} />
+              onChange={this.handleFilterChange}/>
           </div>
         </div>
 
-        <div style={{clear: 'both', height: 0}}>&nbsp;</div>
+        <div style={{ marginTop: '10px', marginBottom: '10px' }}>
+          <Callout intent={Intent.PRIMARY} icon={null}>
+            Displaying {shownQueries} {shownQueries === 1 ? 'query' : 'queries'} (out
+            of {totalQueries} total {totalQueries === 1 ? 'query' : 'queries'})
+          </Callout>
+        </div>
 
         <table className="pt-html-table pt-small pt-html-table-striped">
           <thead>
-            <tr>
-              <th style={{width: '400px'}}>Query</th>
-              <th style={{width: '100px'}}>Type</th>
-            </tr>
+          <tr>
+            <th style={{ width: '400px' }}>Query</th>
+            <th style={{ width: '100px' }}>Type</th>
+          </tr>
           </thead>
           <tbody>
-            {rows}
+          {rows}
           </tbody>
         </table>
       </div>

@@ -15,4 +15,5 @@
 
 # We proceed in two steps to avoid locks on the Bazel process (otherwise all other Bazel
 # commands are blocked while the server is running).
-bazel build pdd/java/ucl/pdd/dashboard && ./bazel-bin/pdd/java/ucl/pdd/dashboard/dashboard "$@"
+bazel build pdd/java/ucl/pdd/dashboard && \
+  ./bazel-bin/pdd/java/ucl/pdd/dashboard/dashboard -api.access_token=a -admin.port=:9991 "$@"

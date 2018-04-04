@@ -20,9 +20,14 @@ import { cloneDeep } from 'lodash';
 
 import Tabs from './Tabs';
 import VocabularyForm from './VocabularyForm';
+import VocabularyUpload from './VocabularyUpload';
 import VocabularyTable from './VocabularyTable';
 
 class EditVocabulary extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
   render() {
     return (
       <div>
@@ -31,9 +36,12 @@ class EditVocabulary extends React.Component {
         <Tabs campaign={this.props.campaign}/>
 
         <VocabularyForm campaign={this.props.campaign} onSubmit={this.props.onSubmit}/>
+        <VocabularyUpload campaign={this.props.campaign} onSubmit={this.props.onSubmit}/>
+
+        <hr style={{marginTop: '10px', marginBottom: '10px'}}/>
 
         <div className="rythmed">
-          <VocabularyTable campaign={this.props.campaign} />
+          <VocabularyTable campaign={this.props.campaign}/>
         </div>
       </div>
     );

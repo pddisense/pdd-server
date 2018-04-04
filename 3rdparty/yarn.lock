@@ -322,6 +322,12 @@ atob@^2.0.0:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/atob/-/atob-2.0.3.tgz#19c7a760473774468f20b2d2d03372ad7d4cbf5d"
 
+attr-accept@^1.0.3:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/attr-accept/-/attr-accept-1.1.2.tgz#6836bfe054e4ef1ee3076fdde56cec9bb3ffead6"
+  dependencies:
+    core-js "^2.5.0"
+
 autobind-decorator@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/autobind-decorator/-/autobind-decorator-2.1.0.tgz#4451240dbfeff46361c506575a63ed40f0e5bc68"
@@ -1478,7 +1484,7 @@ cryptiles@3.x.x:
   dependencies:
     boom "5.x.x"
 
-crypto-browserify@^3.11.0, crypto-browserify@^3.12.0:
+crypto-browserify@^3.11.0:
   version "3.12.0"
   resolved "https://registry.yarnpkg.com/crypto-browserify/-/crypto-browserify-3.12.0.tgz#396cf9f3137f03e4b8e532c58f698254e00f80ec"
   dependencies:
@@ -3988,7 +3994,7 @@ promise@^7.1.1:
   dependencies:
     asap "~2.0.3"
 
-prop-types@^15.5.10, prop-types@^15.5.4, prop-types@^15.5.8, prop-types@^15.6.0, prop-types@^15.6.1:
+prop-types@^15.5.10, prop-types@^15.5.4, prop-types@^15.5.7, prop-types@^15.5.8, prop-types@^15.6.0, prop-types@^15.6.1:
   version "15.6.1"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.6.1.tgz#36644453564255ddda391191fb3a125cbdf654ca"
   dependencies:
@@ -4099,6 +4105,13 @@ react-dom@^16.2.0:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
     prop-types "^15.6.0"
+
+react-dropzone@^4.2.9:
+  version "4.2.9"
+  resolved "https://registry.yarnpkg.com/react-dropzone/-/react-dropzone-4.2.9.tgz#98156ce4d4cb018f7c5099eeb2eaff6dc21836fd"
+  dependencies:
+    attr-accept "^1.0.3"
+    prop-types "^15.5.7"
 
 react-motion@^0.4.8:
   version "0.4.8"

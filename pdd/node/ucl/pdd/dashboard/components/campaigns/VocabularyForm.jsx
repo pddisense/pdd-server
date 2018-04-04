@@ -22,28 +22,7 @@ import { Intent } from '@blueprintjs/core';
 
 import TextInput from '../form/TextInput';
 import toaster from '../toaster';
-
-function appendVocabulary(obj, newQuery) {
-  if (!obj.vocabulary.queries) {
-    obj.vocabulary.queries = [];
-  }
-  if (newQuery.indexOf(',') > -1) {
-    const terms = newQuery.split(',').map(s => s.trim()).filter(s => s.length > 0).sort();
-    const previousIdx = obj.vocabulary.queries.findIndex(q => q.terms && q.terms === terms);
-    if (previousIdx === -1) {
-      obj.vocabulary.queries.push({terms});
-      return true;
-    }
-  } else {
-    const exact = newQuery;
-    const previousIdx = obj.vocabulary.queries.findIndex(q => q.exact && q.exact === exact);
-    if (previousIdx === -1) {
-      obj.vocabulary.queries.push({ exact });
-      return true;
-    }
-  }
-  return false;
-}
+import { appendToVocabulary } from '../../util/vocabulary';
 
 class VocabularyForm extends React.Component {
   constructor(props) {
@@ -55,22 +34,23 @@ class VocabularyForm extends React.Component {
 
   @autobind
   handleChange(e) {
-    this.setState({newQuery: e.target.value});
+    this.setState({ newQuery: e.target.value });
   }
 
   @autobind
   handleSubmit(e) {
     e.preventDefault();
-    if (this.state.newQuery === '') {
+    const newQuery = this.state.newQuery.trim();
+    if (newQuery.length === 0) {
       return;
     }
-    const obj = cloneDeep(this.props.campaign);
-    if (appendVocabulary(obj, this.state.newQuery)) {
-      this.props.onSubmit(obj);
+    const campaign = cloneDeep(this.props.campaign);
+    if (appendToVocabulary(campaign, newQuery)) {
+      this.props.onSubmit(campaign);
       this.setState({ newQuery: '' });
     } else {
       toaster.show({
-        message: `Query "${this.state.newQuery}" is already tracked`,
+        message: `Query "${this.state.newQuery}" is already part of the vocabulary.`,
         intent: Intent.DANGER,
       });
     }
@@ -79,14 +59,23 @@ class VocabularyForm extends React.Component {
   render() {
     return (
       <form onSubmit={this.handleSubmit}>
-        <div className="pt-control-group">
-          <div className="pt-input-group">
-            <TextInput
-              placeholder="flu,influenza"
-              value={this.state.newQuery}
-              onChange={this.handleChange} />
+        <div className="pt-form-group">
+          <div className="pt-form-content">
+            <div className="pt-control-group">
+              <div className="pt-input-group">
+                <TextInput
+                  placeholder="flu,influenza"
+                  value={this.state.newQuery}
+                  onChange={this.handleChange}/>
+              </div>
+              <button className="pt-button pt-intent-primary">Add query</button>
+            </div>
+            <div className="pt-form-helper-text">
+              Commas are used to separate keywords in a multi-terms query.
+              Spaces at the beginning and the end of each keyword will be ignored.
+              For example, "flu,influenza" will result in a multi-terms query tracking the keywords "flu" and "influenza", while "flu" will result in an exact query.
+            </div>
           </div>
-          <button className="pt-button pt-intent-primary">Add query</button>
         </div>
       </form>
     );

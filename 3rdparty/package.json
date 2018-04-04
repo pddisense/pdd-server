@@ -6,7 +6,6 @@
     "autobind-decorator": "^2.1.0",
     "bn.js": "^4.11.8",
     "elliptic": "^6.4.0",
-    "immutable": "^3.8.2",
     "moment": "^2.19.3",
     "prop-types": "^15.6.0",
     "raven-js": "^3.22.0",
