@@ -92,20 +92,3 @@ private[mysql] final class MysqlAggregationStore(mysql: MysqlClient) extends Agg
         decryptedCount = toLong(row, "decryptedCount")))
   }
 }
-
-private[mysql] object MysqlAggregationStore {
-  val CreateSchemaDDL = Map(
-    "aggregations" -> ("create table aggregations(" +
-      "unused_id int not null auto_increment," +
-      "name varchar(255) not null," +
-      "campaignName varchar(255) not null," +
-      "day int not null," +
-      "decryptedValues text not null," +
-      "rawValues text not null," +
-      "activeCount int not null," +
-      "submittedCount int not null," +
-      "decryptedCount int not null," +
-      "primary key (unused_id)," +
-      "UNIQUE KEY uix_name(name)" +
-      ") ENGINE=InnoDB DEFAULT CHARSET=utf8"))
-}

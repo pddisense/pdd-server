@@ -21,30 +21,35 @@ import com.twitter.util.Future
 import ucl.pdd.api.{Campaign, Vocabulary, VocabularyQuery}
 import ucl.pdd.storage.CampaignStore
 
-import scala.collection.mutable
-
 private[mysql] final class MysqlCampaignStore(mysql: MysqlClient) extends CampaignStore with MysqlStore {
 
   import MysqlStore._
 
   override def list(query: CampaignStore.Query): Future[Seq[Campaign]] = {
-    val where = mutable.ListBuffer.empty[String]
-    query.isActive.foreach {
-      case true => where += "startTime is not null and startTime <= now() and (endTime is null or endTime > now())"
-      case false => where += "startTime is null or startTime > now() or (endTime is not null and endTime <= now())"
+    val qb = QueryBuilder
+      .select("campaigns")
+      .orderBy("createTime", "desc")
+    query.isActive.foreach { isActive =>
+      qb.where("startTime is not null")
+        .where("startTime <= now()")
+        .where("endTime is null or endTime > now()")
+      if (!isActive) {
+        qb.not()
+      }
     }
     mysql
-      .prepare("select * " +
-        "from campaigns " +
-        s"where ${if (where.isEmpty) "true" else where.mkString(" and ")} " +
-        "order by createTime desc")
-      .select()(hydrate)
+      .prepare(qb.sql)
+      .select(qb.params: _*)(hydrate)
   }
 
   override def get(name: String): Future[Option[Campaign]] = {
+    val qb = QueryBuilder
+      .select("campaigns")
+      .where("name = ?", name)
+      .limit(1)
     mysql
-      .prepare("select * from campaigns where name = ? limit 1")
-      .select(name)(hydrate)
+      .prepare(qb.sql)
+      .select(qb.params: _*)(hydrate)
       .map(_.headOption)
   }
 
@@ -155,26 +160,4 @@ private[mysql] final class MysqlCampaignStore(mysql: MysqlClient) extends Campai
       query.exact.getOrElse("")
     }
   }
-}
-
-private[mysql] object MysqlCampaignStore {
-  val CreateSchemaDDL = Map(
-    "campaigns" -> ("create table campaigns(" +
-      "unused_id int not null auto_increment," +
-      "name varchar(255) not null," +
-      "createTime timestamp not null," +
-      "displayName varchar(255) not null," +
-      "email text not null," +
-      "vocabulary text not null," +
-      "startTime timestamp null," +
-      "endTime timestamp null," +
-      "collectRaw tinyint," +
-      "collectEncrypted tinyint," +
-      "delay int," +
-      "graceDelay int," +
-      "groupSize int," +
-      "samplingRate double," +
-      "primary key (unused_id)," +
-      "UNIQUE KEY uix_name(name)" +
-      ") ENGINE=InnoDB DEFAULT CHARSET=utf8"))
 }

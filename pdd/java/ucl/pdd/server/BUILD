@@ -30,12 +30,17 @@ deps = [
   "//3rdparty/jvm/com/twitter:finatra_http",
 ]
 main_class = "ucl.pdd.server.PddServerMain"
+runtime_deps = [
+  "//3rdparty/jvm/ch/qos/logback:logback_classic",
+  "//3rdparty/jvm/com/twitter:twitter_server_logback_classic",
+]
 
 scala_binary(
   name = "server",
   srcs = srcs,
   deps = deps,
   main_class = main_class,
+  runtime_deps = runtime_deps,
 )
 
 scala_image(
@@ -43,6 +48,7 @@ scala_image(
   srcs = srcs,
   deps = deps,
   main_class = main_class,
+  runtime_deps = runtime_deps,
 )
 
 container_push(

@@ -26,4 +26,6 @@ trait Storage extends Service {
   def aggregations: AggregationStore
 
   def sketches: SketchStore
+
+  def activity: ActivityStore
 }

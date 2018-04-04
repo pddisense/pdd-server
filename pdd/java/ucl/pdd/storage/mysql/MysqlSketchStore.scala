@@ -135,21 +135,3 @@ private[mysql] final class MysqlSketchStore(mysql: MysqlClient) extends SketchSt
       submitTime = getInstant(row, "submitTime"))
   }
 }
-
-private[mysql] object MysqlSketchStore {
-  val CreateSchemaDDL = Map(
-    "sketches" -> ("create table sketches(" +
-      "unused_id int not null auto_increment," +
-      "name varchar(255) not null," +
-      "clientName varchar(255) not null," +
-      "campaignName varchar(255) not null," +
-      "`group` int not null," +
-      "day int not null," +
-      "publicKey varchar(255) not null," +
-      "encryptedValues text not null," +
-      "rawValues text not null," +
-      "submitTime timestamp null," +
-      "primary key (unused_id)," +
-      "UNIQUE KEY uix_name(name)" +
-      ") ENGINE=InnoDB DEFAULT CHARSET=utf8"))
-}

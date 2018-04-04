@@ -48,8 +48,8 @@ object StorageModule extends TwitterModule {
     override def get(): Storage = {
       val client = MysqlClientFactory(
         user = mysqlUserFlag(),
-        pass = mysqlPassFlag.get.orNull,
-        base = mysqlBaseFlag(),
+        password = mysqlPassFlag.get.orNull,
+        database = mysqlBaseFlag(),
         server = mysqlServerFlag())
       new MysqlStorage(client)
     }

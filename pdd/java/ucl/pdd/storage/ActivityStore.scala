@@ -14,18 +14,32 @@
  * limitations under the License.
  */
 
-package ucl.pdd.storage.mysql
+package ucl.pdd.storage
 
-import com.twitter.finagle.mysql.ServerError
-import com.twitter.util.Monitor
+import com.twitter.util.Future
+import org.joda.time.Instant
+import ucl.pdd.api.Activity
 
-private[mysql] object MysqlMonitor extends Monitor {
-  private[this] val whitelist = Set(1062 /* Duplicate key */)
+trait ActivityStore {
+  /**
+   * Persist a new activity.
+   *
+   * @param activity Activity to save.
+   */
+  def create(activity: Activity): Future[Unit]
 
-  override def handle(exc: Throwable): Boolean = {
-    exc match {
-      case s: ServerError => whitelist.contains(s.code)
-      case _ => false
-    }
-  }
+  def list(query: ActivityStore.Query = ActivityStore.Query()): Future[Seq[Activity]]
+
+  def delete(query: ActivityStore.Query): Future[Int]
+}
+
+
+object ActivityStore {
+
+  case class Query(
+    startTime: Option[Instant] = None,
+    endTime: Option[Instant] = None,
+    clientName: Option[String] = None,
+    countryCode: Option[String] = None)
+
 }

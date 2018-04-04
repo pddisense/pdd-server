@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package ucl.pdd.storage.mysql
+package ucl.pdd.storage.memory
 
-import com.twitter.finagle.mysql.ServerError
-import com.twitter.util.Monitor
+import ucl.pdd.storage.{ActivityStoreSpec, Storage}
 
-private[mysql] object MysqlMonitor extends Monitor {
-  private[this] val whitelist = Set(1062 /* Duplicate key */)
+/**
+ * Unit tests for [[MemoryActivityStore]].
+ */
+class MemoryActivityStoreSpec extends ActivityStoreSpec {
+  behavior of "MemoryActivityStore"
 
-  override def handle(exc: Throwable): Boolean = {
-    exc match {
-      case s: ServerError => whitelist.contains(s.code)
-      case _ => false
-    }
-  }
+  override protected def createStorage: Storage = new MemoryStorage
 }

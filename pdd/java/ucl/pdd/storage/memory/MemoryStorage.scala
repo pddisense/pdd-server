@@ -21,12 +21,10 @@ import ucl.pdd.storage._
 
 final class MemoryStorage extends Storage {
   override val clients: ClientStore = new MemoryClientStore
-
   override val campaigns: CampaignStore = new MemoryCampaignStore
-
   override val aggregations: AggregationStore = new MemoryAggregationStore
-
   override val sketches: SketchStore = new MemorySketchStore
+  override val activity: ActivityStore = new MemoryActivityStore
 
   override def startUp(): Future[Unit] = Future.Done
 

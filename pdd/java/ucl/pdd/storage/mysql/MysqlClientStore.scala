@@ -97,18 +97,3 @@ private[mysql] final class MysqlClientStore(mysql: MysqlClient) extends ClientSt
       leaveTime = getInstant(row, "leaveTime"))
   }
 }
-
-private[mysql] object MysqlClientStore {
-  val CreateSchemaDDL = Map(
-    "clients" -> ("create table clients(" +
-      "unused_id int not null auto_increment," +
-      "name varchar(255) not null," +
-      "createTime timestamp not null," +
-      "publicKey varchar(255) not null," +
-      "browser varchar(255) not null," +
-      "externalName varchar(255) not null," +
-      "leaveTime timestamp null," +
-      "primary key (unused_id)," +
-      "UNIQUE KEY uix_name(name)" +
-      ") ENGINE=InnoDB DEFAULT CHARSET=utf8"))
-}

@@ -19,17 +19,32 @@
 package ucl.pdd.storage.mysql
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.Mysql
+import com.twitter.finagle._
 import com.twitter.finagle.client.DefaultPool
 import com.twitter.finagle.mysql.Client
+import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier}
+import com.twitter.util.{Throw, TimeoutException => UtilTimeoutException}
 
 private[storage] object MysqlClientFactory {
-  def apply(server: String, user: String, pass: String, base: String): Client = {
-    Mysql
-      .client
-      .withCredentials(user, pass)
-      .withDatabase(base)
+  private[this] val responseClassifier = ResponseClassifier.named("MysqlResponseClassifier") {
+    case ReqRep(_, Throw(Failure(Some(_: TimeoutException)))) => ResponseClass.RetryableFailure
+    case ReqRep(_, Throw(Failure(Some(_: UtilTimeoutException)))) => ResponseClass.RetryableFailure
+    case ReqRep(_, Throw(_: TimeoutException)) => ResponseClass.RetryableFailure
+    case ReqRep(_, Throw(_: UtilTimeoutException)) => ResponseClass.RetryableFailure
+    case ReqRep(_, Throw(_: ChannelClosedException)) => ResponseClass.RetryableFailure
+    case ReqRep(_, Throw(ChannelWriteException(Some(_: TimeoutException)))) => ResponseClass.RetryableFailure
+    case ReqRep(_, Throw(ChannelWriteException(Some(_: UtilTimeoutException)))) => ResponseClass.RetryableFailure
+    case ReqRep(_, Throw(ChannelWriteException(Some(_: ChannelClosedException)))) => ResponseClass.RetryableFailure
+  }
+
+  def apply(server: String, user: String, password: String, database: String): Client = {
+    Mysql.client
+      .withCredentials(user, password)
+      .withDatabase(database)
       .withMonitor(MysqlMonitor)
+      .withSessionQualifier.noFailFast
+      .withSessionQualifier.noFailureAccrual
+      .withResponseClassifier(responseClassifier)
       .configured(DefaultPool.Param(
         low = 0,
         high = 10,

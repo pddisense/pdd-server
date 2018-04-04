@@ -77,6 +77,8 @@ final class PublicController @Inject()(
     storage.clients.get(req.name).flatMap {
       case None => Future.value(response.notFound)
       case Some(client) =>
+        storage.activity.create(Activity(req.name, Instant.now(), None))
+
         storage
           .sketches
           .list(SketchStore.Query(clientName = Some(client.name), isSubmitted = Some(false)))

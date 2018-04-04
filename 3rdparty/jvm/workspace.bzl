@@ -24,8 +24,9 @@ def maven_dependencies(callback = declare_maven):
     callback({"artifact": "com.fasterxml.jackson.core:jackson-annotations:2.8.4", "lang": "java", "sha1": "de3570327cf8d1d4f37920535c51a1f74225a6de", "repository": "http://central.maven.org/maven2/", "name": "com_fasterxml_jackson_core_jackson_annotations", "actual": "@com_fasterxml_jackson_core_jackson_annotations//jar", "bind": "jar/com/fasterxml/jackson/core/jackson_annotations"})
 # duplicates in com.fasterxml.jackson.core:jackson-core promoted to 2.8.7
 # - io.sentry:sentry:1.6.4 wanted version 2.8.7
-# - com.twitter:finagle-toggle_2.11:18.2.0 wanted version 2.8.4
 # - com.twitter:finagle-stats_2.11:18.2.0 wanted version 2.8.4
+# - com.twitter:twitter-server_2.11:18.2.0 wanted version 2.8.4
+# - com.twitter:finagle-toggle_2.11:18.2.0 wanted version 2.8.4
 # - com.fasterxml.jackson.core:jackson-databind:2.8.4 wanted version 2.8.4
     callback({"artifact": "com.fasterxml.jackson.core:jackson-core:2.8.7", "lang": "java", "sha1": "8b46f39c78476fb848c81a49fa807a9e9506dddd", "repository": "http://central.maven.org/maven2/", "name": "com_fasterxml_jackson_core_jackson_core", "actual": "@com_fasterxml_jackson_core_jackson_core//jar", "bind": "jar/com/fasterxml/jackson/core/jackson_core"})
     callback({"artifact": "com.fasterxml.jackson.core:jackson-databind:2.8.4", "lang": "java", "sha1": "1c36c81e79cacdf48116afba8495e3393d267ba1", "repository": "http://central.maven.org/maven2/", "name": "com_fasterxml_jackson_core_jackson_databind", "actual": "@com_fasterxml_jackson_core_jackson_databind//jar", "bind": "jar/com/fasterxml/jackson/core/jackson_databind"})
@@ -77,7 +78,8 @@ def maven_dependencies(callback = declare_maven):
     callback({"artifact": "com.twitter:inject-utils_2.11:18.2.0", "lang": "scala", "sha1": "0855897fc1c5589f759960c8ce4030d69919108b", "repository": "http://central.maven.org/maven2/", "name": "com_twitter_inject_utils_2_11", "actual": "@com_twitter_inject_utils_2_11//jar:file", "bind": "jar/com/twitter/inject_utils_2_11"})
     callback({"artifact": "com.twitter:libthrift:0.5.0-7", "lang": "java", "sha1": "dc0124718b7d4baeb802fa960f51cd3f20d5fbda", "repository": "http://central.maven.org/maven2/", "name": "com_twitter_libthrift", "actual": "@com_twitter_libthrift//jar", "bind": "jar/com/twitter/libthrift"})
     callback({"artifact": "com.twitter:scrooge-core_2.11:18.2.0", "lang": "java", "sha1": "b9dc99c8a9b015e634d4afc74147a9fefb5ec7a0", "repository": "http://central.maven.org/maven2/", "name": "com_twitter_scrooge_core_2_11", "actual": "@com_twitter_scrooge_core_2_11//jar", "bind": "jar/com/twitter/scrooge_core_2_11"})
-    callback({"artifact": "com.twitter:twitter-server_2.11:18.2.0", "lang": "java", "sha1": "a085e623b8e44d07d7f492a6fa4205d3cb7a5cc1", "repository": "http://central.maven.org/maven2/", "name": "com_twitter_twitter_server_2_11", "actual": "@com_twitter_twitter_server_2_11//jar", "bind": "jar/com/twitter/twitter_server_2_11"})
+    callback({"artifact": "com.twitter:twitter-server-logback-classic_2.11:18.2.0", "lang": "scala", "sha1": "5c92f0d5c0690c9907a749b9e54dbd656f4adfde", "repository": "http://central.maven.org/maven2/", "name": "com_twitter_twitter_server_logback_classic_2_11", "actual": "@com_twitter_twitter_server_logback_classic_2_11//jar:file", "bind": "jar/com/twitter/twitter_server_logback_classic_2_11"})
+    callback({"artifact": "com.twitter:twitter-server_2.11:18.2.0", "lang": "scala", "sha1": "a085e623b8e44d07d7f492a6fa4205d3cb7a5cc1", "repository": "http://central.maven.org/maven2/", "name": "com_twitter_twitter_server_2_11", "actual": "@com_twitter_twitter_server_2_11//jar:file", "bind": "jar/com/twitter/twitter_server_2_11"})
     callback({"artifact": "com.twitter:util-app_2.11:18.2.0", "lang": "java", "sha1": "7a812b84ee6c71522e2ed9151a9a27cb0a78986a", "repository": "http://central.maven.org/maven2/", "name": "com_twitter_util_app_2_11", "actual": "@com_twitter_util_app_2_11//jar", "bind": "jar/com/twitter/util_app_2_11"})
     callback({"artifact": "com.twitter:util-cache_2.11:18.2.0", "lang": "java", "sha1": "217a7e704c6210b6f529b8018b8a0edc3c8259e4", "repository": "http://central.maven.org/maven2/", "name": "com_twitter_util_cache_2_11", "actual": "@com_twitter_util_cache_2_11//jar", "bind": "jar/com/twitter/util_cache_2_11"})
     callback({"artifact": "com.twitter:util-codec_2.11:18.2.0", "lang": "java", "sha1": "65c0d0cd1df1c716838e845055deb15203f44a82", "repository": "http://central.maven.org/maven2/", "name": "com_twitter_util_codec_2_11", "actual": "@com_twitter_util_codec_2_11//jar", "bind": "jar/com/twitter/util_codec_2_11"})
@@ -141,4 +143,5 @@ def maven_dependencies(callback = declare_maven):
 # - io.sentry:sentry-logback:1.6.4 wanted version 1.7.24
 # - ch.qos.logback:logback-classic:1.2.3 wanted version 1.7.25
 # - com.twitter:inject-slf4j_2.11:18.2.0 wanted version 1.7.21
+# - com.twitter:twitter-server-logback-classic_2.11:18.2.0 wanted version 1.7.21
     callback({"artifact": "org.slf4j:slf4j-api:1.7.25", "lang": "java", "sha1": "da76ca59f6a57ee3102f8f9bd9cee742973efa8a", "repository": "http://central.maven.org/maven2/", "name": "org_slf4j_slf4j_api", "actual": "@org_slf4j_slf4j_api//jar", "bind": "jar/org/slf4j/slf4j_api"})

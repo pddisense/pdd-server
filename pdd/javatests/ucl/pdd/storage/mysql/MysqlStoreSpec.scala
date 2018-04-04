@@ -49,8 +49,8 @@ private[mysql] trait MysqlStoreSpec extends StoreSpec with BeforeAndAfterEach {
   override def createStorage: Storage = {
     val client = MysqlClientFactory(
       user = "root",
-      pass = null,
-      base = base,
+      password = null,
+      database = base,
       server = "0.0.0.0:3306")
     new MysqlStorage(client)
   }

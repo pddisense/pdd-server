@@ -16,16 +16,11 @@
 
 package ucl.pdd.storage.mysql
 
-import com.twitter.finagle.mysql.ServerError
-import com.twitter.util.Monitor
+import ucl.pdd.storage.ActivityStoreSpec
 
-private[mysql] object MysqlMonitor extends Monitor {
-  private[this] val whitelist = Set(1062 /* Duplicate key */)
-
-  override def handle(exc: Throwable): Boolean = {
-    exc match {
-      case s: ServerError => whitelist.contains(s.code)
-      case _ => false
-    }
-  }
+/**
+ * Unit tests for [[MysqlActivityStore]].
+ */
+class MysqlActivityStoreSpec extends ActivityStoreSpec with MysqlStoreSpec {
+  behavior of "MysqlActivityStore"
 }
