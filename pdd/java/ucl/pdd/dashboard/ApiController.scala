@@ -29,15 +29,9 @@ import com.twitter.finatra.httpclient.HttpClient
  */
 @Singleton
 final class ApiController @Inject()(httpClient: HttpClient) extends Controller {
-  get("/api/campaigns") { req: Request => httpClient.execute(req) }
-  post("/api/campaigns") { req: Request => httpClient.execute(req) }
-  get("/api/campaigns/:name") { req: Request => httpClient.execute(req) }
-  put("/api/campaigns/:name") { req: Request => httpClient.execute(req) }
-  delete("/api/campaigns/:name") { req: Request => httpClient.execute(req) }
-
-  get("/api/aggregations") { req: Request => httpClient.execute(req) }
-  get("/api/aggregations/:name") { req: Request => httpClient.execute(req) }
-
-  get("/api/clients") { req: Request => httpClient.execute(req) }
-  get("/api/clients/:name") { req: Request => httpClient.execute(req) }
+  get("/api/:*") { req: Request => httpClient.execute(req) }
+  post("/api/:*") { req: Request => httpClient.execute(req) }
+  put("/api/:*") { req: Request => httpClient.execute(req) }
+  patch("/api/:*") { req: Request => httpClient.execute(req) }
+  delete("/api/:*") { req: Request => httpClient.execute(req) }
 }

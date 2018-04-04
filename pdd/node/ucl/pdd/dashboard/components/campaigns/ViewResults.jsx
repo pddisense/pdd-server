@@ -14,24 +14,28 @@
  * limitations under the License.
  */
 
-package ucl.pdd.api
+import React from 'react';
+import PropTypes from 'prop-types';
 
-/**
- * An aggregation is a request to collect searches during a given time period as part of a
- * campaign. Each campaign is divided in several aggregations, usually one per day.
- */
-case class Aggregation(
-  name: String,
-  campaignName: String,
-  day: Int,
-  decryptedValues: Seq[Long],
-  rawValues: Seq[Long],
-  stats: AggregationStats) {
+import Tabs from './Tabs';
+import ResultTableContainer from './ResultTableContainer';
 
-  def withoutValues: Aggregation = copy(decryptedValues = Seq.empty, rawValues = Seq.empty)
+class ViewResults extends React.Component {
+  render() {
+    return (
+      <div>
+        <h2>{this.props.campaign.displayName}</h2>
+
+        <Tabs campaign={this.props.campaign}/>
+
+        <ResultTableContainer campaign={this.props.campaign}/>
+      </div>
+    );
+  }
 }
 
-case class AggregationStats(
-  activeCount: Long,
-  submittedCount: Long,
-  decryptedCount: Long)
+ViewResults.propTypes = {
+  campaign: PropTypes.object.isRequired,
+};
+
+export default ViewResults;

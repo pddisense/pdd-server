@@ -61,6 +61,7 @@ class VocabularyTable extends React.Component {
     const rows = filterVocabulary(this.props.campaign, this.state).map(q => {
       return (
         <tr key={q.index} onClick={() => this.props.onClick ? this.props.onClick(q) : noop()}>
+          <td>{q.index}</td>
           <td>{q.terms && q.terms.length > 0 ? q.terms.join(',') : q.exact}</td>
           <td>{q.terms && q.terms.length > 0 ? 'terms' : 'exact'}</td>
         </tr>
@@ -92,6 +93,7 @@ class VocabularyTable extends React.Component {
         <table className="pt-html-table pt-small pt-html-table-striped">
           <thead>
           <tr>
+            <th style={{ width: '80px' }}>#</th>
             <th style={{ width: '400px' }}>Query</th>
             <th style={{ width: '100px' }}>Type</th>
           </tr>

@@ -22,6 +22,7 @@ import Dashboard from './Dashboard';
 import CampaignList from './campaigns/CampaignList';
 import NewCampaignContainer from './campaigns/NewCampaignContainer';
 import ViewCampaignContainer from './campaigns/ViewCampaignContainer';
+import ViewResultsContainer from './campaigns/ViewResultsContainer';
 import EditCampaignContainer from './campaigns/EditCampaignContainer';
 import EditVocabularyContainer from './campaigns/EditVocabularyContainer';
 import EditStrategyContainer from './campaigns/EditStrategyContainer';
@@ -38,6 +39,7 @@ export default class App extends React.Component {
           <Route exact path="/campaigns" component={CampaignList}/>
           <Route exact path="/campaigns/new" component={NewCampaignContainer}/>
           <Route exact path="/campaigns/view/:name" component={ViewCampaignContainer}/>
+          <Route exact path="/campaigns/results/:name" component={ViewResultsContainer}/>
           <Route exact path="/campaigns/edit/:name/metadata" component={EditCampaignContainer}/>
           <Route exact path="/campaigns/edit/:name/vocabulary" component={EditVocabularyContainer}/>
           <Route exact path="/campaigns/edit/:name/strategy" component={EditStrategyContainer}/>

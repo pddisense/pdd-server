@@ -16,4 +16,4 @@
 # We proceed in two steps to avoid locks on the Bazel process (otherwise all other Bazel
 # commands are blocked while the server is running).
 bazel build pdd/java/ucl/pdd/server && \
-  ./bazel-bin/pdd/java/ucl/pdd/server/server -api.access_token=a "$@"
+  ./bazel-bin/pdd/java/ucl/pdd/server/server -api.access_token=a -api.testing_mode "$@"

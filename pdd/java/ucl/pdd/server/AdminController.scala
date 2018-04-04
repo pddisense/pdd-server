@@ -24,7 +24,7 @@ import com.twitter.finatra.request.{QueryParam, RouteParam}
 import com.twitter.util.Future
 import org.joda.time.Instant
 import ucl.pdd.api._
-import ucl.pdd.storage.{CampaignStore, ClientStore, Storage}
+import ucl.pdd.storage._
 
 @Singleton
 final class AdminController @Inject()(storage: Storage) extends Controller {
@@ -66,8 +66,29 @@ final class AdminController @Inject()(storage: Storage) extends Controller {
     }
   }
 
-  get("/api/campaigns/:id") { req: GetCampaignRequest =>
-    storage.campaigns.get(req.id)
+  get("/api/campaigns/:name") { req: GetCampaignRequest =>
+    storage.campaigns.get(req.name)
+  }
+
+  get("/api/campaigns/:name/results") { req: GetResultsRequest =>
+    storage
+      .aggregations
+      .list(AggregationStore.Query(campaignName = req.name))
+      .map { aggregations =>
+        if (req.download) {
+          val header = "day,query,decrypted,count"
+          val content = aggregations.flatMap { agg =>
+            agg.rawValues.zipWithIndex.map { case (v, idx) => s"${agg.day},$idx,0,$v" } ++
+              agg.decryptedValues.zipWithIndex.map { case (v, idx) => s"${agg.day},$idx,1,$v" }
+          }
+          response
+            .ok((header +: content).mkString("\n"))
+            .contentType("text/csv")
+            .header("Content-Disposition", s"attachment; filename=${req.name}-day${aggregations.last.day}.csv")
+        } else {
+          ObjectList(aggregations.map(_.withoutValues))
+        }
+      }
   }
 
   put("/api/campaigns/:id") { req: UpdateCampaignRequest =>
@@ -112,9 +133,17 @@ final class AdminController @Inject()(storage: Storage) extends Controller {
   get("/api/clients/:name") { req: GetClientRequest =>
     storage.clients.get(req.name)
   }
+
+  get("/api/clients/:name/activity") { req: GetClientRequest =>
+    storage.activity.list(ActivityStore.Query(clientName = Some(req.name)))
+  }
 }
 
-case class GetCampaignRequest(@RouteParam id: String)
+case class GetCampaignRequest(@RouteParam name: String)
+
+case class GetResultsRequest(
+  @RouteParam name: String,
+  @QueryParam download: Boolean = false)
 
 case class ListCampaignsRequest(@QueryParam active: Option[Boolean])
 
@@ -148,3 +177,5 @@ case class UpdateCampaignRequest(
 case class ListClientsRequest(@QueryParam active: Option[Boolean])
 
 case class GetClientRequest(@RouteParam name: String)
+
+case class GetAggregationRequest(@RouteParam name: String)
