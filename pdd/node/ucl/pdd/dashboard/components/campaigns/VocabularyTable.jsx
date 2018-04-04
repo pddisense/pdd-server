@@ -69,9 +69,9 @@ class VocabularyTable extends React.Component {
     const shownQueries = rows.length;
     let message;
     if (shownQueries < totalQueries) {
-      message = `Displaying ${shownQueries} ${shownQueries === 1 ? 'query' : 'queries'} (out of ${totalQueries} total ${totalQueries === 1 ? 'query' : 'queries'})`;
+      message = `Displaying ${shownQueries} ${shownQueries === 1 ? 'query' : 'queries'} (out of ${totalQueries} total ${totalQueries === 1 ? 'query' : 'queries'}).`;
     } else {
-      message = `Displaying all of ${shownQueries} ${shownQueries === 1 ? 'query' : 'queries'}`
+      message = `Displaying all of the ${shownQueries} ${shownQueries === 1 ? 'query' : 'queries'}.`
     }
     return (
       <div>

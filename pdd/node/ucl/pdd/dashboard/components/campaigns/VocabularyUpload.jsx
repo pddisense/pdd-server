@@ -78,7 +78,7 @@ class VocabularyUpload extends React.Component {
         <div className="pt-form-content">
           <FileInput inputProps={{ accept: '.csv,.txt' }} onInputChange={this.handleUpload}/>
           <div className="pt-form-helper-text">
-            The selected file must be a CSV or TXT file containing one query per line.
+            The selected file must be a CSV or TXT file containing one query per line.<br/>
             Commas are used to separate multiple terms.
             Spaces at the beginning and the end of the query and each term will be ignored.
           </div>
