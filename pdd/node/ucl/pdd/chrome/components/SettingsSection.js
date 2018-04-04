@@ -66,6 +66,7 @@ class SettingsSection extends React.Component {
                    style={{'width': '300px'}}
                    type="text"
                    dir="auto"
+                   value={this.state.externalName}
                    onChange={this.handleExternalNameChange}
                    onBlur={this.handleBlur}/>
             <div className="pt-form-helper-text">

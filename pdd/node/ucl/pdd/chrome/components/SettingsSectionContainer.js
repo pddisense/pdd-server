@@ -16,10 +16,12 @@
 
 import React from 'react';
 import autobind from 'autobind-decorator';
+import { Intent } from '@blueprintjs/core';
 
 import { getClient, setClient } from '../browser/storage';
 import SettingsSection from './SettingsSection';
 import xhr from '../util/xhr';
+import toaster from './toaster';
 
 export default class SettingsSectionContainer extends React.Component {
   constructor(props) {
@@ -36,13 +38,24 @@ export default class SettingsSectionContainer extends React.Component {
       p = xhr(
         `/api/clients/${this.state.data.name}`,
         { method: 'PATCH', body: JSON.stringify(client) }
+      ).then(
+        () => {
+          toaster.show({ message: 'The settings have been updated.', intent: Intent.SUCCESS });
+          return Promise.resolve();
+        },
+        (reason) => {
+          toaster.show({ message: 'There was an error while updating the settings.', intent: Intent.DANGER });
+          return Promise.reject(reason);
+        }
       );
-      // TODO: handle network error here.
     } else {
       // It means that the client is not (yet) registered against the server.
       p = Promise.resolve();
     }
-    p.then(() => setClient({ ...this.state.data, ...client }));
+    p.then(
+      () => setClient({ ...this.state.data, ...client }),
+      () => console.log('Cannot contact the server, changes are discarded.'),
+    );
   }
 
   componentDidMount() {
