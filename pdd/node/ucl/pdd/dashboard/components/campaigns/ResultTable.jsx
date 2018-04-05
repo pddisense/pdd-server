@@ -40,7 +40,7 @@ class ResultTable extends React.Component {
       );
     });
     return (
-      <table className="pt-html-table pt-interactive pt-html-table-striped">
+      <table className="pt-html-table pt-small pt-interactive pt-html-table-striped">
         <thead>
         <tr>
           <th>Day</th>

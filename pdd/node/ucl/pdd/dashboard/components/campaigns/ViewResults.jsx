@@ -16,19 +16,42 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { AnchorButton, Intent, Callout } from '@blueprintjs/core';
 
 import Tabs from './Tabs';
+import Title from './Title';
 import ResultTableContainer from './ResultTableContainer';
 
 class ViewResults extends React.Component {
   render() {
     return (
       <div>
-        <h2>{this.props.campaign.displayName}</h2>
+        <Title campaign={this.props.campaign}/>
 
         <Tabs campaign={this.props.campaign}/>
 
-        <ResultTableContainer campaign={this.props.campaign}/>
+        {this.props.campaign.started ?
+          <div>
+            <div style={{ marginBottom: '15px' }}>
+              <a role="button"
+                 className="pt-button pt-intent-primary"
+                 href={`/api/campaigns/${this.props.campaign.name}/results?download=1`}>
+                Download as CSV
+              </a>
+              <a role="button"
+                 className="pt-button"
+                 style={{ marginLeft: '10px' }}
+                 href={`/api/campaigns/${this.props.campaign.name}/results`}>
+                Download as JSON
+              </a>
+            </div>
+
+            <ResultTableContainer campaign={this.props.campaign}/>
+          </div> :
+          <Callout intent={Intent.DANGER}>
+            This campaign has not yet started. Results will be available once the campaign will be
+            running.
+          </Callout>}
       </div>
     );
   }

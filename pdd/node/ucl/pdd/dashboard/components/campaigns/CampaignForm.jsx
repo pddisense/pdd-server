@@ -66,7 +66,7 @@ class CampaignForm extends React.Component {
             title="Display name"
             required={true}
             minLength={1}
-            help="The name of the campaign, as displayed to the volunteers.">
+            help="The name of the campaign, used to identify it in lists.">
             <TextInput
               value={this.state.displayName}
               required={true}
@@ -75,8 +75,7 @@ class CampaignForm extends React.Component {
 
           <FormGroup
             title="E-mail address(es)"
-            help="These addresses will be used by PDD to send notifications.
-                  They will not be publicly displayed.">
+            help="These addresses will be used by PDD to send notifications. They will not be publicly displayed.">
             <TextInput value={this.state.email} onChange={e => this.handleTextChange(e, 'email')}/>
           </FormGroup>
 

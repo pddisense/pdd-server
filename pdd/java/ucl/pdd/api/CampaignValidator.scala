@@ -68,7 +68,9 @@ object CampaignValidator {
     if (previous.isStarted && obj.startTime != previous.startTime) {
       errors += ErrorCause("cannot be changed once a campaign started", "startTime")
     }
-    if (previous.isStarted && obj.endTime.exists(_.isBefore(Instant.now))) {
+    if (previous.isCompleted && obj.endTime != previous.endTime) {
+      errors += ErrorCause("cannot be changed in the past once a campaign completed", "endTime")
+    } else if (previous.isStarted && obj.endTime.exists(_.isBefore(Instant.now))) {
       errors += ErrorCause("cannot be set in the past once a campaign started", "endTime")
     }
     if (previous.isStarted && obj.delay != previous.delay) {
@@ -83,8 +85,11 @@ object CampaignValidator {
     if (previous.isStarted && obj.collectEncrypted != previous.collectEncrypted) {
       errors += ErrorCause("cannot be changed once a campaign started", "collectEncrypted")
     }
-    if (previous.isStarted && obj.groupSize != previous.groupSize) {
-      errors += ErrorCause("cannot be changed once a campaign started", "groupSize")
+    if (previous.isCompleted && obj.samplingRate != previous.samplingRate) {
+      errors += ErrorCause("cannot be changed in the past once a campaign completed", "samplingRate")
+    }
+    if (previous.isCompleted && obj.groupSize != previous.groupSize) {
+      errors += ErrorCause("cannot be changed in the past once a campaign completed", "groupSize")
     }
 
     // Enforce the vocabulary is append-only.

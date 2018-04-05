@@ -19,6 +19,7 @@ import PropTypes from 'prop-types';
 import { cloneDeep } from 'lodash';
 
 import Tabs from './Tabs';
+import Title from './Title';
 import VocabularyForm from './VocabularyForm';
 import VocabularyUpload from './VocabularyUpload';
 import VocabularyTable from './VocabularyTable';
@@ -31,16 +32,15 @@ class EditVocabulary extends React.Component {
   render() {
     return (
       <div>
-        <h2>{this.props.campaign.displayName}</h2>
+        <Title campaign={this.props.campaign}/>
 
         <Tabs campaign={this.props.campaign}/>
 
         <p className="pt-ui-text-large" style={{marginBottom: '25px'}}>
-          Each campaign allows to track a different set of queries.
+          This page allows to configure the search queries that are actively monitored by this campaign.
           Queries can be either <i>exact</i> queries, which means that users have to type the exact specified string to be counted,
-          or <i>terms</i> queries, which means that users have to type all of the terms to be counted
-          (but the order does not matter, and possible other terms appearing in the user's query are ignored).
-          Vocabulary is append-only.
+          or <i>terms</i> queries, which means that users have to type all of the terms, in any order, to be counted.
+          Vocabulary is append-only, which means queries cannot be removed.
         </p>
 
         <VocabularyForm campaign={this.props.campaign} onSubmit={this.props.onSubmit}/>

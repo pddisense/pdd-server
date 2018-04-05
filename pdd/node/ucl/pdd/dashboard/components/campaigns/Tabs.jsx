@@ -25,7 +25,7 @@ const LINKS = [
     action: 'view',
   },
   {
-    title: 'Results',
+    title: 'View results',
     action: 'results',
   },
   {

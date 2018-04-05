@@ -18,20 +18,16 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import Tabs from './Tabs';
+import Title from './Title';
 
 class ViewCampaign extends React.Component {
   render() {
     const { campaign } = this.props;
     return (
       <div>
-        <h2>{campaign.displayName}</h2>
+        <Title campaign={campaign} />
 
         <Tabs campaign={campaign} />
-
-        <div className="attr-row">
-          <div className="attr-name">E-mail addresse(s)</div>
-          <div className="attr-value">{campaign.email.join(', ')}</div>
-        </div>
 
         <div className="attr-row">
           <div className="attr-name">Start date</div>
@@ -41,6 +37,11 @@ class ViewCampaign extends React.Component {
         <div className="attr-row">
           <div className="attr-name">End date</div>
           <div className="attr-value">{campaign.endTime ? new Date(campaign.endTime).toLocaleDateString() : campaign.startTime ? 'never' : '–'}</div>
+        </div>
+
+        <div className="attr-row">
+          <div className="attr-name">E-mail addresse(s)</div>
+          <div className="attr-value">{campaign.email.join(', ')}</div>
         </div>
 
         <div className="attr-row">

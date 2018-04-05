@@ -37,12 +37,12 @@ class CampaignTable extends React.Component {
           <td>{wrap(item.email ? item.email : '-')}</td>
           <td>{wrap(item.startTime ? moment(item.startTime).fromNow() : '–')}</td>
           <td>{wrap(item.endTime ? moment(item.endTime).fromNow() : item.startTime ? 'never' : '-')}</td>
-          <td>{wrap(item.collectEncrypted ? 'disabled' : 'enabled')}</td>
+          <td>{wrap(item.collectEncrypted ? 'enabled' : 'disabled')}</td>
         </tr>
       );
     });
     return (
-      <table className="pt-html-table pt-interactive pt-html-table-striped">
+      <table className="pt-html-table pt-interactive pt-html-table-striped" style={{width: '100%'}}>
         <thead>
         <tr>
           <th>Name</th>

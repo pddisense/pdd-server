@@ -18,15 +18,21 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import CampaignForm from './CampaignForm';
+import Title from './Title';
 import Tabs from './Tabs';
 
 class EditCampaign extends React.Component {
   render() {
     return (
       <div>
-        <h2>{this.props.campaign.displayName}</h2>
+        <Title campaign={this.props.campaign}/>
 
         <Tabs campaign={this.props.campaign}/>
+
+        <p className="pt-ui-text-large" style={{ marginBottom: '25px' }}>
+          This page allows to edit the basic metadata of this campaign.
+          The monitored vocabulary and the collection strategy can be modified in other tabs.
+        </p>
 
         <CampaignForm {...this.props} />
       </div>

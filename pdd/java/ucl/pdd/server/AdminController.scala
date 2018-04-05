@@ -84,7 +84,7 @@ final class AdminController @Inject()(storage: Storage) extends Controller {
           response
             .ok((header +: content).mkString("\n"))
             .contentType("text/csv")
-            .header("Content-Disposition", s"attachment; filename=${req.name}-day${aggregations.last.day}.csv")
+            .header("Content-Disposition", s"attachment; filename=${req.name}-day${aggregations.head.day}.csv")
         } else {
           ObjectList(aggregations.map(_.withoutValues))
         }

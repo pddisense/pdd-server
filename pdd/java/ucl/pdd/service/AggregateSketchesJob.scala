@@ -68,6 +68,7 @@ final class AggregateSketchesJob @Inject()(
         } else {
           val startDay = actualDay - 1 - campaign.delay - campaign.graceDelay
           val days = math.max(0, startDay) to (actualDay - 1 - campaign.delay)
+          logger.info(s"Aggregating campaign ${campaign.name} on days ${days.mkString(", ")} (today: $actualDay)")
           Future.join(days.map(aggregate(_, campaign)))
         }
         //TODO: backfill.
