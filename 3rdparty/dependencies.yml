@@ -56,9 +56,13 @@ dependencies:
   io.sentry:
     sentry:
       version: "1.6.4"
-      modules: [logback]
       lang: java
+      modules: [logback]
   com.datadoghq:
     java-dogstatsd-client:
-      lang: java
       version: "2.5"
+      lang: java
+  com.nimbusds:
+    nimbus-jose-jwt:
+      version: "5.9"
+      lang: java

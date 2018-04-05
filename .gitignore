@@ -9,8 +9,6 @@ bazel-*
 .installed.cfg
 env/
 _site/
-
-## Node artifacts
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -19,18 +17,7 @@ yarn-error.log*
 .yarn-integrity
 .eslintcache
 **/node_modules/
-
-## Chrome artifacts
 *.crx
-
-## Python artifacts
-__pycache__/
-*.py[cod]
-*.so
-*.egg-info/
-*.egg
-pip-log.txt
-pip-delete-this-directory.txt
 
 # Sensitive files
 .env

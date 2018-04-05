@@ -23,7 +23,7 @@ import { identity } from 'lodash';
 
 class ResultTable extends React.Component {
   handleClick(item) {
-    
+
   }
 
   render() {
