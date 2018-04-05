@@ -57,7 +57,7 @@ object MysqlStorage {
       "createTime timestamp not null," +
       "displayName varchar(255) not null," +
       "email text not null," +
-      "vocabulary text not null," +
+      "vocabulary longtext not null," +
       "startTime timestamp null," +
       "endTime timestamp null," +
       "collectRaw tinyint," +
@@ -75,8 +75,8 @@ object MysqlStorage {
       "name varchar(255) not null," +
       "campaignName varchar(255) not null," +
       "day int not null," +
-      "decryptedValues text not null," +
-      "rawValues text not null," +
+      "decryptedValues longtext not null," +
+      "rawValues longtext not null," +
       "activeCount int not null," +
       "submittedCount int not null," +
       "decryptedCount int not null," +
@@ -92,8 +92,8 @@ object MysqlStorage {
       "`group` int not null," +
       "day int not null," +
       "publicKey varchar(255) not null," +
-      "encryptedValues text not null," +
-      "rawValues text not null," +
+      "encryptedValues longtext not null," +
+      "rawValues longtext not null," +
       "submitTime timestamp null," +
       "primary key (unused_id)," +
       "UNIQUE KEY uix_name(name)" +
