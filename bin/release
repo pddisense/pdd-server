@@ -45,19 +45,17 @@ do
   esac
 done
 
-bazel build pdd/node/ucl/pdd/chrome:package --define env=production && \
-  cp bazel-bin/pdd/node/ucl/pdd/chrome/package.zip ${dist_dir}/chrome.zip
+bazel build pdd/node/ucl/pdd/chrome:package --define env=production
+cp bazel-bin/pdd/node/ucl/pdd/chrome/package.zip ${dist_dir}/chrome.zip
 
-bazel build pdd/java/ucl/pdd/dashboard && \
-  bazel build pdd/java/ucl/pdd/dashboard:dashboard_deploy.jar --define env=production && \
-  cp bazel-bin/pdd/java/ucl/pdd/dashboard/dashboard_deploy.jar ${dist_dir}/pdd-dashboard.jar
+bazel build pdd/java/ucl/pdd/dashboard:dashboard_deploy.jar --define env=production
+cp bazel-bin/pdd/java/ucl/pdd/dashboard/dashboard_deploy.jar ${dist_dir}/pdd-dashboard.jar
 
-bazel build pdd/java/ucl/pdd/server && \
-  bazel build pdd/java/ucl/pdd/server:server_deploy.jar --define env=production && \
-  cp bazel-bin/pdd/java/ucl/pdd/server/server_deploy.jar ${dist_dir}/pdd-server.jar
+bazel build pdd/java/ucl/pdd/server:server_deploy.jar --define env=production
+cp bazel-bin/pdd/java/ucl/pdd/server/server_deploy.jar ${dist_dir}/pdd-server.jar
 
 if [[ ${publish} == 1 ]]; then
   echo "Publishing Docker images..."
   bazel run pdd/java/ucl/pdd/server:publish
-  bazel run pdd/java/ucl/pdd/dashboard:publish
+  bazel run pdd/java/ucl/pdd/dashboard:publish --define env=production
 fi

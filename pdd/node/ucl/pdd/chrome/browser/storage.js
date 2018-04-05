@@ -65,7 +65,7 @@ export function getClient() {
  */
 export function setClient(client) {
   return write(CLIENT_KEY, client).then(() => {
-    console.log('Client data written to local storage', client);
+    // console.log('Client data written to local storage', client);
     localClient = client;
     return client;
   });

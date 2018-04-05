@@ -58,7 +58,7 @@ class SettingsSection extends React.Component {
 
         <div className="pt-form-group">
           <label className="pt-label" htmlFor="external-name">
-            External name
+            Participant identifier
           </label>
           <div className="pt-form-content">
             <input id="external-name"
@@ -72,6 +72,19 @@ class SettingsSection extends React.Component {
             <div className="pt-form-helper-text">
               If you are participating to a study and have been assigned an identifier, please
               indicate it here.
+            </div>
+          </div>
+        </div>
+
+        <div className="pt-form-group">
+          <label className="pt-label" htmlFor="external-name">
+            Client name
+          </label>
+          <div className="pt-form-content">
+            {this.props.client.name}
+            <div className="pt-form-helper-text">
+              This is the internal name that is used to identify you from our server.
+              Should you encounter any issues, our support may ask you this name.
             </div>
           </div>
         </div>
