@@ -23,7 +23,7 @@ import { identity } from 'lodash';
 
 class ResultTable extends React.Component {
   handleClick(item) {
-
+    
   }
 
   render() {
@@ -45,8 +45,8 @@ class ResultTable extends React.Component {
         <tr>
           <th>Day</th>
           <th>Active users</th>
-          <th>Submitted</th>
-          <th>Decrypted</th>
+          <th>Submitted sketches</th>
+          <th>Decrypted sketches</th>
         </tr>
         </thead>
         <tbody>{rows}</tbody>

@@ -40,6 +40,7 @@ class EditVocabulary extends React.Component {
           Queries can be either <i>exact</i> queries, which means that users have to type the exact specified string to be counted,
           or <i>terms</i> queries, which means that users have to type all of the terms to be counted
           (but the order does not matter, and possible other terms appearing in the user's query are ignored).
+          Vocabulary is append-only.
         </p>
 
         <VocabularyForm campaign={this.props.campaign} onSubmit={this.props.onSubmit}/>

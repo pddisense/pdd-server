@@ -61,7 +61,7 @@ private[mysql] trait MysqlStore {
 
   protected final def getLongs(row: Row, field: String): Option[Seq[Long]] =
     getString(row, field).map { str =>
-      str.split("\n").filter(_.nonEmpty).map(_.toLong).toSeq
+      str.split(' ').filter(_.nonEmpty).map(_.toLong).toSeq
     }
 
   protected final def toStrings(row: Row, field: String): Seq[String] = {
@@ -110,7 +110,7 @@ object MysqlStore {
   implicit def wrapInstant(instant: Option[Instant]): Parameter = instant.map(wrapInstant).getOrElse(Parameter.NullParameter)
 
   implicit def wrapString(str: String): Parameter = Parameter.wrap(str)
-  
+
   implicit def wrapString(str: Option[String]): Parameter = Parameter.wrap(str.getOrElse(""))
 
   implicit def wrapStrings(strs: Seq[String]): Parameter = Parameter.wrap(strs.mkString("\n"))
@@ -119,11 +119,7 @@ object MysqlStore {
 
   implicit def wrapDouble(dbl: Option[Double]): Parameter = dbl.map(Parameter.wrap(_)).getOrElse(Parameter.NullParameter)
 
-  implicit def wrapDoubles(dbls: Seq[Double]): Parameter = Parameter.wrap(dbls.mkString("\n"))
-
-  implicit def wrapDoubles(dbls: Option[Seq[Double]]): Parameter = dbls.map(wrapDoubles).getOrElse("")
-
-  implicit def wrapLongs(lngs: Seq[Long]): Parameter = Parameter.wrap(lngs.mkString("\n"))
+  implicit def wrapLongs(lngs: Seq[Long]): Parameter = Parameter.wrap(lngs.mkString(" "))
 
   implicit def wrapLongs(lngs: Option[Seq[Long]]): Parameter = lngs.map(wrapLongs).getOrElse("")
 }
