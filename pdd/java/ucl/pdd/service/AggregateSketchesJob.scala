@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ucl.pdd.cron
+package ucl.pdd.service
 
 import java.util.concurrent.locks.ReentrantLock
 
@@ -76,7 +76,8 @@ final class AggregateSketchesJob @Inject()(
   }
 
   private def aggregate(day: Int, campaign: Campaign): Future[Unit] = {
-    storage.sketches
+    storage
+      .sketches
       .list(SketchStore.Query(campaignName = Some(campaign.name), day = Some(day)))
       .flatMap(sketches => aggregate(day, campaign, sketches))
   }
@@ -89,11 +90,14 @@ final class AggregateSketchesJob @Inject()(
     }
     val (decryptedValues, decryptedCount) = if (campaign.collectEncrypted) {
       // TODO: raise a warning if submitted but no encrypted values?
-      val decryptedByGroup = sketches.groupBy(_.group).values.filter(_.forall(s => s.isSubmitted && s.encryptedValues.isDefined))
-      val groupValues = decryptedByGroup.map { groupSketches =>
+      val decryptedByGroup = sketches
+        .groupBy(_.group)
+        .values
+        .filter(_.forall(s => s.submitted && s.encryptedValues.isDefined))
+      val valuesByGroup = decryptedByGroup.map { groupSketches =>
         foldEncrypted(groupSketches.map(_.encryptedValues.toSeq.flatten))
       }
-      (foldRaw(groupValues), groupValues.map(_.size).sum.toLong)
+      (foldRaw(valuesByGroup), decryptedByGroup.map(_.size).sum.toLong)
     } else {
       (Seq.empty, 0L)
     }
@@ -106,7 +110,7 @@ final class AggregateSketchesJob @Inject()(
       rawValues = rawValues,
       stats = AggregationStats(
         activeCount = sketches.size,
-        submittedCount = sketches.count(_.isSubmitted),
+        submittedCount = sketches.count(_.submitted),
         decryptedCount = decryptedCount))
 
     storage.aggregations

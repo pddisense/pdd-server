@@ -70,13 +70,13 @@ object SketchStore {
    * @param campaignName Return only sketches belonging to a given campaign.
    * @param group        Return only sketches associated with a given group.
    * @param day          Return only sketches associated with a given day.
-   * @param isSubmitted  Return only sketches that have (or not) been submitted.
+   * @param submitted    Return only sketches that have (or not) been submitted.
    */
   case class Query(
     clientName: Option[String] = None,
     campaignName: Option[String] = None,
     group: Option[Int] = None,
     day: Option[Int] = None,
-    isSubmitted: Option[Boolean] = None)
+    submitted: Option[Boolean] = None)
 
 }

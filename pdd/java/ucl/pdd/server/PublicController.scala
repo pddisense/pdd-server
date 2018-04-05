@@ -27,13 +27,13 @@ import com.twitter.util.Future
 import org.joda.time.Instant
 import ucl.pdd.api._
 import ucl.pdd.config.{TestingMode, Timezone}
-import ucl.pdd.storage.{SketchStore, Storage}
-
-import scala.util.Random
+import ucl.pdd.service.PingService
+import ucl.pdd.storage.Storage
 
 @Singleton
 final class PublicController @Inject()(
   storage: Storage,
+  pingService: PingService,
   @Timezone timezone: DateTimeZone,
   @TestingMode testingMode: Boolean)
   extends Controller {
@@ -74,58 +74,9 @@ final class PublicController @Inject()(
   }
 
   get("/api/clients/:name/ping") { req: PingClientRequest =>
-    storage.clients.get(req.name).flatMap {
-      case None => Future.value(response.notFound)
-      case Some(client) =>
-        storage.activity.create(Activity(req.name, Instant.now(), None))
-
-        storage
-          .sketches
-          .list(SketchStore.Query(clientName = Some(client.name), isSubmitted = Some(false)))
-          .flatMap { sketches =>
-            batchGetCampaigns(sketches.map(_.campaignName))
-              .flatMap { campaigns =>
-                val fs = sketches.map { sketch =>
-                  val campaign = campaigns(sketch.campaignName)
-                  collectKeys(client.name, sketch.campaignName, sketch.group)
-                    .map { publicKeys =>
-                      // Note: If a campaign is active, its `startTime` is defined.
-                      val (startTime, endTime) = if (testingMode) {
-                        val startTime = campaign.startTime.get.toDateTime(timezone) + (sketch.day * 5).minutes
-                        val endTime = startTime + 5.minutes
-                        (startTime, endTime)
-                      } else {
-                        val startTime = campaign.startTime.get.toDateTime(timezone).withTimeAtStartOfDay + sketch.day.days
-                        val endTime = startTime + 1.day
-                        (startTime, endTime)
-                      }
-                      val round = sketch.day
-                      SubmitSketchCommand(
-                        sketchName = sketch.name,
-                        startTime = startTime.toInstant,
-                        endTime = endTime.toInstant,
-                        vocabulary = Some(campaign.vocabulary),
-                        publicKeys = publicKeys,
-                        collectRaw = campaign.collectRaw,
-                        collectEncrypted = campaign.collectEncrypted,
-                        round = round)
-                    }
-                }
-                Future.collect(fs)
-              }
-          }
-          .map { submit =>
-            val nextPingTime = if (testingMode) {
-              DateTime.now(timezone).plusMinutes(5)
-            } else {
-              // The sketches are generated at 1:00, so we ask the clients to contact the server
-              // between 2:00 and 3:00 to get their instructions.
-              // We add some randomness to avoid all clients contacting the server at the same time.
-              // People are expected to be sleeping at 2:00, but their computer might still be on.
-              DateTime.now(timezone).plusDays(1).withTimeAtStartOfDay.plusHours(2).plusMinutes(Random.nextInt(60))
-            }
-            PingResponse(submit, Some(nextPingTime.toInstant))
-          }
+    pingService.apply(req.name, Instant.now).map {
+      case None => response.notFound
+      case Some(resp) => resp
     }
   }
 
@@ -150,7 +101,7 @@ final class PublicController @Inject()(
         case None => Future.value(response.notFound)
         case Some(sketch) =>
           val updated = sketch.copy(
-            submitTime = Some(Instant.now()),
+            submitted = true,
             encryptedValues = req.encryptedValues,
             rawValues = req.rawValues)
           storage.sketches.replace(updated).map {
@@ -158,20 +109,6 @@ final class PublicController @Inject()(
             case false => response.notFound
           }
       }
-  }
-
-  private def batchGetCampaigns(ids: Seq[String]): Future[Map[String, Campaign]] = {
-    storage
-      .campaigns
-      .batchGet(ids)
-      .map(_.flatMap(_.toSeq).map(campaign => campaign.name -> campaign).toMap)
-  }
-
-  private def collectKeys(clientName: String, campaignName: String, group: Int): Future[Seq[String]] = {
-    storage
-      .sketches
-      .list(SketchStore.Query(campaignName = Some(campaignName), group = Some(group)))
-      .map(sketches => sketches.sortBy(_.clientName).map(sketch => sketch.publicKey))
   }
 }
 

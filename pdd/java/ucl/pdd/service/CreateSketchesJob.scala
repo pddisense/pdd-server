@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ucl.pdd.cron
+package ucl.pdd.service
 
 import java.util.UUID
 
@@ -90,6 +90,7 @@ final class CreateSketchesJob @Inject()(
               clientName = client.name,
               campaignName = campaign.name,
               group = groupIdx,
+              submitted = false,
               day = day,
               publicKey = client.publicKey)
             storage.sketches.create(sketch).unit

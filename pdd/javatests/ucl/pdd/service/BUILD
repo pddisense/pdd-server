@@ -13,17 +13,15 @@
 # limitations under the License.
 
 scala_test(
-  name = "cron",
+  name = "service",
   srcs = glob(["*.scala"]),
   size = "small",
   deps = [
-    "//pdd/java/ucl/pdd/cron",
+    "//pdd/java/ucl/pdd/service",
     "//pdd/java/ucl/pdd/api",
     "//pdd/java/ucl/pdd/strategy",
     "//pdd/java/ucl/pdd/storage",
     "//pdd/java/ucl/pdd/storage/memory",
     "//pdd/javatests/ucl/testing",
-    "//pdd/javatests/com/twitter/inject",
-     "//3rdparty/jvm/com/twitter:inject_core",
   ]
 )

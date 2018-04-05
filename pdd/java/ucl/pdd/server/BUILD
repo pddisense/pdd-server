@@ -18,13 +18,13 @@ load("@io_bazel_rules_docker//container:push.bzl", "container_push")
 srcs = glob(["*.scala"])
 deps = [
   "//pdd/java/ucl/pdd/api",
-  "//pdd/java/ucl/pdd/cron",
   "//pdd/java/ucl/pdd/config",
   "//pdd/java/ucl/pdd/config:annotations",
   "//pdd/java/ucl/pdd/jackson",
   "//pdd/java/ucl/pdd/strategy",
   "//pdd/java/ucl/pdd/logging",
   "//pdd/java/ucl/pdd/metrics",
+  "//pdd/java/ucl/pdd/service",
   "//pdd/java/ucl/pdd/storage",
   "//pdd/java/ucl/pdd/storage/install",
   "//3rdparty/jvm/com/twitter:finatra_http",

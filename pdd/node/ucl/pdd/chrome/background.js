@@ -72,7 +72,7 @@ function ping(client) {
         ? moment(resp.nextPingTime)
         : moment().add(1, 'day').hours(2);
       chrome.alarms.create('ping', { when: nextPingTime.valueOf() });
-    });
+    }, (reason) => console.log('Error while pinging the server', reason));
 }
 
 /**

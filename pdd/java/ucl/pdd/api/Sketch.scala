@@ -16,8 +16,6 @@
 
 package ucl.pdd.api
 
-import org.joda.time.Instant
-
 /**
  * A sketch is an individual request to collect searches during a given time period
  * concerning a given client. Sketches are created at the same moment than aggregations, and
@@ -30,7 +28,7 @@ import org.joda.time.Instant
  * @param group
  * @param day
  * @param publicKey
- * @param submitTime Time at which the sketch was submitted.
+ * @param submitted  Whether this sketch has been submitted.
  * @param encryptedValues
  * @param rawValues
  */
@@ -41,9 +39,6 @@ case class Sketch(
   group: Int,
   day: Int,
   publicKey: String,
-  submitTime: Option[Instant] = None,
+  submitted: Boolean,
   encryptedValues: Option[Seq[String]] = None,
-  rawValues: Option[Seq[Long]] = None) {
-
-  def isSubmitted: Boolean = submitTime.isDefined
-}
+  rawValues: Option[Seq[Long]] = None)

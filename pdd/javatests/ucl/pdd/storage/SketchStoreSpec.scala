@@ -31,7 +31,7 @@ abstract class SketchStoreSpec extends StoreSpec {
       group = 0,
       day = 0,
       publicKey = "foo-key==",
-      submitTime = Some(now()),
+      submitted = true,
       encryptedValues = Some(Seq("1", "0", "0")),
       rawValues = Some(Seq(1, 1, 0))),
     Sketch(
@@ -41,7 +41,7 @@ abstract class SketchStoreSpec extends StoreSpec {
       group = 0,
       day = 1,
       publicKey = "foo-key==",
-      submitTime = None,
+      submitted = false,
       encryptedValues = None,
       rawValues = None),
     Sketch(
@@ -51,7 +51,7 @@ abstract class SketchStoreSpec extends StoreSpec {
       group = 0,
       day = 0,
       publicKey = "bar-key==",
-      submitTime = None,
+      submitted = false,
       encryptedValues = None,
       rawValues = None),
     Sketch(
@@ -61,7 +61,7 @@ abstract class SketchStoreSpec extends StoreSpec {
       group = 0,
       day = 0,
       publicKey = "bar-key==",
-      submitTime = None,
+      submitted = false,
       encryptedValues = None,
       rawValues = None))
 
@@ -73,8 +73,8 @@ abstract class SketchStoreSpec extends StoreSpec {
 
     Await.result(storage.sketches.list(SketchStore.Query(campaignName = Some("campaign1")))) should contain theSameElementsAs Seq(sketches(0), sketches(1), sketches(2))
     Await.result(storage.sketches.list(SketchStore.Query(clientName = Some("client1")))) should contain theSameElementsAs Seq(sketches(0), sketches(1))
-    Await.result(storage.sketches.list(SketchStore.Query(isSubmitted = Some(true)))) should contain theSameElementsAs Seq(sketches(0))
-    Await.result(storage.sketches.list(SketchStore.Query(isSubmitted = Some(false)))) should contain theSameElementsAs Seq(sketches(1), sketches(2), sketches(3))
+    Await.result(storage.sketches.list(SketchStore.Query(submitted = Some(true)))) should contain theSameElementsAs Seq(sketches(0))
+    Await.result(storage.sketches.list(SketchStore.Query(submitted = Some(false)))) should contain theSameElementsAs Seq(sketches(1), sketches(2), sketches(3))
   }
 
   it should "replace sketches" in {
@@ -83,7 +83,7 @@ abstract class SketchStoreSpec extends StoreSpec {
     Await.result(storage.sketches.create(sketches(0)))
     Await.result(storage.sketches.create(sketches(1)))
 
-    val newSketch2 = sketches(1).copy(submitTime = Some(now()), encryptedValues = Some(Seq("0", "10", "2")), rawValues = Some(Seq(1, 10, 3)))
+    val newSketch2 = sketches(1).copy(submitted = true, encryptedValues = Some(Seq("0", "10", "2")), rawValues = Some(Seq(1, 10, 3)))
     Await.result(storage.sketches.replace(newSketch2)) shouldBe true
     Await.result(storage.sketches.get("sketch1")) shouldBe Some(sketches(0))
     Await.result(storage.sketches.get("sketch2")) shouldBe Some(newSketch2)

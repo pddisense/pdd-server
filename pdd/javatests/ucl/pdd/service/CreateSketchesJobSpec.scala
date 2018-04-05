@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ucl.pdd.cron
+package ucl.pdd.service
 
 import com.twitter.util.{Await, Future}
 import org.joda.time.{DateTime, DateTimeZone, Instant}
@@ -82,7 +82,7 @@ class CreateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach {
     sketches.foreach { sketch =>
       sketch.encryptedValues.isEmpty shouldBe true
       sketch.rawValues.isEmpty shouldBe true
-      sketch.submitTime.isEmpty shouldBe true
+      sketch.submitted shouldBe false
       sketch.campaignName should (be("campaign1") or be("campaign2"))
       // The following line does compile despite Intellij errors.
       sketch.clientName should (be("client1") or be("client2") or be("client3") or be("client4") or be("client5"))

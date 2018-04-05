@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package ucl.pdd.cron
+package ucl.pdd.service
 
 import com.twitter.util.{Await, Future}
-import org.joda.time.{DateTime, DateTimeZone}
+import org.joda.time.{DateTime, DateTimeZone, Duration}
 import org.scalatest.BeforeAndAfterEach
 import ucl.pdd.api.{Campaign, Sketch, Vocabulary, VocabularyQuery}
-import ucl.pdd.storage.{AggregationStore, Storage}
 import ucl.pdd.storage.memory.MemoryStorage
+import ucl.pdd.storage.{AggregationStore, Storage}
 import ucl.testing.UnitSpec
 
 /**
@@ -33,29 +33,35 @@ class AggregateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach {
   private[this] var job: AggregateSketchesJob = _
   private[this] var storage: Storage = _
   private[this] val timezone = DateTimeZone.forID("Europe/London")
-  private[this] val now = DateTime.now(timezone).minusDays(1).withHourOfDay(12).toInstant
-  private[this] val campaign1 = Campaign(
-    name = "campaign1",
-    createTime = now,
-    displayName = "a campaign",
-    email = Seq.empty,
-    vocabulary = Vocabulary(Seq(VocabularyQuery(exact = Some("foo")))),
-    startTime = Some(now),
-    endTime = None,
-    collectRaw = true,
-    collectEncrypted = true,
-    delay = 0,
-    graceDelay = 0,
-    groupSize = 3,
-    samplingRate = None)
+  private[this] val now = DateTime.now(timezone)
 
   override def beforeEach(): Unit = {
     storage = new MemoryStorage
+    Await.ready(storage.startUp())
+    val startTime = now.minusDays(1).withTimeAtStartOfDay().toInstant
+    val campaign1 = Campaign(
+      name = "campaign1",
+      createTime = now.toInstant,
+      displayName = "a campaign",
+      email = Seq.empty,
+      vocabulary = Vocabulary(Seq(VocabularyQuery(exact = Some("foo")))),
+      startTime = Some(startTime),
+      endTime = None,
+      collectRaw = true,
+      collectEncrypted = true,
+      delay = 0,
+      graceDelay = 0,
+      groupSize = 3,
+      samplingRate = None)
+    val campaign2 = campaign1.copy(name = "campaign2")
+    Await.ready(Future.join(storage.campaigns.create(campaign1), storage.campaigns.create(campaign2)))
+
     job = new AggregateSketchesJob(storage, timezone, testingMode = false)
     super.beforeEach()
   }
 
   override def afterEach(): Unit = {
+    Await.ready(storage.shutDown())
     storage = null
     job = null
     super.afterEach()
@@ -69,7 +75,7 @@ class AggregateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach {
         clientName = "client1",
         day = 0,
         group = 0,
-        submitTime = Some(now.toDateTime(timezone).plusHours(1).toInstant),
+        submitted = true,
         rawValues = Some(Seq(1, 0, 2)),
         encryptedValues = Some(Seq("-1", "0", "1")),
         publicKey = "pubkey1"),
@@ -78,7 +84,7 @@ class AggregateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach {
         campaignName = "campaign1",
         clientName = "client2",
         day = 0,
-        submitTime = Some(now.toDateTime(timezone).plusHours(1).toInstant),
+        submitted = true,
         rawValues = Some(Seq(0, 0, 1)),
         encryptedValues = Some(Seq("1", "1", "-2")),
         group = 0,
@@ -89,7 +95,7 @@ class AggregateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach {
         clientName = "client3",
         day = 0,
         group = 0,
-        submitTime = Some(now.toDateTime(timezone).plusHours(1).toInstant),
+        submitted = true,
         rawValues = Some(Seq(0, 1, 2)),
         encryptedValues = Some(Seq("2", "0", "6")),
         publicKey = "pubkey3"),
@@ -98,7 +104,7 @@ class AggregateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach {
         campaignName = "campaign1",
         clientName = "client4",
         day = 0,
-        submitTime = Some(now.toDateTime(timezone).plusHours(1).toInstant),
+        submitted = true,
         group = 1,
         rawValues = Some(Seq(0, 1, 0)),
         encryptedValues = Some(Seq("2", "0", "-3")),
@@ -109,6 +115,7 @@ class AggregateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach {
         clientName = "client5",
         day = 0,
         group = 1,
+        submitted = false,
         publicKey = "pubkey5"),
 
       Sketch(
@@ -117,6 +124,7 @@ class AggregateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach {
         clientName = "client1",
         day = 1,
         group = 0,
+        submitted = false,
         publicKey = "pubkey1"),
       Sketch(
         name = "sketch7",
@@ -124,6 +132,7 @@ class AggregateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach {
         clientName = "client2",
         day = 1,
         group = 0,
+        submitted = false,
         publicKey = "pubkey2"),
 
       Sketch(
@@ -134,7 +143,7 @@ class AggregateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach {
         group = 0,
         rawValues = Some(Seq(0, 1, 2)),
         encryptedValues = Some(Seq("2", "0", "6")),
-        submitTime = Some(now.toDateTime(timezone).plusHours(1).toInstant),
+        submitted = true,
         publicKey = "pubkey2"),
       Sketch(
         name = "sketch9",
@@ -142,25 +151,30 @@ class AggregateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach {
         clientName = "client3",
         day = 0,
         group = 0,
-        submitTime = Some(now.toDateTime(timezone).plusHours(1).toInstant),
+        submitted = true,
         rawValues = Some(Seq(1, 1, 0)),
         encryptedValues = Some(Seq("-1", "2", "-4")),
         publicKey = "pubkey3"))
-    val campaign2 = campaign1.copy(name = "campaign2")
-    Await.result(Future.collect(Seq(storage.campaigns.create(campaign1), storage.campaigns.create(campaign2)) ++ sketches.map(storage.sketches.create)))
+    Await.result(Future.collect(sketches.map(storage.sketches.create)))
 
-    job.execute(now.toDateTime(timezone).plusDays(1).toInstant)
+    job.execute(now.toInstant)
 
-    val aggregations1 = Await.result(storage.aggregations.list(AggregationStore.Query(campaignName = "campaign1")))
-    aggregations1 should have size 1
-    aggregations1.head.day shouldBe 0
-    aggregations1.head.rawValues shouldBe Seq(1, 2, 5)
-    aggregations1.head.decryptedValues shouldBe Seq(2, 1, 5)
+    val agg1 = Await.result(storage.aggregations.list(AggregationStore.Query(campaignName = "campaign1")))
+    agg1 should have size 1
+    agg1.head.day shouldBe 0
+    agg1.head.rawValues shouldBe Seq(1, 2, 5)
+    agg1.head.decryptedValues shouldBe Seq(2, 1, 5)
+    agg1.head.stats.activeCount shouldBe 5
+    agg1.head.stats.submittedCount shouldBe 4
+    agg1.head.stats.decryptedCount shouldBe 3
 
-    val aggregations2 = Await.result(storage.aggregations.list(AggregationStore.Query(campaignName = "campaign2")))
-    aggregations2 should have size 1
-    aggregations2.head.day shouldBe 0
-    aggregations2.head.rawValues shouldBe Seq(1, 2, 2)
-    aggregations2.head.decryptedValues shouldBe Seq(1, 2, 2)
+    val agg2 = Await.result(storage.aggregations.list(AggregationStore.Query(campaignName = "campaign2")))
+    agg2 should have size 1
+    agg2.head.day shouldBe 0
+    agg2.head.rawValues shouldBe Seq(1, 2, 2)
+    agg2.head.decryptedValues shouldBe Seq(1, 2, 2)
+    agg2.head.stats.activeCount shouldBe 2
+    agg2.head.stats.submittedCount shouldBe 2
+    agg2.head.stats.decryptedCount shouldBe 2
   }
 }

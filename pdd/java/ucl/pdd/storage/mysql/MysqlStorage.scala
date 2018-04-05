@@ -94,7 +94,7 @@ object MysqlStorage {
       "publicKey varchar(255) not null," +
       "encryptedValues longtext not null," +
       "rawValues longtext not null," +
-      "submitTime timestamp null," +
+      "submitted tinyint not null," +
       "primary key (unused_id)," +
       "UNIQUE KEY uix_name(name)" +
       ") ENGINE=InnoDB DEFAULT CHARSET=utf8",

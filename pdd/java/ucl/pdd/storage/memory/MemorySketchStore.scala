@@ -50,6 +50,6 @@ private[memory] final class MemorySketchStore extends SketchStore {
       query.campaignName.forall(sketch.campaignName == _) &&
       query.group.forall(sketch.group == _) &&
       query.day.forall(sketch.day == _) &&
-      query.isSubmitted.forall(sketch.isSubmitted == _)
+      query.submitted.forall(sketch.submitted == _)
   }
 }

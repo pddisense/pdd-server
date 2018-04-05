@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ucl.pdd.cron
+package ucl.pdd.service
 
 import com.google.inject.Provides
 import com.twitter.inject.{Injector, TwitterPrivateModule}

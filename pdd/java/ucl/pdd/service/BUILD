@@ -15,7 +15,7 @@
 package(default_visibility = ["//visibility:public"])
 
 scala_library(
-  name = "cron",
+  name = "service",
   srcs = glob(["*.scala"]),
   deps = [
     "//pdd/java/ucl/pdd/api",

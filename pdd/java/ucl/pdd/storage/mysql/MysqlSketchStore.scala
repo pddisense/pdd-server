@@ -29,7 +29,7 @@ private[mysql] final class MysqlSketchStore(mysql: MysqlClient) extends SketchSt
 
   override def create(sketch: Sketch): Future[Boolean] = {
     val sql = "insert into sketches(name, clientName, campaignName, `group`, day, publicKey, " +
-      "encryptedValues, rawValues, submitTime) " +
+      "encryptedValues, rawValues, submitted) " +
       "values (?, ?, ?, ?, ?, ?, ?, ?, ?)"
     mysql
       .prepare(sql)
@@ -42,7 +42,7 @@ private[mysql] final class MysqlSketchStore(mysql: MysqlClient) extends SketchSt
         sketch.publicKey,
         sketch.encryptedValues,
         sketch.rawValues,
-        sketch.submitTime)
+        sketch.submitted)
       .map(_ => true)
       .rescue {
         // Error code 1062 corresponds to a duplicate entry, which means the object already exists.
@@ -53,7 +53,7 @@ private[mysql] final class MysqlSketchStore(mysql: MysqlClient) extends SketchSt
   override def replace(sketch: Sketch): Future[Boolean] = {
     val sql = "update sketches " +
       "set clientName = ?, campaignName = ?, `group` = ?, day = ?, publicKey = ?, " +
-      "encryptedValues = ?, rawValues = ?, submitTime = ? " +
+      "encryptedValues = ?, rawValues = ?, submitted = ? " +
       "where name = ?"
     mysql
       .prepare(sql)
@@ -65,7 +65,7 @@ private[mysql] final class MysqlSketchStore(mysql: MysqlClient) extends SketchSt
         sketch.publicKey,
         sketch.encryptedValues,
         sketch.rawValues,
-        sketch.submitTime,
+        sketch.submitted,
         sketch.name)
       .map {
         case ok: OK => ok.affectedRows == 1
@@ -102,9 +102,9 @@ private[mysql] final class MysqlSketchStore(mysql: MysqlClient) extends SketchSt
       where += "`group` = ?"
       params += group
     }
-    query.isSubmitted.foreach {
-      case true => where += "submitTime is not null"
-      case false => where += "submitTime is null"
+    query.submitted.foreach {
+      case true => where += "submitted = 1"
+      case false => where += "submitted = 0"
     }
 
     val sql = "select * " +
@@ -132,6 +132,6 @@ private[mysql] final class MysqlSketchStore(mysql: MysqlClient) extends SketchSt
       publicKey = toString(row, "publicKey"),
       encryptedValues = getStrings(row, "encryptedValues"),
       rawValues = getLongs(row, "rawValues"),
-      submitTime = getInstant(row, "submitTime"))
+      submitted = toBoolean(row, "submitted"))
   }
 }
