@@ -21,7 +21,6 @@ import com.google.inject.{Inject, Singleton}
 import com.twitter.util.Future
 import org.joda.time.Instant
 import ucl.pdd.api._
-import ucl.pdd.config.{TestingMode, Timezone}
 import ucl.pdd.storage.{SketchStore, Storage}
 
 import scala.util.Random

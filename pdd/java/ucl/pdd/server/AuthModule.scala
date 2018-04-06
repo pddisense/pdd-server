@@ -14,31 +14,21 @@
  * limitations under the License.
  */
 
-package ucl.pdd.config
+package ucl.pdd.server
 
 import com.twitter.inject.TwitterModule
-import org.joda.time.DateTimeZone
 
 import scala.util.Random
 
-object ConfigModule extends TwitterModule {
-  private[this] val timezoneFlag = flag("api.timezone", "Europe/London", "Reference timezone")
+object AuthModule extends TwitterModule {
   private[this] val tokenFlag = flag[String]("api.access_token", "Token used to secure the access to relevant endpoints")
-  private[this] val testingModeFlag = flag("api.testing_mode", false, "Whether to switch the server to testing mode (where days only last 5 minutes)")
 
   override def configure(): Unit = {
-    bind[DateTimeZone].annotatedWith[Timezone].toInstance(DateTimeZone.forID(timezoneFlag()))
     bind[String].annotatedWith[AccessToken].toInstance(tokenFlag.get.getOrElse(randomToken(20)))
-    bind[Boolean].annotatedWith[TestingMode].toInstance(testingModeFlag())
-
-    if (testingModeFlag()) {
-      logger.warn("Running in TESTING mode. Days will only last 5 minutes!")
-    }
   }
 
-  private[this] val characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-
   private def randomToken(length: Int): String = {
+    val characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
     val token = Seq.fill(length)(characters(Random.nextInt(characters.length))).mkString
     logger.info("---------------------------------------------------------")
     logger.info(s"Randomly generated API access token: $token")

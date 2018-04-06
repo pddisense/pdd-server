@@ -21,7 +21,6 @@ import com.twitter.conversions.time._
 import com.twitter.inject.Injector
 import com.twitter.util.{Future, Time, Timer}
 import org.joda.time.{DateTime, DateTimeZone, Instant, ReadableInstant}
-import ucl.pdd.config.{TestingMode, Timezone}
 import ucl.pdd.util.Service
 
 /**

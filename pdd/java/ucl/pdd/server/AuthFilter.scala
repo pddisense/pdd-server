@@ -20,7 +20,6 @@ import com.google.inject.{Inject, Singleton}
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.finagle.{Service, SimpleFilter}
 import com.twitter.util.Future
-import ucl.pdd.config.AccessToken
 
 /**
  * Filter handling authentication via a Bearer Token. It looks for a token both in the standard

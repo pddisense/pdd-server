@@ -24,7 +24,6 @@ import com.twitter.inject.Logging
 import com.twitter.util.{Await, Future}
 import org.joda.time.Instant
 import ucl.pdd.api._
-import ucl.pdd.config.{TestingMode, Timezone}
 import ucl.pdd.storage.{CampaignStore, ClientStore, Storage}
 import ucl.pdd.strategy.{Strategy, StrategyAttrs}
 

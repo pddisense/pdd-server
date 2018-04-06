@@ -17,9 +17,8 @@ load("@io_bazel_rules_docker//container:push.bzl", "container_push")
 
 srcs = glob(["*.scala"])
 deps = [
+  ":annotations",
   "//pdd/java/ucl/pdd/api",
-  "//pdd/java/ucl/pdd/config",
-  "//pdd/java/ucl/pdd/config:annotations",
   "//pdd/java/ucl/pdd/jackson",
   "//pdd/java/ucl/pdd/strategy",
   "//pdd/java/ucl/pdd/logging",
@@ -41,6 +40,14 @@ scala_binary(
   deps = deps,
   main_class = main_class,
   runtime_deps = runtime_deps,
+)
+
+java_library(
+  name = "annotations",
+  srcs = glob(["*.java"]),
+  deps = [
+    "//3rdparty/jvm/com/twitter:inject_core",
+  ],
 )
 
 scala_image(

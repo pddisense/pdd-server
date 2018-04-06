@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ucl.pdd.config;
+package ucl.pdd.service;
 
 import com.google.inject.BindingAnnotation;
 
@@ -26,5 +26,5 @@ import java.lang.annotation.Target;
 @BindingAnnotation
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface AccessToken {
+public @interface TestingMode {
 }

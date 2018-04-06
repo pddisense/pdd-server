@@ -24,7 +24,6 @@ import com.twitter.inject.Logging
 import com.twitter.util.{Await, Future}
 import org.joda.time.Instant
 import ucl.pdd.api.{Aggregation, AggregationStats, Campaign, Sketch}
-import ucl.pdd.config.{TestingMode, Timezone}
 import ucl.pdd.storage.{SketchStore, Storage}
 
 final class AggregateSketchesJob @Inject()(
@@ -71,8 +70,8 @@ final class AggregateSketchesJob @Inject()(
           logger.info(s"Aggregating campaign ${campaign.name} on days ${days.mkString(", ")} (today: $actualDay)")
           Future.join(days.map(aggregate(_, campaign)))
         }
-        //TODO: backfill.
-        //TODO: clean old sketches.
+      //TODO: backfill.
+      //TODO: clean old sketches.
     }
   }
 

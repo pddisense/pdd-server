@@ -18,7 +18,6 @@ package ucl.pdd.server
 
 import java.util.UUID
 
-import com.github.nscala_time.time.Imports._
 import com.google.inject.{Inject, Singleton}
 import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
@@ -26,16 +25,11 @@ import com.twitter.finatra.request.RouteParam
 import com.twitter.util.Future
 import org.joda.time.Instant
 import ucl.pdd.api._
-import ucl.pdd.config.{TestingMode, Timezone}
 import ucl.pdd.service.PingService
 import ucl.pdd.storage.Storage
 
 @Singleton
-final class PublicController @Inject()(
-  storage: Storage,
-  pingService: PingService,
-  @Timezone timezone: DateTimeZone,
-  @TestingMode testingMode: Boolean)
+final class PublicController @Inject()(storage: Storage, pingService: PingService)
   extends Controller {
 
   options("/api/:*") { _: Request => response.ok }

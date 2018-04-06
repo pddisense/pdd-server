@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ucl.pdd.config;
+package ucl.pdd.service;
 
 import com.google.inject.BindingAnnotation;
 

@@ -17,16 +17,26 @@
 package ucl.pdd.service
 
 import com.google.inject.Provides
-import com.twitter.inject.{Injector, TwitterPrivateModule}
+import com.twitter.inject.{Injector, TwitterModule}
 import com.twitter.util.{Await, JavaTimer, Timer}
+import org.joda.time.DateTimeZone
 
 /**
- * Guice module providing crons.
+ * Guice module providing business services.
  */
-object CronModule extends TwitterPrivateModule {
+object ServiceModule extends TwitterModule {
+  private[this] val timezoneFlag = flag("api.timezone", "Europe/London", "Reference timezone")
+  private[this] val testingModeFlag = flag(
+    "api.testing_mode",
+    false,
+    "Whether to switch the server to testing mode (where days only last 5 minutes). It should be only activated for testing purposes.")
+
   override def configure(): Unit = {
-    bind[CronManager] // Must explicitly bind a class before exposing it.
-    expose[CronManager]
+    bind[DateTimeZone].annotatedWith[Timezone].toInstance(DateTimeZone.forID(timezoneFlag()))
+    bind[Boolean].annotatedWith[TestingMode].toInstance(testingModeFlag())
+    if (testingModeFlag()) {
+      logger.warn("Running in TESTING mode. Days will only last 5 minutes!")
+    }
   }
 
   @Provides

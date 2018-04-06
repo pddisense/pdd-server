@@ -18,14 +18,22 @@ scala_library(
   name = "service",
   srcs = glob(["*.scala"]),
   deps = [
+    ":annotations",
     "//pdd/java/ucl/pdd/api",
     "//pdd/java/ucl/pdd/storage",
     "//pdd/java/ucl/pdd/strategy",
-    "//pdd/java/ucl/pdd/config:annotations",
     "//pdd/java/ucl/pdd/util",
     "//3rdparty/jvm/com/twitter:util_core",
     "//3rdparty/jvm/com/twitter:inject_core",
     "//3rdparty/jvm/com/twitter:inject_slf4j",
     "//3rdparty/jvm/com/github/nscala_time",
+  ],
+)
+
+java_library(
+  name = "annotations",
+  srcs = glob(["*.java"]),
+  deps = [
+    "//3rdparty/jvm/com/twitter:inject_core",
   ],
 )
