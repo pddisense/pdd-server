@@ -51,6 +51,11 @@ export default class App extends React.Component {
     this.setState({ authenticated: true });
   }
 
+  @autobind
+  handleLogout() {
+    this.setState({ authenticated: false });
+  }
+
   render() {
     let content;
     if (this.state.loading) {
@@ -75,7 +80,7 @@ export default class App extends React.Component {
     }
     return (
       <div className="page">
-        <Navbar/>
+        <Navbar onLogout={this.handleLogout}/>
         {content}
       </div>
     );

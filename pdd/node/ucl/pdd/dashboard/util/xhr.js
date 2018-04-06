@@ -31,7 +31,7 @@ export default function xhr(url, params = {}) {
     method: 'GET',
     ...params
   };
-  const accessToken = window.sessionStorage.getItem('access_token');
+  const accessToken = window.localStorage.getItem('access_token');
   if (null !== accessToken) {
     params.headers['Authorization'] = `Bearer ${accessToken}`;
   }

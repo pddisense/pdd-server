@@ -15,16 +15,27 @@
  */
 
 import React from 'react';
-import { withRouter, Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import autobind from 'autobind-decorator';
+import { Link, withRouter } from 'react-router-dom';
+import { noop } from 'lodash';
+
+import { logout } from '../util/auth';
 
 const LINKS = [
-  { title: 'Dashboard', path: '/' },
-  { title: 'Campaigns', path: '/campaigns' },
-  { title: 'Clients', path: '/clients' },
+  { title: 'Dashboard', path: '/', icon: 'dashboard' },
+  { title: 'Campaigns', path: '/campaigns', icon: 'projects' },
+  { title: 'Clients', path: '/clients', icon: 'people' },
 ];
 
 @withRouter
-export default class Navbar extends React.Component {
+class Navbar extends React.Component {
+  @autobind
+  handleLogout() {
+    logout();
+    this.props.onLogout();
+  }
+
   render() {
     const items = LINKS.map((link, idx) => {
       let active;
@@ -34,31 +45,35 @@ export default class Navbar extends React.Component {
         active = this.props.location.pathname.indexOf(link.path) === 0;
       }
       return (
-        <Link to={link.path} key={idx} className={'pt-button pt-minimal ' + (active ? 'pt-active' : '')}>
+        <Link to={link.path} key={idx}
+              className={`pt-button pt-minimal pt-icon-${link.icon} ${active ? 'pt-active' : ''}`}>
           {link.title}
         </Link>
       );
     });
 
-    /*
-    <div className="pt-navbar-group pt-align-right">
-          <input className="pt-input" placeholder="Search..." type="text" />
-          <span className="pt-navbar-divider"></span>
-          <button className="pt-button pt-minimal pt-icon-user"></button>
-          <button className="pt-button pt-minimal pt-icon-notifications"></button>
-          <button className="pt-button pt-minimal pt-icon-cog"></button>
-        </div>
-     */
-
     return (
-      <nav className="pt-navbar">
+      <nav className="pt-navbar pt-dark">
         <div className="container">
           <div className="pt-navbar-group pt-align-left">
             <div className="pt-navbar-heading">Private Data Donor</div>
             {items}
           </div>
+          <div className="pt-navbar-group pt-align-right">
+            <a className="pt-button pt-minimal" onClick={this.handleLogout}>Logout</a>
+          </div>
         </div>
       </nav>
     );
   }
+}
+
+Navbar.propTypes = {
+  onLogout: PropTypes.func.isRequired,
 };
+
+Navbar.defaultProps = {
+  onLogout: noop,
+};
+
+export default Navbar;

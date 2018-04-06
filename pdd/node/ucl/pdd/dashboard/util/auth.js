@@ -24,7 +24,7 @@ export function authenticate(password) {
   return xhr('/auth', { method: 'POST', body: JSON.stringify({ password }) }).then(resp => {
     if (resp.authenticated) {
       if (resp.accessToken) {
-        window.sessionStorage.setItem('access_token', resp.accessToken);
+        window.localStorage.setItem('access_token', resp.accessToken);
       }
       return true;
     } else {
@@ -34,5 +34,5 @@ export function authenticate(password) {
 }
 
 export function logout() {
-  window.sessionStorage.removeItem('access_token');
+  window.localStorage.removeItem('access_token');
 }
