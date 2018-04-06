@@ -26,10 +26,14 @@ const status = (response) => {
 
 export default function xhr(url, params = {}) {
   params = {
-    headers: {'Content-Type': 'application/json'},
+    headers: { 'Content-Type': 'application/json' },
     credentials: 'same-origin',
     method: 'GET',
     ...params
   };
+  const accessToken = window.sessionStorage.getItem('access_token');
+  if (null !== accessToken) {
+    params.headers['Authorization'] = `Bearer ${accessToken}`;
+  }
   return fetch(url, params).then(status, e => Promise.reject(e));
 }

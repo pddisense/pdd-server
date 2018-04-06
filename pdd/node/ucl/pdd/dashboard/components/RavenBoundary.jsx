@@ -18,6 +18,10 @@ import React from 'react';
 import Raven from 'raven-js';
 import { NonIdealState } from '@blueprintjs/core';
 
+/**
+ * React boundary capturing any exception and forwarding it to Sentry (if a SENTRY_DSN has been
+ * appropriately configured).
+ */
 export default class RavenBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -27,17 +31,15 @@ export default class RavenBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    this.setState({error});
-    Raven.captureException(error, {extra: errorInfo});
+    this.setState({ error });
+    Raven.captureException(error, { extra: errorInfo });
   }
 
   render() {
     if (this.state.error) {
-      return <NonIdealState
-        title="Something went wrong."
-        visual="error"
-        description="We are very sorry about this. Our team has been notified and is investigating on this issue."
-      />;
+      return <NonIdealState title="Something went wrong."
+                            visual="error"
+                            description="We are very sorry about this. Our team has been notified and is investigating on this issue."/>;
     } else {
       return this.props.children;
     }

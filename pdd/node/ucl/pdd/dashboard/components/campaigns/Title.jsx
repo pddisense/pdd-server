@@ -41,11 +41,11 @@ class Title extends React.Component {
     }
     return (
       <h2>
+        {this.props.campaign.displayName}
         <Icon icon={iconName}
               title={iconTitle}
               iconSize={20}
-              style={{position: 'relative', top: '6px', marginRight: '15px'}}/>
-        {this.props.campaign.displayName}
+              style={{position: 'relative', top: '6px', marginLeft: '15px'}}/>
       </h2>
     );
   }

@@ -62,7 +62,7 @@ dependencies:
     java-dogstatsd-client:
       version: "2.5"
       lang: java
-  com.nimbusds:
-    nimbus-jose-jwt:
-      version: "5.9"
-      lang: java
+  com.pauldijou:
+    jwt-core:
+      version: "0.16.0"
+      lang: scala

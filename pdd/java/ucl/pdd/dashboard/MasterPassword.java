@@ -14,26 +14,17 @@
  * limitations under the License.
  */
 
-import React from 'react';
+package ucl.pdd.dashboard;
 
-import FormGroup from './form/FormGroup';
-import TextInput from './form/TextInput';
+import com.google.inject.BindingAnnotation;
 
-class Login extends React.Component {
-  render() {
-    return (
-      <div>
-        <form>
-          <FormGroup title="Username">
-            <TextInput required />
-          </FormGroup>
-          <FormGroup title="Password">
-            <TextInput required type="password" />
-          </FormGroup>
-        </form>
-      </div>
-    );
-  }
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@BindingAnnotation
+@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface MasterPassword {
 }
-
-export default Login;

@@ -17,12 +17,14 @@ load("@io_bazel_rules_docker//container:push.bzl", "container_push")
 
 srcs = glob(["*.scala"])
 deps = [
+  ":annotations",
   "//pdd/java/ucl/pdd/api",
   "//pdd/java/ucl/pdd/jackson",
   "//pdd/java/ucl/pdd/logging",
   "//pdd/java/ucl/pdd/metrics",
   "//3rdparty/jvm/com/twitter:finatra_http",
   "//3rdparty/jvm/com/twitter:finatra_httpclient",
+  "//3rdparty/jvm/com/pauldijou:jwt_core",
 ]
 resources = [
   "//pdd/node/ucl/pdd/dashboard:index.bundle.js",
@@ -39,6 +41,14 @@ scala_binary(
   resources = resources,
   resource_strip_prefix = resource_strip_prefix,
   main_class = main_class,
+)
+
+java_library(
+  name = "annotations",
+  srcs = glob(["*.java"]),
+  deps = [
+    "//3rdparty/jvm/com/twitter:inject_core",
+  ],
 )
 
 scala_image(

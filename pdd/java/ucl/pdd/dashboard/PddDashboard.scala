@@ -27,7 +27,7 @@ import ucl.pdd.metrics.MetricsModule
 object PddDashboardMain extends PddDashboard
 
 class PddDashboard extends HttpServer with LoggingConfigurator {
-  override def modules = Seq(ApiHttpClientModule)
+  override def modules = Seq(ApiClientModule, AuthModule)
 
   override def jacksonModule = PddJacksonModule
 
@@ -40,8 +40,8 @@ class PddDashboard extends HttpServer with LoggingConfigurator {
       .filter[LoggingMDCFilter[Request, Response]]
       .filter[TraceIdMDCFilter[Request, Response]]
       .filter[CommonFilters]
-      .add[HealthController]
-      .add[ApiController]
+      .add[AuthFilter, ApiController]
+      .add[AuthController]
       .add[UiController]
   }
 }

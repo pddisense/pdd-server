@@ -1,9 +1,9 @@
 load("@io_bazel_rules_scala//scala:scala_import.bzl", "scala_import")
 java_library(
-    name = "accessors_smart",
+    name = "bcpkix_jdk15on",
     exports = [
-        "//3rdparty/jvm/org/ow2/asm:asm",
-        "//external:jar/net/minidev/accessors_smart"
+        "//external:jar/org/bouncycastle/bcpkix_jdk15on",
+        ":bcprov_jdk15on"
     ],
     visibility = [
         "//visibility:public"
@@ -13,10 +13,9 @@ java_library(
 
 
 java_library(
-    name = "json_smart",
+    name = "bcprov_jdk15on",
     exports = [
-        "//external:jar/net/minidev/json_smart",
-        ":accessors_smart"
+        "//external:jar/org/bouncycastle/bcprov_jdk15on"
     ],
     visibility = [
         "//visibility:public"

@@ -16,13 +16,13 @@
 
 package ucl.pdd.dashboard
 
-import com.google.inject.Singleton
-import com.twitter.finagle.http.Request
-import com.twitter.finatra.http.Controller
+import com.twitter.finatra.httpclient.modules.HttpClientModule
 
-@Singleton
-final class HealthController extends Controller {
-  get("/health") { request: Request =>
-    response.ok("OK")
-  }
+object ApiClientModule extends HttpClientModule {
+  private[this] val serverFlag = flag("api.server", "localhost:8000", "Address to the API server")
+  private[this] val tokenFlag = flag[String]("api.access_token", "Token to communicate with the API")
+
+  override def dest = serverFlag()
+
+  override def defaultHeaders = Map("Authorization" -> s"Bearer ${tokenFlag()}")
 }

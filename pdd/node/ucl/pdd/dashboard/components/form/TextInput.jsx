@@ -31,19 +31,21 @@ class TextInput extends React.Component {
         minLength={this.props.minLength}
         maxLength={this.props.maxLength}
         style={{minWidth: '300px'}}
+        autoFocus={this.props.autoFocus}
         dir="auto" />
     );
   }
 }
 
 TextInput.propTypes = {
-  value: PropTypes.string,
-  type: PropTypes.string,
+  value: PropTypes.string.isRequired,
+  type: PropTypes.string.isRequired,
   placeholder: PropTypes.string,
-  required: PropTypes.bool,
+  required: PropTypes.bool.isRequired,
   onChange: PropTypes.func,
-  minLength: PropTypes.number,
-  maxLength: PropTypes.number,
+  minLength: PropTypes.number.isRequired,
+  maxLength: PropTypes.number.isRequired,
+  autoFocus: PropTypes.bool.isRequired,
 };
 
 TextInput.defaultProps = {
@@ -51,9 +53,10 @@ TextInput.defaultProps = {
   type: 'text',
   placeholder: null,
   required: false,
-  onChange: noop,
+  onChange: null,
   minLength: 0,
   maxLength: 80,
+  autoFocus: false,
 };
 
 export default TextInput;

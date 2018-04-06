@@ -14,15 +14,25 @@
  * limitations under the License.
  */
 
-package ucl.pdd.dashboard
+import xhr from './xhr';
 
-import com.twitter.finatra.httpclient.modules.HttpClientModule
+export function checkAuthenticated() {
+  return xhr('/auth').then(resp => resp.authenticated);
+}
 
-object ApiHttpClientModule extends HttpClientModule {
-  private[this] val destFlag = flag("api.server", "localhost:8000", "Address to the API server")
-  private[this] val tokenFlag = flag[String]("api.access_token", "Token to communicate with the API")
+export function authenticate(password) {
+  return xhr('/auth', { method: 'POST', body: JSON.stringify({ password }) }).then(resp => {
+    if (resp.authenticated) {
+      if (resp.accessToken) {
+        window.sessionStorage.setItem('access_token', resp.accessToken);
+      }
+      return true;
+    } else {
+      return false;
+    }
+  });
+}
 
-  override def dest = destFlag()
-
-  override def defaultHeaders = Map("Authorization" -> s"Bearer ${tokenFlag()}")
+export function logout() {
+  window.sessionStorage.removeItem('access_token');
 }
