@@ -1,12 +1,13 @@
 body {
   /* Padding to let some space for the sticky navbar */
-  padding-top: 57px;
+  padding-top: 56px;
   /* Padding to let some space for the sticky footer */
   padding-bottom: 100px;
 }
 
-body, body p {
+body, body p, body li {
   font-family: Roboto, sans-serif;
+  font-size: 16px;
 }
 
 footer .license {
@@ -15,9 +16,11 @@ footer .license {
 }
 
 footer {
-  margin-top: 25px;
   padding-top: 15px;
   padding-bottom: 15px;
+
+  border-top: 1px solid rgba(0,0,0,.2);
+  background-color: rgba(0, 0, 0, 0.03);
 
   position: absolute;
   bottom: 0;
@@ -30,12 +33,20 @@ html {
   min-height: 100%;
 }
 
+nav.navbar {
+  background-color: #4582EC !important;
+}
+
+.navbar .actions {
+  margin-left: 15px;
+}
+
 /**
  * Home.
  */
 .banner {
-  padding-top: 60px;
-  padding-bottom: 60px;
+  padding-top: 50px;
+  padding-bottom: 50px;
   color: white;
   /* Generated at http://www.heropatterns.com/ */
   /* Foreground color: #cadbf7 */
@@ -49,43 +60,42 @@ html {
 
 .banner p {
   font-size: 1.3em;
-  margin-top: 50px;
-  line-height: 2em;
+  margin-top: 35px;
+  margin-bottom: 35px;
+  line-height: 1.5em;
 }
 
 .banner .btn {
-  margin-top: 50px;
   margin-right: 25px;
 }
 
 .btn.btn-lg {
   padding: 0.5rem 1rem;
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   line-height: 1.5;
   border-radius: 0.3rem;
 }
 
 .partners {
-  border-top: 1px solid rgba(0,0,0,.2);
-  border-bottom: 1px solid rgba(0,0,0,.2);
   text-align: center;
+  padding: 15px 0 15px 0;
 }
 
 .partners img {
-  max-height: 80px;
+  max-height: 60px;
 }
 
 .feature {
-  border-bottom: 1px solid rgba(0,0,0,.2);
+  border-top: 1px solid rgba(0,0,0,.2);
 }
 
 .feature-image {
   background-size: cover;
-  height: 450px;
+  height: 300px;
 }
 
 .feature-text {
-  padding: 50px;
+  padding: 40px;
 }
 
 .feature-text h4 {
@@ -97,8 +107,8 @@ html {
 }
 
 .feature-text p {
-  margin-top: 50px;
-  line-height: 2em;
+  margin-top: 40px;
+  line-height: 1.5em;
 }
 
 .feature-left .feature-text p, .feature-right .feature-text p {
@@ -193,9 +203,8 @@ html {
   margin-right: 25px;
 }
 
-.callout.callout-stacked {
+.callout.stacked {
   margin-top: 0;
-  border-top: none;
 }
 
 /**
@@ -207,14 +216,37 @@ html {
 
 #page h1 {
   border-bottom: 1px solid rgba(0,0,0,.2);
-  padding-bottom: 25px;
+  padding-bottom: 15px;
   margin-bottom: 25px;
   font-weight: 300;
+  font-size: 36px;
 }
 
 #page h2 {
   margin-top: 25px;
   margin-bottom: 25px;
+  font-size: 30px;
+}
+
+#page h3 {
+  margin-top: 25px;
+  margin-bottom: 25px;
+  font-size: 24px;
+}
+
+/**
+ * Documentation pages.
+ */
+.docs img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.center {
+  text-align: center;
 }
 
 .box {
@@ -244,12 +276,17 @@ html {
 }
 
 /**
- * Documentation pages.
+ * Search results.
  */
-.docs img {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: 15px;
-  margin-bottom: 15px;
+#search-results {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+#search-results h4 {
+  margin: 10px 0 5px 0;
+}
+
+#search-results p {
+  margin-top: 0;
 }

@@ -1,33 +1,105 @@
-$(function () {
-  let index = undefined;
+---
+layout: null
+---
+(function () {
+  function getQueryVariable(variable) {
+    var query = window.location.search.substring(1),
+      vars = query.split("&");
 
-  function buildIndex(callback) {
-    if (typeof index === 'undefined') {
-      fetch('/content.json')
-        .then(function (response) {
-          return response.json();
-        })
-        .then(function (data) {
-          index = lunr(function () {
-            this.ref('url');
-            this.field('title');
-            this.field('content');
-            data.forEach(function (doc) {
-              this.add(doc)
-            }, this)
-          });
-          callback();
-        });
-    } else {
-      callback();
+    for (var i = 0; i < vars.length; i++) {
+      var pair = vars[i].split("=");
+
+      if (pair[0] === variable) {
+        return decodeURIComponent(pair[1].replace(/\+/g, '%20')).trim();
+      }
     }
   }
 
-  $('#search-form').submit(function (e) {
-    e.preventDefault();
-    buildIndex(function() {
-      const q = $('#search-form input[type=text]').val();
-      console.log(index.search(q));
-    });
+  function getPreview(query, content, previewLength) {
+    previewLength = previewLength || (content.length * 2);
+
+    var parts = query.split(" "),
+      match = content.toLowerCase().indexOf(query.toLowerCase()),
+      matchLength = query.length,
+      preview;
+
+    // Find a relevant location in content
+    for (var i = 0; i < parts.length; i++) {
+      if (match >= 0) {
+        break;
+      }
+
+      match = content.toLowerCase().indexOf(parts[i].toLowerCase());
+      matchLength = parts[i].length;
+    }
+
+    // Create preview
+    if (match >= 0) {
+      var start = match - (previewLength / 2),
+        end = start > 0 ? match + matchLength + (previewLength / 2) : previewLength;
+
+      preview = content.substring(start, end).trim();
+
+      if (start > 0) {
+        preview = "..." + preview;
+      }
+
+      if (end < content.length) {
+        preview = preview + "...";
+      }
+
+      // Highlight query parts
+      preview = preview.replace(new RegExp("(" + parts.join("|") + ")", "gi"), "<strong>$1</strong>");
+    } else {
+      // Use start of content if no match found
+      preview = content.substring(0, previewLength).trim() + (content.length > previewLength ? "..." : "");
+    }
+
+    return preview;
+  }
+
+  function displaySearchResults(results, query) {
+    var searchResultsEl = document.getElementById("search-results"),
+      searchProcessEl = document.getElementById("search-process");
+
+    if (results.length) {
+      var resultsHTML = "";
+      results.forEach(function (result) {
+        var item = window.data[result.ref],
+          contentPreview = getPreview(query, item.content, 170),
+          titlePreview = getPreview(query, item.title);
+
+        resultsHTML += "<li><h4><a href='{{ site.baseurl }}" + item.url.trim() + "'>" + titlePreview + "</a></h4><p><small>" + contentPreview + "</small></p></li>";
+      });
+
+      searchResultsEl.innerHTML = resultsHTML;
+      searchProcessEl.innerText = "Showing";
+    } else {
+      searchResultsEl.style.display = "none";
+      searchProcessEl.innerText = "No";
+    }
+  }
+
+  window.index = lunr(function () {
+    this.field("id");
+    this.field("title", { boost: 10 });
+    this.field("category");
+    this.field("url");
+    this.field("content");
+
+    for (var key in window.data) {
+      this.add(window.data[key]);
+    }
   });
-});
+
+  var query = decodeURIComponent((getQueryVariable("q") || "").replace(/\+/g, "%20")),
+    searchQueryContainerEl = document.getElementById("search-query-container"),
+    searchQueryEl = document.getElementById("search-query"),
+    searchInputEl = document.getElementById("search-input");
+
+  searchInputEl.value = query;
+  searchQueryEl.innerText = query;
+  searchQueryContainerEl.style.display = "inline";
+
+  displaySearchResults(window.index.search(query), query); // Hand the results off to be displayed
+})();

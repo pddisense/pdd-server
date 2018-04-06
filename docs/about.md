@@ -31,4 +31,4 @@ They are particularly interested in addressing key technical aspects of informat
 The data collected by the Private Data Donor is then exploited by the [Media Futures Research Group](https://iris.ucl.ac.uk/iris/browse/researchGroup/1147)
 Their research interests include information retrieval, digital rights management, and statistical modelling of the structural topology of information sources.
 
-Both research groups are part of the department of Computer Sciences at the [University College London](https://www.ucl.ac.uk).
+Both research groups are part of the department of Computer Science at the [University College London](https://www.ucl.ac.uk).
