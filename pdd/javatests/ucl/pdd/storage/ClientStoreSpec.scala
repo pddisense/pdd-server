@@ -48,6 +48,13 @@ abstract class ClientStoreSpec extends StoreSpec {
     Await.result(storage.clients.list()) shouldBe Seq(clients(1), clients(0))
   }
 
+  it should "count clients" in {
+    Await.result(storage.clients.count()) shouldBe 0
+
+    clients.foreach(client => Await.result(storage.clients.create(client)) shouldBe true)
+    Await.result(storage.clients.count()) shouldBe 2
+  }
+
   it should "replace clients" in {
     Await.result(storage.clients.replace(clients(0))) shouldBe false
 

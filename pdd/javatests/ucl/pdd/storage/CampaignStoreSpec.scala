@@ -68,6 +68,15 @@ abstract class CampaignStoreSpec extends StoreSpec {
     Await.result(storage.campaigns.list(CampaignStore.Query(isActive = Some(false)))) should contain theSameElementsInOrderAs Seq(campaigns(0))
   }
 
+  it should "count campaigns" in {
+    Await.result(storage.campaigns.count()) shouldBe 0
+
+    campaigns.foreach(campaign => Await.result(storage.campaigns.create(campaign)) shouldBe true)
+    Await.result(storage.campaigns.count()) shouldBe 2
+    Await.result(storage.campaigns.count(CampaignStore.Query(isActive = Some(true)))) shouldBe 1
+    Await.result(storage.campaigns.count(CampaignStore.Query(isActive = Some(false)))) shouldBe 1
+  }
+
   it should "replace campaigns" in {
     Await.result(storage.campaigns.replace(campaigns.head)) shouldBe false
 
