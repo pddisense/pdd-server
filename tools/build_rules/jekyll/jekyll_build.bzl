@@ -84,7 +84,7 @@ jekyll_build = rule(
     "_httpserver": attr.label(default=":httpserver", allow_files=True, single_file=True),
   },
   outputs = {
-    "targz": "%{name}_deploy.tar.gz",
+    "targz": "%{name}.tar.gz",
   },
 )
 """Build a Jekyll website.
