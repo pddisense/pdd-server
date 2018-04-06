@@ -58,6 +58,13 @@ trait CampaignStore {
    * @param query A query to filter campaigns.
    */
   def list(query: CampaignStore.Query = CampaignStore.Query()): Future[Seq[Campaign]]
+
+  /**
+   * Count campaigns according to a query.
+   *
+   * @param query A query to filter campaigns.
+   */
+  def count(query: CampaignStore.Query = CampaignStore.Query()): Future[Int]
 }
 
 object CampaignStore {

@@ -30,15 +30,16 @@ private[mysql] final class MysqlCampaignStore(mysql: MysqlClient)
 
   override def list(q: CampaignStore.Query): Future[Seq[Campaign]] = {
     val qb = query.select.orderBy("createTime", "desc")
-    q.isActive.foreach { isActive =>
-      qb.where("startTime is not null")
-        .where("startTime <= now()")
-        .where("endTime is null or endTime > now()")
-      if (!isActive) {
-        qb.not()
-      }
-    }
+    addWhere(qb, q)
     qb.execute()
+  }
+
+  override def count(q: CampaignStore.Query): Future[Int] = {
+    val qb = query.select
+    addWhere(qb, q)
+    // TODO: do not force deserialization just to count... However the QueryBuilder API forces
+    // use to extract campaigns.
+    qb.execute().map(_.size)
   }
 
   override def get(name: String): Future[Option[Campaign]] = {
@@ -145,6 +146,17 @@ private[mysql] final class MysqlCampaignStore(mysql: MysqlClient)
       query.terms.get.mkString(",") + ","
     } else {
       query.exact.getOrElse("")
+    }
+  }
+
+  private def addWhere(qb: query.SelectQuery, q: CampaignStore.Query): Unit = {
+    q.isActive.foreach { isActive =>
+      qb.where("startTime is not null")
+        .where("startTime <= now()")
+        .where("endTime is null or endTime > now()")
+      if (!isActive) {
+        qb.not()
+      }
     }
   }
 }

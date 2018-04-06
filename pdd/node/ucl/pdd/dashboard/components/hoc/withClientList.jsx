@@ -65,7 +65,7 @@ export default function withClientList(WrappedComponent) {
       if (this.state.isLoading) {
         return <Spinner/>;
       } else if (this.state.isLoaded && null !== this.state.data) {
-        return <WrappedComponent clients={this.state.data.items}/>;
+        return <WrappedComponent clients={this.state.data.clients}/>;
       } else if (this.state.isLoaded) {
         return <NonIdealState visual="error" title="An error occurred while loading clients."/>;
       }

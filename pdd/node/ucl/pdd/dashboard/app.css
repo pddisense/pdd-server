@@ -52,3 +52,20 @@ h1 .pt-text-muted, h2 .pt-text-muted, h3 .pt-text-muted {
 .attr-value {
   float: left;
 }
+
+.stats-row .pt-card {
+  width: 200px;
+  text-align: center;
+  display: inline-block;
+  margin-right: 15px;
+}
+
+.pt-card .figure {
+  font-size: 40px;
+  font-weight: bold;
+}
+
+.pt-card .label {
+  margin-top: 15px;
+  font-size: 20px;
+}

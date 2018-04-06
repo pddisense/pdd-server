@@ -30,7 +30,7 @@ class CampaignTable extends React.Component {
 
   render() {
     const rows = this.props.campaigns.map((item, idx) => {
-      const wrap = (el) => item.startTime ? el : <span className="pt-text-muted">{el}</span>;
+      const wrap = (el) => item.active ? el : <span className="pt-text-muted">{el}</span>;
       return (
         <tr onClick={() => this.handleClick(item)} key={idx}>
           <td>{wrap(item.displayName ? item.displayName : 'Untitled campaign')}</td>

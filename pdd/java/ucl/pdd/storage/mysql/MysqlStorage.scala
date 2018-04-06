@@ -46,7 +46,6 @@ object MysqlStorage {
       "publicKey varchar(255) not null," +
       "browser varchar(255) not null," +
       "externalName varchar(255) not null," +
-      "leaveTime timestamp null," +
       "primary key (unused_id)," +
       "UNIQUE KEY uix_name(name)" +
       ") ENGINE=InnoDB DEFAULT CHARSET=utf8",

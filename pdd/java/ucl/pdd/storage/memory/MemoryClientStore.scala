@@ -35,18 +35,16 @@ private[memory] final class MemoryClientStore extends ClientStore {
     index.replace(client.name, client).isDefined
   }
 
-  override def list(query: ClientStore.Query): Future[Seq[Client]] = Future {
-    index.values
-      .filter(matches(query, _))
+  override def list(): Future[Seq[Client]] = Future {
+    index
+      .values
       .toSeq
       .sortWith { case (a, b) => a.createTime.compareTo(b.createTime) >= 0 }
   }
 
-  override def get(name: String): Future[Option[Client]] = Future {
-    index.get(name)
-  }
+  override def count(): Future[Int] = Future(index.size)
 
-  private def matches(query: ClientStore.Query, client: Client): Boolean = {
-    query.hasLeft.forall(client.hasLeft == _)
-  }
+  override def get(name: String): Future[Option[Client]] = Future(index.get(name))
+
+  override def delete(name: String): Future[Boolean] = Future(index.remove(name).isDefined)
 }

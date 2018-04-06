@@ -76,8 +76,8 @@ class LoginDialog extends React.Component {
           </div>
           <div className="pt-dialog-footer">
             <div className="pt-dialog-footer-actions">
-              <button type="submit" className="pt-button pt-intent-primary">Log in</button>
               <a role="button" className="pt-button" href="https://ppd.cs.ucl.ac.uk">Exit</a>
+              <button type="submit" className="pt-button pt-intent-primary">Log in</button>
             </div>
           </div>
         </form>

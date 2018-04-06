@@ -22,7 +22,6 @@ import com.twitter.util.Future
 import scala.collection.mutable
 
 private[mysql] class QueryBuilder[T](mysql: Client, table: String, hydrator: Row => T) {
-
   def select: SelectQuery = new SelectQuery(table)
 
   def update: UpdateQuery = new UpdateQuery(table)

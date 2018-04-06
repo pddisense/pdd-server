@@ -21,15 +21,13 @@ import com.twitter.util.Future
 import ucl.pdd.api.Client
 import ucl.pdd.storage.ClientStore
 
-import scala.collection.mutable
-
 private[mysql] final class MysqlClientStore(mysql: MysqlClient) extends ClientStore with MysqlStore {
 
   import MysqlStore._
 
   override def create(client: Client): Future[Boolean] = {
-    val sql = "insert into clients(name, createTime, publicKey, browser, externalName, leaveTime) " +
-      "values (?, ?, ?, ?, ?, ?)"
+    val sql = "insert into clients(name, createTime, publicKey, browser, externalName) " +
+      "values (?, ?, ?, ?, ?)"
     mysql
       .prepare(sql)
       .apply(
@@ -37,8 +35,7 @@ private[mysql] final class MysqlClientStore(mysql: MysqlClient) extends ClientSt
         client.createTime,
         client.publicKey,
         client.browser,
-        client.externalName,
-        client.leaveTime)
+        client.externalName)
       .map(_ => true)
       .rescue {
         // Error code 1062 corresponds to a duplicate entry, which means the object already exists.
@@ -48,7 +45,7 @@ private[mysql] final class MysqlClientStore(mysql: MysqlClient) extends ClientSt
 
   override def replace(client: Client): Future[Boolean] = {
     val sql = "update clients " +
-      "set createTime = ?, publicKey = ?, browser = ?, externalName = ?, leaveTime = ? " +
+      "set createTime = ?, publicKey = ?, browser = ?, externalName = ? " +
       "where name = ?"
     mysql
       .prepare(sql)
@@ -57,7 +54,6 @@ private[mysql] final class MysqlClientStore(mysql: MysqlClient) extends ClientSt
         client.publicKey,
         client.browser,
         client.externalName,
-        client.leaveTime,
         client.name)
       .map {
         case ok: OK => ok.affectedRows == 1
@@ -65,19 +61,27 @@ private[mysql] final class MysqlClientStore(mysql: MysqlClient) extends ClientSt
       }
   }
 
-  override def list(query: ClientStore.Query): Future[Seq[Client]] = {
-    val where = mutable.ListBuffer.empty[String]
-    query.hasLeft.foreach {
-      case true => where += "leaveTime is not null"
-      case false => where += "leaveTime is null"
-    }
-    val sql = "select * " +
-      "from clients " +
-      s"where ${if (where.isEmpty) "true" else where.mkString(" and ")} " +
-      "order by createTime desc"
+  override def delete(name: String): Future[Boolean] = {
     mysql
-      .prepare(sql)
+      .prepare("delete from clients where name = ?")
+      .apply(name)
+      .map {
+        case ok: OK => ok.affectedRows == 1
+        case _ => false
+      }
+  }
+
+  override def list(): Future[Seq[Client]] = {
+    mysql
+      .prepare("select * from clients order by createTime desc")
       .select()(hydrate)
+  }
+
+  override def count(): Future[Int] = {
+    mysql
+      .prepare("select count(1) c from clients")
+      .select()(toLong(_, "c").toInt)
+      .map(_.head)
   }
 
   override def get(name: String): Future[Option[Client]] = {
@@ -93,7 +97,6 @@ private[mysql] final class MysqlClientStore(mysql: MysqlClient) extends ClientSt
       createTime = toInstant(row, "createTime"),
       browser = toString(row, "browser"),
       publicKey = toString(row, "publicKey"),
-      externalName = getString(row, "externalName"),
-      leaveTime = getInstant(row, "leaveTime"))
+      externalName = getString(row, "externalName"))
   }
 }

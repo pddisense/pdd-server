@@ -75,7 +75,7 @@ final class CreateSketchesJob @Inject()(
   private def handleCampaign(day: Int, campaign: Campaign): Future[Unit] = {
     storage
       .clients
-      .list(ClientStore.Query(hasLeft = Some(false)))
+      .list()
       .flatMap { clients =>
         val sampledClients = campaign.samplingRate match {
           case None | Some(1d) => clients

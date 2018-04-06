@@ -34,8 +34,7 @@ abstract class ClientStoreSpec extends StoreSpec {
       createTime = now().plus(1000),
       browser = "scalatest",
       publicKey = "foobar==",
-      externalName = Some("foo"),
-      leaveTime = Some(now().plus(10000))))
+      externalName = Some("foo")))
 
   it should "create and retrieve clients" in {
     Await.result(storage.clients.get("client1")) shouldBe None
@@ -46,19 +45,7 @@ abstract class ClientStoreSpec extends StoreSpec {
 
     Await.result(storage.clients.get("client1")) shouldBe Some(clients(0))
     Await.result(storage.clients.get("client2")) shouldBe Some(clients(1))
-
     Await.result(storage.clients.list()) shouldBe Seq(clients(1), clients(0))
-    Await.result(storage.clients.list(ClientStore.Query(hasLeft = Some(true)))) should contain theSameElementsInOrderAs Seq(clients(1))
-    Await.result(storage.clients.list(ClientStore.Query(hasLeft = Some(false)))) should contain theSameElementsInOrderAs Seq(clients(0))
-
-    val newClient1 = clients(0).copy(leaveTime = Some(now()))
-    Await.result(storage.clients.replace(newClient1)) shouldBe true
-    Await.result(storage.clients.get("client1")) shouldBe Some(newClient1)
-    Await.result(storage.clients.get("client2")) shouldBe Some(clients(1))
-
-    Await.result(storage.clients.list()) shouldBe Seq(clients(1), newClient1)
-    Await.result(storage.clients.list(ClientStore.Query(hasLeft = Some(true)))) should contain theSameElementsInOrderAs Seq(clients(1), newClient1)
-    Await.result(storage.clients.list(ClientStore.Query(hasLeft = Some(false)))) should have size 0
   }
 
   it should "replace clients" in {
@@ -66,10 +53,19 @@ abstract class ClientStoreSpec extends StoreSpec {
 
     clients.foreach(client => Await.result(storage.clients.create(client)) shouldBe true)
 
-    val newClient1 = clients(0).copy(leaveTime = Some(now()))
+    val newClient1 = clients(0).copy(browser = "fakebrowser")
     Await.result(storage.clients.replace(newClient1)) shouldBe true
     Await.result(storage.clients.get("client1")) shouldBe Some(newClient1)
     Await.result(storage.clients.get("client2")) shouldBe Some(clients(1))
-    Await.result(storage.clients.list()) should contain theSameElementsAs Seq(clients(1), newClient1)
+  }
+
+  it should "delete clients" in {
+    Await.result(storage.clients.delete("client1")) shouldBe false
+
+    clients.foreach(client => Await.result(storage.clients.create(client)) shouldBe true)
+
+    Await.result(storage.clients.delete("client1")) shouldBe true
+    Await.result(storage.clients.get("client1")) shouldBe None
+    Await.result(storage.clients.get("client2")) shouldBe Some(clients(1))
   }
 }

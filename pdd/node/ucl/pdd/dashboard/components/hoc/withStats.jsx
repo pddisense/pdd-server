@@ -20,8 +20,8 @@ import { Spinner, NonIdealState } from '@blueprintjs/core';
 
 import xhr from '../../util/xhr';
 
-export default function withCampaignList(WrappedComponent) {
-  return class CampaignListContainer extends React.Component {
+export default function withStats(WrappedComponent) {
+  return class StatsContainer extends React.Component {
     constructor(props) {
       super(props);
       this.state = {
@@ -38,36 +38,31 @@ export default function withCampaignList(WrappedComponent) {
 
     @autobind
     onError(resp) {
-      console.log('Unexpected error while fetching campaigns', resp);
+      console.log('Unexpected error while fetching stats', resp);
       this.setState({ isLoading: false, isLoaded: true });
     }
 
-    load(props) {
+    load() {
       this.setState({ isLoading: true });
-      let url = '/api/campaigns';
-      if (props.filter && Object.keys(props.filter).length > 0) {
-        url += '?' + map(props.filter, (v, k) => `${k}=${encodeURIComponent(v)}`).join('&');
-      }
+      let url = '/api/stats';
       xhr(url).then(this.onSuccess, this.onError)
     }
 
     componentDidMount() {
-      this.load(this.props);
+      this.load();
     }
 
-    componentWillReceiveProps(nextProps) {
-      // We always reload the list of campaigns, even if the properties did not change, to avoid
-      // showing stale data.
-      this.load(nextProps);
+    componentWillReceiveProps() {
+      this.load();
     }
 
     render() {
       if (this.state.isLoading) {
         return <Spinner/>;
       } else if (this.state.isLoaded && null !== this.state.data) {
-        return <WrappedComponent campaigns={this.state.data.campaigns}/>;
+        return <WrappedComponent stats={this.state.data}/>;
       } else if (this.state.isLoaded) {
-        return <NonIdealState visual="error" title="An error occurred while loading campaigns."/>;
+        return <NonIdealState visual="error" title="An error occurred while loading stats."/>;
       }
       return null;
     }

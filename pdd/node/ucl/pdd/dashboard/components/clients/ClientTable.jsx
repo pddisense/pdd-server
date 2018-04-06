@@ -21,28 +21,27 @@ import moment from 'moment';
 class ClientTable extends React.Component {
   render() {
     const rows = this.props.clients.map((client, idx) => {
-      const wrap = (el) => client.leaveTime ? <span className="pt-text-muted">{el}</span> : el;
       return (
         <tr key={idx}>
-          <td>{wrap(client.name)}</td>
-          <td>{wrap(client.browser)}</td>
-          <td>{wrap(client.externalName ? client.externalName : '–')}</td>
-          <td>{wrap(moment(client.createTime).fromNow())}</td>
+          <td>{client.name}</td>
+          <td>{client.browser}</td>
+          <td>{client.externalName ? client.externalName : '–'}</td>
+          <td>{moment(client.createTime).fromNow()}</td>
         </tr>
       );
     });
     return (
-        <table className="pt-html-table pt-html-table-striped">
-          <thead>
-          <tr>
-            <th>Identifier</th>
-            <th>Browser</th>
-            <th>External name</th>
-            <th>Created</th>
-          </tr>
-          </thead>
-          <tbody>{rows}</tbody>
-        </table>
+      <table className="pt-html-table pt-small pt-html-table-striped" style={{ width: '100%' }}>
+        <thead>
+        <tr>
+          <th>Identifier</th>
+          <th>Browser</th>
+          <th>External name</th>
+          <th>Join time</th>
+        </tr>
+        </thead>
+        <tbody>{rows}</tbody>
+      </table>
     );
   }
 }

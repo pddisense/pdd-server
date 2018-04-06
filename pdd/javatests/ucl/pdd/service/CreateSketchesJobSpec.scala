@@ -115,25 +115,10 @@ class CreateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach {
     sketches.foreach(sketch => sketch.campaignName shouldBe "campaign1")
   }
 
-  it should "ignore inactive clients" in {
-    val clients = Seq.tabulate(3)(idx => createClient(idx)) ++ Seq.tabulate(2)(idx => createClient(idx + 3, active = false))
-    Await.result(Future.collect(storage.campaigns.create(campaign1) +: clients.map(storage.clients.create)))
-
-    job.execute(now.toDateTime(timezone).plusDays(2).toInstant)
-    val sketches = Await.result(storage.sketches.list())
-
-    sketches should have size 3 // Only three active clients.
-    sketches.foreach { sketch =>
-      // The following line does compile despite Intellij errors.
-      sketch.clientName should (be("client1") or be("client2") or be("client3"))
-    }
-  }
-
-  private def createClient(index: Int, active: Boolean = true) =
+  private def createClient(index: Int) =
     Client(
       name = s"client${index + 1}",
       createTime = now,
       publicKey = s"pubkey${index + 1}",
-      browser = "fake-browser",
-      leaveTime = if (active) None else Some(new Instant(1)))
+      browser = "fake-browser")
 }

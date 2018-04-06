@@ -45,20 +45,19 @@ trait ClientStore {
   def get(name: String): Future[Option[Client]]
 
   /**
-   * Retrieve several clients according to a query, ordered by decreasing `createTime` (the most
-   * recent client is returned first).
+   * Delete a single client by its name, if it exists.
    *
-   * @param query A query to filter clients.
+   * @param name A client name.
    */
-  def list(query: ClientStore.Query = ClientStore.Query()): Future[Seq[Client]]
-}
-
-object ClientStore {
+  def delete(name: String): Future[Boolean]
 
   /**
-   * A query used to filter clients.
-   *
-   * @param hasLeft Return only clients who have (or not) left the system.
+   * Retrieve all clients.
    */
-  case class Query(hasLeft: Option[Boolean] = None)
+  def list(): Future[Seq[Client]]
+
+  /**
+   * Count all clients.
+   */
+  def count(): Future[Int]
 }

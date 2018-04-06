@@ -20,7 +20,7 @@ import { Route } from 'react-router-dom';
 import autobind from 'autobind-decorator';
 
 import Navbar from './Navbar';
-import Dashboard from './dashboard/Dashboard';
+import DashboardContainer from './dashboard/DashboardContainer';
 import CampaignList from './campaigns/CampaignList';
 import NewCampaignContainer from './campaigns/NewCampaignContainer';
 import ViewCampaignContainer from './campaigns/ViewCampaignContainer';
@@ -63,25 +63,29 @@ export default class App extends React.Component {
     } else if (!this.state.authenticated) {
       content = <LoginDialog onLogin={this.handleLogin}/>;
     } else {
-      content = (
-        <div className="container content">
-          <Route exact path="/" component={Dashboard}/>
-          <Route exact path="/campaigns" component={CampaignList}/>
-          <Route exact path="/campaigns/new" component={NewCampaignContainer}/>
-          <Route exact path="/campaigns/view/:name" component={ViewCampaignContainer}/>
-          <Route exact path="/campaigns/results/:name" component={ViewResultsContainer}/>
-          <Route exact path="/campaigns/edit/:name/metadata" component={EditCampaignContainer}/>
-          <Route exact path="/campaigns/edit/:name/vocabulary"
-                 component={EditVocabularyContainer}/>
-          <Route exact path="/campaigns/edit/:name/strategy" component={EditStrategyContainer}/>
-          <Route exact path="/clients" component={ClientList}/>
-        </div>
-      );
+      content = [
+        <Route exact path="/" component={DashboardContainer}/>,
+        <Route exact path="/campaigns" component={CampaignList}/>,
+        <Route exact path="/campaigns/new" component={NewCampaignContainer}/>,
+        <Route exact path="/campaigns/view/:name" component={ViewCampaignContainer}/>,
+        <Route exact path="/campaigns/results/:name" component={ViewResultsContainer}/>,
+        <Route exact path="/campaigns/edit/:name/metadata" component={EditCampaignContainer}/>,
+        <Route exact path="/campaigns/edit/:name/vocabulary" component={EditVocabularyContainer}/>,
+        <Route exact path="/campaigns/edit/:name/strategy" component={EditStrategyContainer}/>,
+        <Route exact path="/clients" component={ClientList}/>,
+      ];
+      content.forEach((route, idx) => {
+        console.log(route.key);
+        route.key = idx;
+        console.log(route.key);
+      });
     }
     return (
       <div className="page">
         <Navbar onLogout={this.handleLogout}/>
-        {content}
+        <div className="container content">
+          {content}
+        </div>
       </div>
     );
   }

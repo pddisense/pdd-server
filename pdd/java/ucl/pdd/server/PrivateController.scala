@@ -19,6 +19,7 @@ package ucl.pdd.server
 import java.util.UUID
 
 import com.google.inject.{Inject, Singleton}
+import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
 import com.twitter.finatra.request.{QueryParam, RouteParam}
 import com.twitter.util.Future
@@ -27,12 +28,12 @@ import ucl.pdd.api._
 import ucl.pdd.storage._
 
 @Singleton
-final class AdminController @Inject()(storage: Storage) extends Controller {
+final class PrivateController @Inject()(storage: Storage) extends Controller {
   get("/api/campaigns") { req: ListCampaignsRequest =>
     storage
       .campaigns
       .list(CampaignStore.Query(isActive = req.active))
-      .map(campaigns => ObjectList(campaigns.map(_.withoutVocabulary)))
+      .map(campaigns => ListCampaignsResponse(campaigns.map(_.withoutVocabulary)))
   }
 
   post("/api/campaigns") { req: CreateCampaignRequest =>
@@ -86,7 +87,7 @@ final class AdminController @Inject()(storage: Storage) extends Controller {
             .contentType("text/csv")
             .header("Content-Disposition", s"attachment; filename=${req.name}-day${aggregations.head.day}.csv")
         } else {
-          ObjectList(aggregations.map(_.withoutValues))
+          GetResultsResponse(aggregations.map(_.withoutValues))
         }
       }
   }
@@ -123,11 +124,8 @@ final class AdminController @Inject()(storage: Storage) extends Controller {
     }
   }
 
-  get("/api/clients") { req: ListClientsRequest =>
-    storage
-      .clients
-      .list(ClientStore.Query(hasLeft = req.active))
-      .map(clients => ObjectList(clients))
+  get("/api/clients") { req: Request =>
+    storage.clients.list().map(clients => ListClientsResponse(clients))
   }
 
   get("/api/clients/:name") { req: GetClientRequest =>
@@ -137,7 +135,19 @@ final class AdminController @Inject()(storage: Storage) extends Controller {
   get("/api/clients/:name/activity") { req: GetClientRequest =>
     storage.activity.list(ActivityStore.Query(clientName = Some(req.name)))
   }
+
+  get("/api/stats") { req: Request =>
+    val f1 = storage.campaigns.count(CampaignStore.Query(isActive = Some(true)))
+    val f2 = storage.clients.count()
+    Future
+      .join(f1, f2)
+      .map { case (activeCampaigns, activeClients) =>
+        GetStatisticsResponse(activeCampaigns = activeCampaigns, activeClients = activeClients)
+      }
+  }
 }
+
+case class GetStatisticsResponse(activeCampaigns: Int, activeClients: Int)
 
 case class GetCampaignRequest(@RouteParam name: String)
 
@@ -145,7 +155,11 @@ case class GetResultsRequest(
   @RouteParam name: String,
   @QueryParam download: Boolean = false)
 
+case class GetResultsResponse(results: Seq[Aggregation])
+
 case class ListCampaignsRequest(@QueryParam active: Option[Boolean])
+
+case class ListCampaignsResponse(campaigns: Seq[Campaign])
 
 case class CreateCampaignRequest(
   displayName: String,
@@ -174,8 +188,8 @@ case class UpdateCampaignRequest(
   groupSize: Int,
   samplingRate: Option[Double])
 
-case class ListClientsRequest(@QueryParam active: Option[Boolean])
-
 case class GetClientRequest(@RouteParam name: String)
+
+case class ListClientsResponse(clients: Seq[Client])
 
 case class GetAggregationRequest(@RouteParam name: String)

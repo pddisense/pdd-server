@@ -62,7 +62,7 @@ export default function withResultList(WrappedComponent) {
       if (this.state.isLoading) {
         return <Spinner/>;
       } else if (this.state.isLoaded && null !== this.state.data) {
-        return <WrappedComponent results={this.state.data.items} campaign={this.props.campaign}/>;
+        return <WrappedComponent results={this.state.data.results} campaign={this.props.campaign}/>;
       } else if (this.state.isLoaded) {
         return <NonIdealState visual="error" title="An error occurred while loading campaign's results."/>;
       }

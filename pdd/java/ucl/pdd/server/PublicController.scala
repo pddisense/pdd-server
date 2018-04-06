@@ -75,14 +75,9 @@ final class PublicController @Inject()(storage: Storage, pingService: PingServic
   }
 
   delete("/api/clients/:name") { req: DeleteClientRequest =>
-    storage.clients.get(req.name).flatMap {
-      case None => Future.value(response.notFound)
-      case Some(client) =>
-        val updated = client.copy(leaveTime = Some(Instant.now))
-        storage.clients.replace(updated).map {
-          case true => response.ok
-          case false => response.notFound
-        }
+    storage.clients.delete(req.name).map {
+      case false => response.notFound
+      case true => response.ok
     }
   }
 

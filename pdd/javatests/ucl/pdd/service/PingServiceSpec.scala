@@ -59,21 +59,17 @@ class PingServiceSpec extends UnitSpec with BeforeAndAfterEach {
         name = s"client1",
         createTime = createTime,
         publicKey = s"pubkey1",
-        browser = "fake-browser",
-        leaveTime = None),
+        browser = "fake-browser"),
       Client(
         name = s"client2",
         createTime = createTime,
         publicKey = s"pubkey2",
-        browser = "fake-browser",
-        leaveTime = None),
+        browser = "fake-browser"),
       Client(
         name = s"client3",
         createTime = createTime,
         publicKey = s"pubkey3",
-        browser = "fake-browser",
-        leaveTime = None)
-    )
+        browser = "fake-browser"))
     Await.ready(Future.join(
       Seq(storage.campaigns.create(campaign1), storage.campaigns.create(campaign2)) ++
         clients.map(storage.clients.create)))

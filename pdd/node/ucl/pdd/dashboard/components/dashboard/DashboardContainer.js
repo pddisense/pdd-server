@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
-package ucl.pdd.api
+import React from 'react';
 
-case class ObjectList[T](items: Seq[T])
+import Dashboard from './Dashboard';
+import withStats from '../hoc/withStats';
+
+export default withStats(Dashboard);

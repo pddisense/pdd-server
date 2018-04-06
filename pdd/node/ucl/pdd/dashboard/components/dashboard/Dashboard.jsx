@@ -19,8 +19,15 @@ import React from 'react';
 export default class Dashboard extends React.Component {
   render() {
     return (
-      <div>
-        dashboard
+      <div className="stats-row">
+        <div className="pt-card">
+          <div className="figure">{this.props.stats.activeCampaigns}</div>
+          <div className="label">active campaigns</div>
+        </div>
+        <div className="pt-card">
+          <div className="figure">{this.props.stats.activeClients}</div>
+          <div className="label">active clients</div>
+        </div>
       </div>
     );
   }

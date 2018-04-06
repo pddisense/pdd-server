@@ -27,16 +27,10 @@ import org.joda.time.Instant
  * @param publicKey    Public key.
  * @param browser      Identifier of the browser used by this client.
  * @param externalName A name voluntarily filled by the user allowing to identify him.
- * @param leaveTime    Time at which the client left the campaign. Shall he choose to come back, he
- *                     will be considered as a new client.
  */
 case class Client(
   name: String,
   createTime: Instant,
   publicKey: String,
   browser: String,
-  externalName: Option[String] = None,
-  leaveTime: Option[Instant] = None) {
-
-  def hasLeft: Boolean = leaveTime.nonEmpty
-}
+  externalName: Option[String] = None)

@@ -42,6 +42,10 @@ private[memory] final class MemoryCampaignStore extends CampaignStore {
       .sortWith { case (a, b) => a.createTime.compareTo(b.createTime) >= 0 }
   }
 
+  override def count(query: CampaignStore.Query): Future[Int] = Future {
+    index.values.count(matches(query, _))
+  }
+
   override def get(name: String): Future[Option[Campaign]] = Future {
     index.get(name)
   }
