@@ -7,7 +7,7 @@ excluded_in_search: true
 
 This page is intended for participants coming from the [Prolific platform](https://www.prolific.ac/).
 It provides instructions to get started.
-To participate to the study, you should fulfill the following requirements:
+To participate to the study, you should fulfil the following requirements:
 
 * Be using Chrome (or Chromium) as your main Web browser.
 * Be using Google on a daily basis to perform searches.
