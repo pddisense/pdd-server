@@ -45,6 +45,6 @@ class PddServer extends HttpServer with LoggingConfigurator {
       .filter[TraceIdMDCFilter[Request, Response]]
       .filter[CommonFilters]
       .add[AuthFilter, PrivateController]
-      .add[PublicController]
+      .add[CorsFilter, PublicController]
   }
 }
