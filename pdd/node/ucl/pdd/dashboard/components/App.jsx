@@ -74,11 +74,7 @@ export default class App extends React.Component {
         <Route exact path="/campaigns/edit/:name/strategy" component={EditStrategyContainer}/>,
         <Route exact path="/clients" component={ClientList}/>,
       ];
-      content.forEach((route, idx) => {
-        console.log(route.key);
-        route.key = idx;
-        console.log(route.key);
-      });
+      content = React.Children.map(content, (route, idx) => React.cloneElement(route, { key: idx }));
     }
     return (
       <div className="page">

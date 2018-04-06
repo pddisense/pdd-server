@@ -41,27 +41,45 @@ chrome.browserAction.onClicked.addListener(() => {
 // extension has been installed, but it may exceptionally happen again, e.g., if the local storage
 // has been emptied. We do not store the result in a local variable, as the local cache may
 // potentially be wiped out at any time, and will instead try that again at every ping.
-getOrRegisterClient();
+getOrRegisterClient().catch(reason => {
+  console.log('Unexpected error while registering the client');
+  console.error(reason);
+});
 
 // At the heart of the extension, there is the "ping" feature. Periodically (typically once a day),
 // the API server will be contacted for instructions about what to do. The extension will then
 // process those commands and send the server the required information.
 chrome.alarms.onAlarm.addListener(alarm => {
   if ('ping' === alarm.name) {
-    getOrRegisterClient().then(client => ping(client));
+    getOrRegisterClient()
+      .then(client => ping(client))
+      .catch(reason => {
+        // There has been an unhandled error, and it can be anything...
+        console.log('Unexpected error while pinging the server');
+        console.error(reason);
+
+        // Schedule a ping during the next hour to try recovering. It is important to do so when
+        // an error occurs, otherwise the extension will simply stop sending data.
+        const nextPingTime = moment().add(30, 'minutes').add((Math.random() * 30) | 0, 'minutes');
+        chrome.alarms.create('ping', { when: nextPingTime.valueOf() });
+      });
   }
 });
 
-// We schedule a first ping in 2 minutes. Normally, scheduling it the next day would be sufficient,
+// We schedule a first ping in 1 minute. Normally, scheduling it the next day would be sufficient,
 // but for testing purposes the duration of a "day" may be reduced at first. So we prefer to do a
 // first useless ping query, that will give us the next ping time.
-chrome.alarms.create('ping', { when: moment().add(2, 'minutes').valueOf() });
+chrome.alarms.create('ping', { when: moment().add(1, 'minute').valueOf() });
 
+/**
+ * Contact the API server to get instructions, and perform them.
+ *
+ * @param client Current client.
+ */
 function ping(client) {
   console.log(`Pinging the server for client ${client.name}...`);
-  // TODO: re-register in case of 404.
-  xhr(`/api/clients/${client.name}/ping`)
-    .then(resp => {
+  return xhr(`/api/clients/${client.name}/ping`).then(
+    resp => {
       // Submit each sketch that was requested.
       resp.submit.forEach(command => submitSketch(client, command));
 
@@ -72,7 +90,18 @@ function ping(client) {
         ? moment(resp.nextPingTime)
         : moment().add(1, 'day').hours(2);
       chrome.alarms.create('ping', { when: nextPingTime.valueOf() });
-    }, (reason) => console.log('Error while pinging the server', reason));
+      return Promise.resolve();
+    },
+    reason => {
+      if (reason.httpStatus === 404) {
+        // A 404 means that the client is not registered, or more likely has been deleted by the
+        // server (either manually or due to inactivity). We need to re-register.
+        console.log('Re-registering the client...');
+        return getClient().then(registerClient).then(client => ping(client));
+      } else {
+        return Promise.reject(reason);
+      }
+    });
 }
 
 /**
@@ -86,6 +115,7 @@ function getOrRegisterClient() {
     if (client.name) {
       return client;
     } else {
+      console.log('Registering the client...');
       return registerClient(client);
     }
   });
@@ -98,26 +128,24 @@ function getOrRegisterClient() {
  * @returns PromiseLike<Client>
  */
 function registerClient(data) {
-  console.log('Registering client...');
   const keyPair = generateKeyPair();
   const attrs = {
     ...data,
     publicKey: keyPair.publicKey,
     browser: 'chrome',
   };
-  return xhr(
-    `/api/clients`,
-    { method: 'POST', body: JSON.stringify(attrs) }
-  ).then(created => setClient({
-    keyPair,
-    name: created.name,
-    createTime: created.createTime,
-    browser: created.browser,
-    externalName: created.externalName,
-  })).then(client => {
-    console.log(`Registered as client ${client.name}`);
-    return client;
-  });
+  return xhr('/api/clients', { method: 'POST', body: JSON.stringify(attrs) })
+    .then(created => setClient({
+      keyPair,
+      name: created.name,
+      createTime: created.createTime,
+      browser: created.browser,
+      externalName: created.externalName,
+    }))
+    .then(client => {
+      console.log(`Registered as client ${client.name}`);
+      return client;
+    });
 }
 
 function submitSketch(client, command) {

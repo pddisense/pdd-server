@@ -81,7 +81,7 @@ class SettingsSection extends React.Component {
             Client name
           </label>
           <div className="pt-form-content">
-            {this.props.client.name}
+            {this.props.client.name || '(not yet registered)'}
             <div className="pt-form-helper-text">
               This is the internal name that is used to identify you from our server.
               Should you encounter any issues, our support may ask you this name.
