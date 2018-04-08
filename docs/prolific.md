@@ -46,7 +46,9 @@ Now that the extension is installed and configured, please confirm your particip
 ## 4. Keep using Chrome and Google for a week
 
 The only thing we ask you is to use Chrome to perform Google searches on a daily basis.
-You do not have to change your behaviour, the extension is simply running on the background.
+We simply ask you to **search for "flu" on Google at least once a day**, so that we are sure to receive some relevant data for each participant.
+You otherwise do not have to change your behaviour, the extension is running in the background.
+
 For your payment to be performed in full, we require to receive at least **6 days of data (out of 7)**.
  
 After that period of time, you may freely remove the extension from your browser.
