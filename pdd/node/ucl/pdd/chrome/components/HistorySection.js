@@ -40,11 +40,10 @@ class HistorySection extends React.Component {
       <div>
         <h1>History</h1>
         <p>
-          Here are the search queries that Private Data Donor has detected for
-          {yesterday ? 'yesterday' : 'today'}. Those that are of interest will be automatically
-          sent {yesterday ? '' : 'tomorrow'} at 1am. If you which to delete some of them, please
-          remove the corresponding activity from <a onClick={this.handleHistoryClick}>your browsing
-          history</a>.
+          Here are the search queries that Private Data Donor has detected for {yesterday ? 'yesterday' : 'today'}.
+          Those that are of interest will be automatically sent {yesterday ? '' : 'tomorrow'} at 1am.
+          If you wish to delete some of them, please remove the corresponding activity
+          from <a onClick={this.handleHistoryClick}>your browsing history</a>.
         </p>
         <p>
           <b>{this.props.searches.length} quer{this.props.searches.length === 1 ? 'y' : 'ies'}</b> have
