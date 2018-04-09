@@ -16,8 +16,6 @@
 
 package ucl.pdd.service
 
-import java.util.concurrent.locks.ReentrantLock
-
 import com.github.nscala_time.time.Imports._
 import com.google.inject.Inject
 import com.twitter.inject.Logging
@@ -32,26 +30,23 @@ final class AggregateSketchesJob @Inject()(
   @TestingMode testingMode: Boolean)
   extends Logging {
 
-  private[this] val lock = new ReentrantLock()
+  private[this] val prefix = s"[${getClass.getSimpleName}]"
 
-  def execute(fireTime: Instant): Unit = {
-    lock.lock()
-    try {
-      logger.info(s"Starting ${getClass.getSimpleName}")
-      val now = fireTime.toDateTime(timezone)
-      val f = storage.campaigns
-        .list()
-        .flatMap(results => Future.join(results.map(handleCampaign(now, _))))
-      Await.result(f)
-    } finally {
-      lock.unlock()
-      logger.info(s"Completed ${getClass.getSimpleName}")
-    }
+  def execute(fireTime: Instant): Unit = synchronized {
+    logger.info(s"$prefix Starting job")
+
+    val now = fireTime.toDateTime(timezone)
+    val f = storage.campaigns
+      .list()
+      .flatMap(results => Future.join(results.map(handleCampaign(now, _))))
+    Await.result(f)
+
+    logger.info(s"$prefix Completed job")
   }
 
   private def handleCampaign(now: DateTime, campaign: Campaign): Future[Unit] = {
-    // On a given day `d`, we aggregate the sketches from day `d - 1 - campaign.delay - campaign.graceDelay`
-    // to `d - 1 - campaign.delay`.
+    // On a given day `d`, we aggregate the sketches from day `d - 2 - campaign.delay - campaign.graceDelay`
+    // to `d - 2 - campaign.delay`.
     campaign.startTime match {
       case None =>
         // This campaign was never started, nothing to do.
@@ -62,12 +57,13 @@ final class AggregateSketchesJob @Inject()(
         } else {
           (startTime.toDateTime(timezone).withTimeAtStartOfDay to now).duration.days.toInt
         }
-        if (actualDay - campaign.delay <= 0) {
+        val endDay = actualDay - 2 - campaign.delay
+        if (endDay < 0) {
+          logger.info(s"$prefix Nothing to do for campaign ${campaign.name} (just started)")
           Future.Done
         } else {
-          val startDay = actualDay - 1 - campaign.delay - campaign.graceDelay
-          val days = math.max(0, startDay) to (actualDay - 1 - campaign.delay)
-          logger.info(s"Aggregating campaign ${campaign.name} on days ${days.mkString(", ")} (today: $actualDay)")
+          val startDay = math.max(0, actualDay - 2 - campaign.delay - campaign.graceDelay)
+          val days = startDay to endDay
           Future.join(days.map(aggregate(_, campaign)))
         }
       //TODO: backfill.
@@ -118,6 +114,9 @@ final class AggregateSketchesJob @Inject()(
       .map {
         case Some(_) => storage.aggregations.replace(aggregation)
         case None => storage.aggregations.create(aggregation)
+      }
+      .onSuccess { _ =>
+        logger.info(s"$prefix Aggregated ${sketches.size} sketches for campaign ${campaign.name} (day: $day)")
       }
       .unit
   }

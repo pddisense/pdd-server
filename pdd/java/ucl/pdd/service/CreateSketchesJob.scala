@@ -24,7 +24,7 @@ import com.twitter.inject.Logging
 import com.twitter.util.{Await, Future}
 import org.joda.time.Instant
 import ucl.pdd.api._
-import ucl.pdd.storage.{CampaignStore, ClientStore, Storage}
+import ucl.pdd.storage.{CampaignStore, Storage}
 import ucl.pdd.strategy.{Strategy, StrategyAttrs}
 
 import scala.util.Random
@@ -44,8 +44,10 @@ final class CreateSketchesJob @Inject()(
   @TestingMode testingMode: Boolean)
   extends Logging {
 
+  private[this] val prefix = s"[${getClass.getSimpleName}]"
+
   def execute(fireTime: Instant): Unit = {
-    logger.info(s"Starting ${getClass.getSimpleName}")
+    logger.info(s"$prefix Starting job")
 
     val now = fireTime.toDateTime(timezone)
     val f = storage.campaigns
@@ -53,7 +55,7 @@ final class CreateSketchesJob @Inject()(
       .flatMap(results => Future.join(results.map(handleCampaign(now, _))))
     Await.result(f)
 
-    logger.info(s"Completed ${getClass.getSimpleName}")
+    logger.info(s"$prefix Completed job")
   }
 
   private def handleCampaign(now: DateTime, campaign: Campaign): Future[Unit] = {
@@ -64,11 +66,12 @@ final class CreateSketchesJob @Inject()(
     } else {
       (campaign.startTime.get.toDateTime(timezone).withTimeAtStartOfDay to now).duration.days.toInt
     }
-    if (currentDay <= 0) {
-      logger.info(s"Nothing to do on day $currentDay")
+    val day = currentDay - 1
+    if (day < 0) {
+      logger.info(s"$prefix Nothing to do for campaign ${campaign.name} (just started)")
       Future.Done
     } else {
-      handleCampaign(currentDay - 1, campaign)
+      handleCampaign(day, campaign)
     }
   }
 
@@ -95,7 +98,12 @@ final class CreateSketchesJob @Inject()(
             storage.sketches.create(sketch).unit
           }
         }
-        Future.collect(fs).unit
+        Future
+          .collect(fs)
+          .onSuccess { res =>
+            logger.info(s"$prefix Created ${res.size} sketches for campaign ${campaign.name} (day $day)")
+          }
+          .unit
       }
   }
 }

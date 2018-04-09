@@ -38,7 +38,7 @@ class AggregateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach {
   override def beforeEach(): Unit = {
     storage = new MemoryStorage
     Await.ready(storage.startUp())
-    val startTime = now.minusDays(1).withTimeAtStartOfDay().toInstant
+    val startTime = now.minusDays(2).withTimeAtStartOfDay().toInstant
     val campaign1 = Campaign(
       name = "campaign1",
       createTime = now.toInstant,
