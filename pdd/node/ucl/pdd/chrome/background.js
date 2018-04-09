@@ -124,7 +124,7 @@ function getOrRegisterClient() {
 /**
  * Register a new client.
  *
- * @param data Client data in the storage (some fields might be defined, e.g., `externalName`).
+ * @param data Client data in the storage (some fields might be already defined, e.g., `externalName`).
  * @returns PromiseLike<Client>
  */
 function registerClient(data) {
