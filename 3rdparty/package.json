@@ -10,6 +10,7 @@
     "prop-types": "^15.6.0",
     "raven-js": "^3.22.0",
     "react": "^16.2.0",
+    "react-copy-to-clipboard": "^5.0.1",
     "react-dom": "^16.2.0",
     "react-router": "^4.2.0",
     "react-router-dom": "^4.2.2",

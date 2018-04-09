@@ -45,7 +45,7 @@ export default function xhr(url, params = {}) {
     headers: { 'Content-Type': 'application/json' },
     method: 'GET',
     mode: 'cors',
-    ...params
+    ...params,
   };
   return fetch(API_URL + url, params).then(status);
 }

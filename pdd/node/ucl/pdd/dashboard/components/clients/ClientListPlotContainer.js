@@ -16,21 +16,7 @@
 
 import React from 'react';
 
-import ClientTableContainer from './ClientTableContainer';
-import ClientListPlotContainer from './ClientListPlotContainer';
+import ActivityPlot from './ActivityPlot';
+import withActivity from '../hoc/withActivity';
 
-class ClientList extends React.Component {
-  render() {
-    return (
-      <div>
-        <h2>Clients</h2>
-
-        <ClientListPlotContainer/>
-
-        <ClientTableContainer/>
-      </div>
-    );
-  }
-}
-
-export default ClientList;
+export default withActivity(ActivityPlot);

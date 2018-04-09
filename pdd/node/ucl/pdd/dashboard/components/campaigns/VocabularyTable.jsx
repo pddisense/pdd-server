@@ -16,9 +16,8 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { some, noop } from 'lodash';
-import { Icon, Callout, Intent } from '@blueprintjs/core';
-import autobind from 'autobind-decorator';
+import { noop, some } from 'lodash';
+import { Callout, Icon, Intent } from '@blueprintjs/core';
 
 import TextInput from '../form/TextInput';
 
@@ -43,7 +42,6 @@ class VocabularyTable extends React.Component {
     }
   }
 
-  @autobind
   handleFilterChange(e) {
     this.setState({ filter: e.target.value });
   }

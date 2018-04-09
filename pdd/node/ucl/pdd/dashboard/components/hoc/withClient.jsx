@@ -16,21 +16,20 @@
 
 import React from 'react';
 
-import ClientTableContainer from './ClientTableContainer';
-import ClientListPlotContainer from './ClientListPlotContainer';
+import DataContainer from './DataContainer';
 
-class ClientList extends React.Component {
-  render() {
-    return (
-      <div>
-        <h2>Clients</h2>
+export default function withClient(WrappedComponent) {
+  return class WithClientContainer extends DataContainer {
+    constructor(props) {
+      super(props, WrappedComponent);
+    }
 
-        <ClientListPlotContainer/>
+    getApiEndpoint(props) {
+      return `/api/clients/${props.match.params.name}`;
+    }
 
-        <ClientTableContainer/>
-      </div>
-    );
+    stateToProps(state) {
+      return { client: state.data };
+    }
   }
 }
-
-export default ClientList;

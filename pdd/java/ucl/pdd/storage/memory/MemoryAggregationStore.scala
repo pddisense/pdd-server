@@ -39,7 +39,7 @@ private[memory] final class MemoryAggregationStore extends AggregationStore {
     index.values
       .filter(matches(query, _))
       .toSeq
-      .sortWith { case (a, b) => a.day.compareTo(b.day) >= 0 }
+      .sortWith { case (a, b) => a.day > b.day }
   }
 
   override def get(name: String): Future[Option[Aggregation]] = Future {

@@ -17,12 +17,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
+import { withRouter } from 'react-router-dom';
 
+@withRouter
 class ClientTable extends React.Component {
+  handleClick(client) {
+    this.props.history.push(`/clients/view/${client.name}`);
+  }
+
   render() {
     const rows = this.props.clients.map((client, idx) => {
       return (
-        <tr key={idx}>
+        <tr onClick={() => this.handleClick(client)} key={idx}>
           <td>{client.name}</td>
           <td>{client.browser}</td>
           <td>{client.externalName ? client.externalName : '–'}</td>
@@ -31,7 +37,8 @@ class ClientTable extends React.Component {
       );
     });
     return (
-      <table className="pt-html-table pt-small pt-html-table-striped" style={{ width: '100%' }}>
+      <table className="pt-html-table pt-interactive pt-small pt-html-table-striped"
+             style={{ width: '100%' }}>
         <thead>
         <tr>
           <th>Identifier</th>

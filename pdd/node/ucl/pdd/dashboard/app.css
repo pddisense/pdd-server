@@ -32,9 +32,21 @@
   cursor: pointer;
 }
 
+h1, h2, ul.pt-breadcrumbs {
+  margin-bottom: 25px;
+}
+
 h1 .pt-text-muted, h2 .pt-text-muted, h3 .pt-text-muted {
   margin-left: 15px;
   font-size: 0.5em;
+}
+
+.actions {
+  float: right;
+}
+
+.actions .pt-button {
+  margin-left: 15px;
 }
 
 .attr-row {
@@ -68,4 +80,9 @@ h1 .pt-text-muted, h2 .pt-text-muted, h3 .pt-text-muted {
 .pt-card .label {
   margin-top: 15px;
   font-size: 20px;
+}
+
+.plot-container .title {
+  text-align: center;
+  font-style: italic;
 }

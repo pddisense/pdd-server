@@ -18,10 +18,12 @@ package ucl.pdd.server
 
 import java.util.UUID
 
+import com.github.nscala_time.time.Imports._
 import com.google.inject.{Inject, Singleton}
 import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
-import com.twitter.finatra.request.{QueryParam, RouteParam}
+import com.twitter.finatra.http.request.RequestUtils
+import com.twitter.finatra.request.{ContentType, QueryParam, RouteParam}
 import com.twitter.util.Future
 import org.joda.time.Instant
 import ucl.pdd.api._
@@ -76,24 +78,23 @@ final class PrivateController @Inject()(storage: Storage) extends Controller {
       .aggregations
       .list(AggregationStore.Query(campaignName = req.name))
       .map { aggregations =>
-        if (req.download) {
-          val header = "day,query,decrypted,count"
-          val content = aggregations.flatMap { agg =>
-            agg.rawValues.zipWithIndex.map { case (v, idx) => s"${agg.day},$idx,0,$v" } ++
-              agg.decryptedValues.zipWithIndex.map { case (v, idx) => s"${agg.day},$idx,1,$v" }
-          }
-          response
-            .ok((header +: content).mkString("\n"))
-            .contentType("text/csv")
-            .header("Content-Disposition", s"attachment; filename=${req.name}-day${aggregations.head.day}.csv")
-        } else {
-          GetResultsResponse(aggregations.map(_.withoutValues))
+        RequestUtils.respondTo(req.request) {
+          case ContentType.CSV =>
+            val header = "day,query,decrypted,count"
+            val content = aggregations.flatMap { agg =>
+              agg.rawValues.zipWithIndex.map { case (v, idx) => s"${agg.day},$idx,0,$v" } ++
+                agg.decryptedValues.zipWithIndex.map { case (v, idx) => s"${agg.day},$idx,1,$v" }
+            }
+            response
+              .ok((header +: content).mkString("\n"))
+              .contentType("text/csv")
+          case _ => GetResultsResponse(aggregations.map(_.withoutValues))
         }
       }
   }
 
-  put("/api/campaigns/:id") { req: UpdateCampaignRequest =>
-    storage.campaigns.get(req.id).flatMap {
+  put("/api/campaigns/:name") { req: UpdateCampaignRequest =>
+    storage.campaigns.get(req.name).flatMap {
       case None => Future.value(response.notFound)
       case Some(previous) =>
         val campaign = Campaign(
@@ -132,11 +133,35 @@ final class PrivateController @Inject()(storage: Storage) extends Controller {
     storage.clients.get(req.name)
   }
 
-  get("/api/clients/:name/activity") { req: GetClientRequest =>
-    storage.activity.list(ActivityStore.Query(clientName = Some(req.name)))
+  get("/api/clients/:name/activity") { req: GetClientActivityRequest =>
+    val (startTime, endTime) = req.tail match {
+      case None => (None, None)
+      case Some(n) =>
+        val endTime = DateTime.now().withTimeAtStartOfDay()
+        val startTime = endTime.minusDays(n)
+        (Some(startTime.toInstant), Some(endTime.toInstant.minus(1)))
+    }
+    storage
+      .activity
+      .list(ActivityStore.Query(clientName = Some(req.name), startTime = startTime, endTime = endTime))
+      .map(GetActivityResponse.apply)
   }
 
-  get("/api/stats") { req: Request =>
+  get("/api/activity") { req: GetActivityRequest =>
+    val (startTime, endTime) = req.tail match {
+      case None => (None, None)
+      case Some(n) =>
+        val endTime = DateTime.now().withTimeAtStartOfDay()
+        val startTime = endTime.minusDays(n)
+        (Some(startTime.toInstant), Some(endTime.toInstant.minus(1)))
+    }
+    storage
+      .activity
+      .list(ActivityStore.Query(startTime = startTime, endTime = endTime))
+      .map(GetActivityResponse.apply)
+  }
+
+  get("/api/stats") { _: Request =>
     val f1 = storage.campaigns.count(CampaignStore.Query(isActive = Some(true)))
     val f2 = storage.clients.count()
     Future
@@ -145,13 +170,25 @@ final class PrivateController @Inject()(storage: Storage) extends Controller {
         GetStatisticsResponse(activeCampaigns = activeCampaigns, activeClients = activeClients)
       }
   }
+
+  get("/api/results/:name") { req: GetResultRequest =>
+    storage
+      .aggregations
+      .get(req.name)
+      .map {
+        case None => response.notFound
+        case Some(aggregation) => aggregation
+      }
+  }
 }
 
 case class GetStatisticsResponse(activeCampaigns: Int, activeClients: Int)
 
 case class GetCampaignRequest(@RouteParam name: String)
 
-case class GetResultsRequest(
+case class GetResultsRequest(@RouteParam name: String, request: Request)
+
+case class GetResultRequest(
   @RouteParam name: String,
   @QueryParam download: Boolean = false)
 
@@ -175,7 +212,7 @@ case class CreateCampaignRequest(
   samplingRate: Option[Double])
 
 case class UpdateCampaignRequest(
-  @RouteParam id: String,
+  @RouteParam name: String,
   displayName: String,
   email: Seq[String],
   vocabulary: Vocabulary,
@@ -189,6 +226,12 @@ case class UpdateCampaignRequest(
   samplingRate: Option[Double])
 
 case class GetClientRequest(@RouteParam name: String)
+
+case class GetClientActivityRequest(@RouteParam name: String, @QueryParam tail: Option[Int])
+
+case class GetActivityRequest(@QueryParam tail: Option[Int])
+
+case class GetActivityResponse(days: Seq[Activity])
 
 case class ListClientsResponse(clients: Seq[Client])
 

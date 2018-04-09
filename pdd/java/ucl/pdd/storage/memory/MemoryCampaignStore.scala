@@ -18,6 +18,7 @@ package ucl.pdd.storage.memory
 
 import java.util.concurrent.ConcurrentHashMap
 
+import com.github.nscala_time.time.Imports._
 import com.twitter.util.Future
 import ucl.pdd.api.Campaign
 import ucl.pdd.storage.CampaignStore
@@ -39,7 +40,7 @@ private[memory] final class MemoryCampaignStore extends CampaignStore {
     index.values
       .filter(matches(query, _))
       .toSeq
-      .sortWith { case (a, b) => a.createTime.compareTo(b.createTime) >= 0 }
+      .sortWith { case (a, b) => a.createTime > b.createTime }
   }
 
   override def count(query: CampaignStore.Query): Future[Int] = Future {

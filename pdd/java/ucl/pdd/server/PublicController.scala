@@ -26,7 +26,7 @@ import com.twitter.util.Future
 import org.joda.time.Instant
 import ucl.pdd.api._
 import ucl.pdd.service.PingService
-import ucl.pdd.storage.Storage
+import ucl.pdd.storage.{ActivityStore, Storage}
 
 @Singleton
 final class PublicController @Inject()(storage: Storage, pingService: PingService)
@@ -75,9 +75,13 @@ final class PublicController @Inject()(storage: Storage, pingService: PingServic
   }
 
   delete("/api/clients/:name") { req: DeleteClientRequest =>
-    storage.clients.delete(req.name).map {
-      case false => response.notFound
-      case true => response.ok
+    storage.clients.delete(req.name).flatMap {
+      case false => Future.value(response.notFound)
+      case true =>
+        storage
+          .activity
+          .delete(ActivityStore.Query(clientName = Some(req.name)))
+          .map(_ => response.ok)
     }
   }
 

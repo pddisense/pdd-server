@@ -16,21 +16,20 @@
 
 import React from 'react';
 
-import ClientTableContainer from './ClientTableContainer';
-import ClientListPlotContainer from './ClientListPlotContainer';
+import DataContainer from './DataContainer';
 
-class ClientList extends React.Component {
-  render() {
-    return (
-      <div>
-        <h2>Clients</h2>
+export default function withActivity(WrappedComponent) {
+  return class WithActivityContainer extends DataContainer {
+    constructor(props) {
+      super(props, WrappedComponent);
+    }
 
-        <ClientListPlotContainer/>
+    getApiEndpoint(props) {
+      return `/api/activity?tail=14`;
+    }
 
-        <ClientTableContainer/>
-      </div>
-    );
+    stateToProps(state) {
+      return { activity: state.data };
+    }
   }
 }
-
-export default ClientList;

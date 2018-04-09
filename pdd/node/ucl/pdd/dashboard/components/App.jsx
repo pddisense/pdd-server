@@ -29,8 +29,9 @@ import EditCampaignContainer from './campaigns/EditCampaignContainer';
 import EditVocabularyContainer from './campaigns/EditVocabularyContainer';
 import EditStrategyContainer from './campaigns/EditStrategyContainer';
 import ClientList from './clients/ClientList';
-import { checkAuthenticated } from '../util/auth';
+import ViewClientContainer from './clients/ViewClientContainer';
 import LoginDialog from './LoginDialog';
+import { checkAuthenticated } from '../util/auth';
 
 export default class App extends React.Component {
   constructor(props) {
@@ -42,8 +43,7 @@ export default class App extends React.Component {
   }
 
   componentDidMount() {
-    checkAuthenticated()
-      .then(authenticated => this.setState({ authenticated, loading: false }));
+    checkAuthenticated().then(authenticated => this.setState({ authenticated, loading: false }));
   }
 
   @autobind
@@ -73,6 +73,7 @@ export default class App extends React.Component {
         <Route exact path="/campaigns/edit/:name/vocabulary" component={EditVocabularyContainer}/>,
         <Route exact path="/campaigns/edit/:name/strategy" component={EditStrategyContainer}/>,
         <Route exact path="/clients" component={ClientList}/>,
+        <Route exact path="/clients/view/:name" component={ViewClientContainer}/>,
       ];
       content = React.Children.map(content, (route, idx) => React.cloneElement(route, { key: idx }));
     }

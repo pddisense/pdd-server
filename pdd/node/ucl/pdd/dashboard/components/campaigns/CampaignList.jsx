@@ -23,15 +23,15 @@ class CampaignList extends React.Component {
   render() {
     return (
       <div>
-        <Link
-          to="/campaigns/new"
-          className="pt-button pt-icon-add pt-intent-primary"
-          style={{ float: 'right' }}>
-          New campaign
-        </Link>
+        <div className="actions">
+          <Link to="/campaigns/new"
+                className="pt-button pt-icon-add pt-intent-primary">
+            New campaign
+          </Link>
+        </div>
 
         <h2>Campaigns</h2>
-        <CampaignTableContainer />
+        <CampaignTableContainer/>
       </div>
     );
   }

@@ -19,7 +19,7 @@ import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import autobind from 'autobind-decorator';
 import moment from 'moment';
-import {identity} from 'lodash';
+import { identity } from 'lodash';
 
 @withRouter
 class CampaignTable extends React.Component {
@@ -42,7 +42,8 @@ class CampaignTable extends React.Component {
       );
     });
     return (
-      <table className="pt-html-table pt-interactive pt-html-table-striped" style={{width: '100%'}}>
+      <table className="pt-html-table pt-interactive pt-html-table-striped"
+             style={{ width: '100%' }}>
         <thead>
         <tr>
           <th>Name</th>
