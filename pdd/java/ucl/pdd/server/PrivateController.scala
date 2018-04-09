@@ -74,23 +74,21 @@ final class PrivateController @Inject()(storage: Storage) extends Controller {
   }
 
   get("/api/campaigns/:name/results") { req: GetResultsRequest =>
-    storage
-      .aggregations
-      .list(AggregationStore.Query(campaignName = req.name))
-      .map { aggregations =>
-        RequestUtils.respondTo(req.request) {
-          case ContentType.CSV =>
-            val header = "day,query,decrypted,count"
-            val content = aggregations.flatMap { agg =>
-              agg.rawValues.zipWithIndex.map { case (v, idx) => s"${agg.day},$idx,0,$v" } ++
-                agg.decryptedValues.zipWithIndex.map { case (v, idx) => s"${agg.day},$idx,1,$v" }
+    storage.campaigns.get(req.name).flatMap {
+      case None => Future.value(response.notFound)
+      case Some(campaign) =>
+        storage
+          .aggregations
+          .list(AggregationStore.Query(campaignName = req.name))
+          .map { aggregations =>
+            RequestUtils.respondTo(req.request) {
+              case ContentType.CSV =>
+                val content = Exporter.csv(campaign, aggregations)
+                response.ok(content).contentType(ContentType.CSV.contentTypeName)
+              case _ => GetResultsResponse(aggregations.map(_.withoutValues))
             }
-            response
-              .ok((header +: content).mkString("\n"))
-              .contentType("text/csv")
-          case _ => GetResultsResponse(aggregations.map(_.withoutValues))
-        }
-      }
+          }
+    }
   }
 
   put("/api/campaigns/:name") { req: UpdateCampaignRequest =>
