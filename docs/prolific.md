@@ -12,9 +12,12 @@ To participate to the study, you should fulfil the following requirements:
 * Be using Chrome (or Chromium) as your main Web browser.
 * Be using Google on a daily basis to perform searches.
 
+Please follow carefully the instructions until the end.
+It should not take more than 15 minutes.
+
 ## 1. Install the Chrome extension
 
-The Private Data Donor is hosted on the official Chrome Web Store, on the following page: 
+The Private Data Donor is hosted on the official Chrome Web Store, on the following page:
 [https://chrome.google.com/webstore/detail/private-data-donor/ipeekohlgfhagcopnndkgoommcihmdmk](https://chrome.google.com/webstore/detail/private-data-donor/ipeekohlgfhagcopnndkgoommcihmdmk)
 
 Then, click on the blue button labeled "Add to Chrome" to actually install the extension.
@@ -22,21 +25,27 @@ Then, click on the blue button labeled "Add to Chrome" to actually install the e
 ![Add to Chrome](assets/screenshots/add_to_chrome.jpeg)
 {: .center}
 
+Finally, will have accept the permissions that the extension requires.
+We only need to access your browsing history, in order to monitor the searches you do on Google.
+
+![Accept permissions](assets/screenshots/chrome_permissions.jpeg)
+{: .center}
+
 ## 2. Fill in your Prolific ID
 
 Just after the extension is installed, the options page should open automatically.
 If it is not the case, or if you already closed it, you can access the options at any time by clicking on the button that has appeared at the far right of your address bar:
 
-![Add to Chrome](assets/screenshots/chrome_address_bar.jpg)
+![Chrome address bar](assets/screenshots/chrome_address_bar.jpg)
 {: .center}
 
 Then click on the "Settings" tab, and fill in your Prolific ID:
 
-![Add to Chrome](assets/screenshots/fill_prolific_id.jpeg)
+![Fill prolific ID](assets/screenshots/fill_prolific_id.jpeg)
 {: .center}
 
-**Take care of mentioning the Prolific ID that has been assigned to you by the platform.**
-This step is important to allow us to verify that you actually installed the extension, validate your participation and ultimately your payment.
+**Take care of mentioning the actual Prolific ID that has been assigned to you by the platform.**
+This step allow us to verify that you actually installed the extension, validate your participation and ultimately allow your payment.
 
 ## 3. Confirm your participation on Prolific
 
@@ -50,5 +59,5 @@ We simply ask you to **search for "flu" on Google at least once a day**, so that
 You otherwise do not have to change your behaviour, the extension is running in the background.
 
 For your payment to be performed in full, we require to receive at least **6 days of data (out of 7)**.
- 
+
 After that period of time, you may freely remove the extension from your browser.
