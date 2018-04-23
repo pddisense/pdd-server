@@ -89,6 +89,7 @@ final class DataDogStatsReceiver(client: StatsDClient, timer: Timer) extends Sta
     names match {
       case "http" +: _ => false
       case "toggles" +: _ => false
+      case "route" :: Method(_) +: _ => false
       case _ => true
     }
   }
@@ -100,17 +101,10 @@ final class DataDogStatsReceiver(client: StatsDClient, timer: Timer) extends Sta
       case Seq("status", status) => ("http.requests", Seq(s"status:$status"))
       case Seq("time", status) => ("http.time", Seq(s"status:$status"))
       case Seq("response_size") => ("http.response_size", Seq.empty)
-
-      case Seq("route", Method(method), metricName, Status(status)) =>
-        (sanitizeName(Seq("http", metricName)), Seq(s"route:root", s"method:$method", s"status:$status"))
-      case "route" :: Method(method) +: metricName =>
-        (sanitizeName(Seq("http") ++ metricName), Seq(s"route:root", s"method:$method"))
-
       case Seq("route", routeName, Method(method), metricName, Status(status)) =>
         (sanitizeName(Seq("http", metricName)), Seq(s"route:$routeName", s"method:$method", s"status:$status"))
-      case "route" :: routeName :: Method(method) +: metricName =>
-        (sanitizeName(Seq("http") ++ metricName), Seq(s"route:$routeName", s"method:$method"))
-
+      case Seq("route", routeName, Method(method), metricName) =>
+        (sanitizeName(Seq("http", metricName)), Seq(s"route:$routeName", s"method:$method"))
       case _ => (sanitizeName(names), Seq.empty)
     }
 
