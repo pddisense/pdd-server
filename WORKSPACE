@@ -50,7 +50,7 @@ maven_dependencies()
 
 ## Download and load the rules bringing Docker support.
 # https://github.com/bazelbuild/rules_docker
-rules_docker_version = "4d8ec6570a5313fb0128e2354f2bc4323685282a"
+rules_docker_version = "452878d665648ada0aaf816931611fdd9c683a97"
 http_archive(
   name = "io_bazel_rules_docker",
   url = "https://github.com/bazelbuild/rules_docker/archive/%s.zip" % rules_docker_version,
