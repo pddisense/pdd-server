@@ -24,15 +24,15 @@ import TextInput from '../form/TextInput';
 
 function attrsToState(campaign) {
   return {
-    displayName: campaign.displayName ? campaign.displayName : '',
-    email: campaign.email ? campaign.email : '',
+    displayName: campaign.displayName,
+    email: campaign.email || '',
   };
 }
 
 function stateToAttrs(state) {
   return {
     displayName: state.displayName,
-    email: state.email,
+    email: state.email === '' ? null : state.email,
   };
 }
 

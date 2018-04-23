@@ -40,8 +40,8 @@ class ViewCampaign extends React.Component {
         </div>
 
         <div className="attr-row">
-          <div className="attr-name">E-mail addresse(s)</div>
-          <div className="attr-value">{campaign.email.join(', ')}</div>
+          <div className="attr-name">E-mail address</div>
+          <div className="attr-value">{campaign.email || '–'}</div>
         </div>
 
         <div className="attr-row">
