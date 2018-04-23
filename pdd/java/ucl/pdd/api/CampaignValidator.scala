@@ -41,9 +41,7 @@ object CampaignValidator {
     if (obj.samplingRate.exists(samplingRate => samplingRate < 0 || samplingRate > 1)) {
       errors += ErrorCause("should be between 0 and 1", "samplingRate")
     }
-    obj.email.zipWithIndex.foreach { case (email, idx) =>
-      validateTerm(s"email.$idx", email, errors)
-    }
+    obj.email.foreach(email => validateTerm("email", email, errors))
     obj.vocabulary.queries.zipWithIndex.foreach { case (query, idx) =>
       query match {
         case VocabularyQuery(Some(exact), None) =>

@@ -39,7 +39,7 @@ class CreateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach {
     name = "campaign1",
     createTime = now,
     displayName = "a campaign",
-    email = Seq.empty,
+    email = None,
     vocabulary = Vocabulary(Seq(VocabularyQuery(exact = Some("foo")))),
     startTime = Some(now),
     endTime = None,

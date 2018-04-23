@@ -217,7 +217,7 @@ case class ListCampaignsResponse(campaigns: Seq[Campaign])
 
 case class CreateCampaignRequest(
   displayName: String,
-  email: Seq[String] = Seq.empty,
+  email: Option[String],
   vocabulary: Vocabulary = Vocabulary(),
   startTime: Option[Instant],
   endTime: Option[Instant],
@@ -231,7 +231,7 @@ case class CreateCampaignRequest(
 case class UpdateCampaignRequest(
   @RouteParam name: String,
   displayName: String,
-  email: Seq[String],
+  email: Option[String],
   vocabulary: Vocabulary,
   startTime: Option[Instant],
   endTime: Option[Instant],

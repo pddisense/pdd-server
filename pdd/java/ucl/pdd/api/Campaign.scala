@@ -25,8 +25,7 @@ import org.joda.time.Instant
  * @param name             Campaign name, unique among all campaigns.
  * @param createTime       Time at which the campaign was created.
  * @param displayName      Human-readable name of this campaign.
- * @param email            E-mail addresses associated with this campaign. They are not publicly
- *                         displayed to the users but receive notifications sent by the system.
+ * @param email            E-mail address associated with this campaign.
  * @param vocabulary       Last version of the vocabulary tracked by this campaign. We do not keep
  *                         a history of the vocabularies here, this is implicitly tracked by the
  *                         various aggregations created as part of this campaign.
@@ -50,7 +49,7 @@ case class Campaign(
   name: String,
   createTime: Instant,
   displayName: String,
-  email: Seq[String],
+  email: Option[String],
   vocabulary: Vocabulary,
   startTime: Option[Instant],
   endTime: Option[Instant],

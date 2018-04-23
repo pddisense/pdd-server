@@ -43,7 +43,7 @@ class AggregateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach {
       name = "campaign1",
       createTime = now.toInstant,
       displayName = "a campaign",
-      email = Seq.empty,
+      email = None,
       vocabulary = Vocabulary(Seq(VocabularyQuery(exact = Some("foo")))),
       startTime = Some(startTime),
       endTime = None,

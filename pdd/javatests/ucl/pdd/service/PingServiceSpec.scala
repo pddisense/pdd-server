@@ -43,7 +43,7 @@ class PingServiceSpec extends UnitSpec with BeforeAndAfterEach {
       name = "campaign1",
       createTime = createTime,
       displayName = "a campaign",
-      email = Seq.empty,
+      email = None,
       vocabulary = Vocabulary(Seq(VocabularyQuery(exact = Some("foo")))),
       startTime = Some(createTime),
       endTime = None,

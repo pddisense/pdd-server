@@ -25,14 +25,14 @@ import TextInput from '../form/TextInput';
 function attrsToState(campaign) {
   return {
     displayName: campaign.displayName ? campaign.displayName : '',
-    email: campaign.email ? campaign.email.join(' ') : '',
+    email: campaign.email ? campaign.email : '',
   };
 }
 
 function stateToAttrs(state) {
   return {
     displayName: state.displayName,
-    email: state.email.split(' ').map(s => s.trim()).filter(s => s.length > 0),
+    email: state.email,
   };
 }
 
@@ -74,8 +74,8 @@ class CampaignForm extends React.Component {
           </FormGroup>
 
           <FormGroup
-            title="E-mail address(es)"
-            help="These addresses will be used by PDD to send notifications. They will not be publicly displayed.">
+            title="E-mail address"
+            help="This address will be used by PDD to send notifications. It will not be publicly displayed.">
             <TextInput value={this.state.email} onChange={e => this.handleTextChange(e, 'email')}/>
           </FormGroup>
 

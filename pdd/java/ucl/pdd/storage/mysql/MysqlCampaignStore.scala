@@ -65,7 +65,7 @@ private[mysql] final class MysqlCampaignStore(mysql: MysqlClient)
       .set("name", campaign.name)
       .set("createTime", campaign.createTime)
       .set("displayName", campaign.displayName)
-      .set("email", encodeEmail(campaign.email))
+      .set("email", campaign.email)
       .set("vocabulary", encodeVocabulary(campaign.vocabulary))
       .set("startTime", campaign.startTime)
       .set("endTime", campaign.endTime)
@@ -89,7 +89,7 @@ private[mysql] final class MysqlCampaignStore(mysql: MysqlClient)
       .where("name = ?", campaign.name)
       .set("createTime", campaign.createTime)
       .set("displayName", campaign.displayName)
-      .set("email", encodeEmail(campaign.email))
+      .set("email", campaign.email)
       .set("vocabulary", encodeVocabulary(campaign.vocabulary))
       .set("startTime", campaign.startTime)
       .set("endTime", campaign.endTime)
@@ -107,7 +107,6 @@ private[mysql] final class MysqlCampaignStore(mysql: MysqlClient)
   }
 
   private def hydrate(row: Row): Campaign = {
-    val email = toString(row, "email").split("\n").filter(_.nonEmpty)
     val vocabulary = Vocabulary(toString(row, "vocabulary")
       .split("\n")
       .filter(_.nonEmpty)
@@ -116,7 +115,7 @@ private[mysql] final class MysqlCampaignStore(mysql: MysqlClient)
       name = toString(row, "name"),
       createTime = toInstant(row, "createTime"),
       displayName = toString(row, "displayName"),
-      email = email,
+      email = getString(row, "email"),
       vocabulary = vocabulary,
       startTime = getInstant(row, "startTime"),
       endTime = getInstant(row, "endTime"),
@@ -134,8 +133,6 @@ private[mysql] final class MysqlCampaignStore(mysql: MysqlClient)
     } else {
       VocabularyQuery(exact = Some(str))
     }
-
-  private def encodeEmail(email: Seq[String]) = email.mkString("\n")
 
   private def encodeVocabulary(vocabulary: Vocabulary) = {
     vocabulary.queries.map(encodeQuery).mkString("\n")
