@@ -34,7 +34,7 @@ function download(url, contentType, filename) {
 
 class Title extends React.Component {
   handleDownload() {
-    const url = `/api/campaigns/${this.props.campaign.name}/results`;
+    const url = `/api/campaigns/${this.props.campaign.name}/results?export=1`;
     const filename = `${this.props.campaign.name}.csv`;
     download(url, 'application/csv', filename);
   }

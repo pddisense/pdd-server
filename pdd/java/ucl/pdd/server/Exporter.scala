@@ -19,33 +19,48 @@ package ucl.pdd.server
 import ucl.pdd.api.{Aggregation, Campaign}
 
 object Exporter {
-  def csv(campaign: Campaign, results: Seq[Aggregation]): String = {
-    val lines = if (campaign.collectEncrypted && campaign.collectRaw) {
-      val header = "day,query,raw count,decrypted count"
-      val content = results.flatMap { result =>
+
+  case class Count(
+    day: Int,
+    query: Int,
+    rawCount: Option[Long] = None,
+    decryptedCount: Option[Long] = None)
+
+  def json(campaign: Campaign, results: Seq[Aggregation]): Seq[Count] = {
+    if (campaign.collectEncrypted && campaign.collectRaw) {
+      results.flatMap { result =>
         result.rawValues
           .zip(result.decryptedValues)
           .zipWithIndex
+          .filter { case ((rawCount, decryptedCount), _) => rawCount > 0 || decryptedCount > 0 }
           .map { case ((rawCount, decryptedCount), idx) =>
-            s"${result.day},$idx,$rawCount,$decryptedCount"
+            Count(result.day, idx, Some(rawCount), Some(decryptedCount))
           }
       }
-      header +: content
     } else if (campaign.collectEncrypted) {
-      val header = "day,query,decrypted count"
-      val content = results.map { result =>
-        result.decryptedValues.zipWithIndex.map { case (v, idx) => s"${result.day},$idx,$v" }
+      results.flatMap { result =>
+        result.decryptedValues
+          .zipWithIndex
+          .filter { case (v, _) => v > 0 }
+          .map { case (v, idx) => Count(result.day, idx, decryptedCount = Some(v)) }
       }
-      header +: content
     } else if (campaign.collectRaw) {
-      val header = "day,query,raw count"
-      val content = results.map { result =>
-        result.rawValues.zipWithIndex.map { case (v, idx) => s"${result.day},$idx,$v" }
+      results.flatMap { result =>
+        result.rawValues
+          .zipWithIndex
+          .filter { case (v, _) => v > 0 }
+          .map { case (v, idx) => Count(result.day, idx, rawCount = Some(v)) }
       }
-      header +: content
     } else {
       Seq.empty
     }
-    lines.mkString("\n")
+  }
+
+  def csv(campaign: Campaign, results: Seq[Aggregation]): String = {
+    val header = "day,query,raw count,decrypted count"
+    val lines = json(campaign, results).map { count =>
+      s"${count.day},${count.query},${count.rawCount.getOrElse("")},${count.decryptedCount.getOrElse("")}"
+    }
+    (header +: lines).mkString("\n")
   }
 }

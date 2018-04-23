@@ -81,13 +81,37 @@ final class PrivateController @Inject()(storage: Storage) extends Controller {
           .aggregations
           .list(AggregationStore.Query(campaignName = req.name))
           .map { aggregations =>
-            RequestUtils.respondTo(req.request) {
-              case ContentType.CSV =>
-                val content = Exporter.csv(campaign, aggregations)
-                response.ok(content).contentType(ContentType.CSV.contentTypeName)
-              case _ => GetResultsResponse(aggregations.map(_.withoutValues))
+            if (req.export) {
+              export(req.request, campaign, aggregations)
+            } else {
+              GetResultsResponse(aggregations.map(_.withoutValues))
             }
           }
+    }
+  }
+
+  get("/api/campaigns/:name/results/:day") { req: GetResultRequest =>
+    storage.campaigns.get(req.name).flatMap {
+      case None => Future.value(response.notFound)
+      case Some(campaign) =>
+        storage
+          .aggregations
+          .get(s"${req.name}-${req.day}")
+          .map {
+            case None => response.notFound
+            case Some(aggregation) =>
+              if (req.export) export(req.request, campaign, Seq(aggregation)) else aggregation
+          }
+    }
+  }
+
+  private def export(request: Request, campaign: Campaign, results: Seq[Aggregation]) = {
+    RequestUtils.respondTo(request) {
+      case ContentType.CSV =>
+        val content = Exporter.csv(campaign, results)
+        response.ok(content).contentType(ContentType.CSV.contentTypeName)
+      case ContentType.JSON => response.ok(Exporter.json(campaign, results))
+      case _ => response.notAcceptable
     }
   }
 
@@ -100,7 +124,7 @@ final class PrivateController @Inject()(storage: Storage) extends Controller {
           name = previous.name,
           createTime = previous.createTime,
           // Other fields come from the request. As opposed to when a campaign is created, all of
-          // them have to been specified.
+          // them have to be specified.
           displayName = req.displayName,
           email = req.email,
           vocabulary = req.vocabulary,
@@ -168,27 +192,22 @@ final class PrivateController @Inject()(storage: Storage) extends Controller {
         GetStatisticsResponse(activeCampaigns = activeCampaigns, activeClients = activeClients)
       }
   }
-
-  get("/api/results/:name") { req: GetResultRequest =>
-    storage
-      .aggregations
-      .get(req.name)
-      .map {
-        case None => response.notFound
-        case Some(aggregation) => aggregation
-      }
-  }
 }
 
 case class GetStatisticsResponse(activeCampaigns: Int, activeClients: Int)
 
 case class GetCampaignRequest(@RouteParam name: String)
 
-case class GetResultsRequest(@RouteParam name: String, request: Request)
+case class GetResultsRequest(
+  @RouteParam name: String,
+  @QueryParam export: Boolean = false,
+  request: Request)
 
 case class GetResultRequest(
   @RouteParam name: String,
-  @QueryParam download: Boolean = false)
+  @RouteParam day: Int,
+  @QueryParam export: Boolean = false,
+  request: Request)
 
 case class GetResultsResponse(results: Seq[Aggregation])
 
