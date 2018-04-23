@@ -156,30 +156,18 @@ final class PrivateController @Inject()(storage: Storage) extends Controller {
   }
 
   get("/api/clients/:name/activity") { req: GetClientActivityRequest =>
-    val (startTime, endTime) = req.tail match {
-      case None => (None, None)
-      case Some(n) =>
-        val endTime = DateTime.now().withTimeAtStartOfDay()
-        val startTime = endTime.minusDays(n)
-        (Some(startTime.toInstant), Some(endTime.toInstant.minus(1)))
-    }
+    val startTime = req.tail.map(n => DateTime.now().withTimeAtStartOfDay().minusDays(n - 1).toInstant)
     storage
       .activity
-      .list(ActivityStore.Query(clientName = Some(req.name), startTime = startTime, endTime = endTime))
+      .list(ActivityStore.Query(clientName = Some(req.name), startTime = startTime))
       .map(GetActivityResponse.apply)
   }
 
   get("/api/activity") { req: GetActivityRequest =>
-    val (startTime, endTime) = req.tail match {
-      case None => (None, None)
-      case Some(n) =>
-        val endTime = DateTime.now().withTimeAtStartOfDay()
-        val startTime = endTime.minusDays(n)
-        (Some(startTime.toInstant), Some(endTime.toInstant.minus(1)))
-    }
+    val startTime = req.tail.map(n => DateTime.now().withTimeAtStartOfDay().minusDays(n - 1).toInstant)
     storage
       .activity
-      .list(ActivityStore.Query(startTime = startTime, endTime = endTime))
+      .list(ActivityStore.Query(startTime = startTime))
       .map(GetActivityResponse.apply)
   }
 

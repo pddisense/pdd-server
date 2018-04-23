@@ -28,15 +28,16 @@ import 'react-vis/dist/style.css';
 import moment from 'moment';
 import { range } from 'lodash';
 
+const DAYS_COUNT = 14;
+
 class ActivityPlot extends React.Component {
   render() {
-    const { activity, days } = this.props;
+    const { activity } = this.props;
     const data = [];
-    const beginTime = moment().startOf('day').subtract(days, 'days');
-    range(0, days + 1).forEach(day => {
+    const beginTime = moment().startOf('day').subtract(DAYS_COUNT - 1, 'days');
+    range(0, DAYS_COUNT).forEach(day => {
       const startTime = beginTime.clone().add(day, 'days');
       const endTime = startTime.clone().add(1, 'day');
-      console.log(startTime.toString() + ' - ' + endTime.toString());
       const count = activity.days.filter(item => moment(item.time).isBetween(startTime, endTime)).length;
       data.push({ x: startTime.valueOf(), y: count });
     });
@@ -45,12 +46,12 @@ class ActivityPlot extends React.Component {
         <XYPlot xType="time" width={800} height={200}>
           <HorizontalGridLines/>
           <VerticalGridLines/>
-          <XAxis tickTotal={days}/>
+          <XAxis tickTotal={DAYS_COUNT}/>
           <YAxis/>
           <LineSeries data={data}/>
         </XYPlot>
         <div className="title" style={{width: '800px'}}>
-          Client activity over the past {days} days
+          Client activity over the past {DAYS_COUNT} days
         </div>
       </div>
     );
@@ -59,11 +60,6 @@ class ActivityPlot extends React.Component {
 
 ActivityPlot.propTypes = {
   activity: PropTypes.object.isRequired,
-  days: PropTypes.number.isRequired,
-};
-
-ActivityPlot.defaultProps = {
-  days: 14,
 };
 
 export default ActivityPlot;
