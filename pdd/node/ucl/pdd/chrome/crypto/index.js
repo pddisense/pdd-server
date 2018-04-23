@@ -66,7 +66,7 @@ export function encryptCounters(publicKeys, round, keyPair, counters) {
   }
 
   // Generate blinding factors.
-  const factors = generateBlindingFactors(publicKeys, key, clientIndex, counters.length, round || 1);
+  const factors = generateBlindingFactors(publicKeys, key, clientIndex, counters.length, round);
 
   // Encrypt each counter by adding the blinding factor to its value.
   const encrypted = [];

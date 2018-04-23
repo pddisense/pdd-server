@@ -90,6 +90,7 @@ function ping(client) {
         ? moment(resp.nextPingTime)
         : moment().add(1, 'day').hours(2);
       chrome.alarms.create('ping', { when: nextPingTime.valueOf() });
+      console.log(`Next ping will be on ${nextPingTime.format()}`);
       return Promise.resolve();
     },
     reason => {
@@ -149,6 +150,7 @@ function registerClient(data) {
 }
 
 function submitSketch(client, command) {
+  console.log(`Submitting sketch ${command.sketchName}...`);
   const startTime = moment(command.startTime);
   const endTime = moment(command.endTime);
   return aggregateHistory(startTime, endTime, command.vocabulary)

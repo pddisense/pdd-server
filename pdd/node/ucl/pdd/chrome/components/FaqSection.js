@@ -22,8 +22,7 @@ export default class FaqSection extends React.Component {
     return (
       <div>
         <p>
-          <Icon icon="help"/>&nbsp;
-          <i>What personal data will be collected by the PDD extension?</i>
+          <Icon icon="help"/> <i>What personal data will be collected by the PDD extension?</i>
         </p>
         <p>
           While the extension is enabled, search queries performed on Google will be monitored by
@@ -31,8 +30,7 @@ export default class FaqSection extends React.Component {
         </p>
 
         <p>
-          <Icon icon="help"/>&nbsp;
-          <i>How will my data be protected by the PDD extension?</i>
+          <Icon icon="help"/> <i>How will my data be protected by the PDD extension?</i>
         </p>
         <p>
           Our experiments may run in two different modes.
@@ -48,8 +46,7 @@ export default class FaqSection extends React.Component {
         </p>
 
         <p>
-          <Icon icon="help"/>&nbsp;
-          <i>Does the PDD extension monitor all my search queries?</i>
+          <Icon icon="help"/> <i>Does the PDD extension monitor all my search queries?</i>
         </p>
         <p>
           Only the search queries that contain specific keywords related to infectious diseases
@@ -58,8 +55,7 @@ export default class FaqSection extends React.Component {
         </p>
 
         <p>
-          <Icon icon="help"/>&nbsp;
-          <i>If I disable the extension, will my queries still be monitored?</i>
+          <Icon icon="help"/> <i>If I disable the extension, will my queries still be monitored?</i>
         </p>
         <p>
           Once the extension is disabled your search queries will no longer be monitored, and data
@@ -67,8 +63,7 @@ export default class FaqSection extends React.Component {
         </p>
 
         <p>
-          <Icon icon="help"/>&nbsp;
-          <i>How will my data be used?</i>
+          <Icon icon="help"/> <i>How will my data be used?</i>
         </p>
         <p>
           The data you provide to the PDD will be used solely for research purposes.
