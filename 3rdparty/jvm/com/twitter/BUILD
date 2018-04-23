@@ -85,7 +85,6 @@ java_library(
         "//external:jar/com/twitter/finagle_http_2_11",
         ":finagle_base_http_2_11",
         ":finagle_http2_2_11",
-        ":finagle_netty3_http_2_11",
         ":finagle_netty4_http_2_11",
         ":finagle_toggle_2_11",
         ":util_codec_2_11",
@@ -163,19 +162,6 @@ java_library(
 
 
 java_library(
-    name = "finagle_netty3_http_2_11",
-    exports = [
-        "//3rdparty/jvm/commons_lang:commons_lang",
-        "//external:jar/com/twitter/finagle_netty3_http_2_11"
-    ],
-    visibility = [
-        "//visibility:public"
-    ]
-)
-
-
-
-java_library(
     name = "finagle_netty4_2_11",
     exports = [
         "//3rdparty/jvm/io/netty:netty_handler",
@@ -195,6 +181,7 @@ java_library(
 java_library(
     name = "finagle_netty4_http_2_11",
     exports = [
+        "//3rdparty/jvm/commons_lang:commons_lang",
         "//external:jar/com/twitter/finagle_netty4_http_2_11",
         ":finagle_netty4_2_11"
     ],
@@ -237,9 +224,9 @@ scala_import(
 java_library(
     name = "finagle_thrift_2_11",
     exports = [
+        "//3rdparty/jvm/org/apache/thrift:libthrift",
         "//external:jar/com/twitter/finagle_thrift_2_11",
         ":finagle_netty4_2_11",
-        ":libthrift",
         ":scrooge_core_2_11"
     ],
     visibility = [
@@ -472,19 +459,6 @@ scala_import(
     ],
     jars = [
         "//external:jar/com/twitter/inject_utils_2_11"
-    ],
-    visibility = [
-        "//visibility:public"
-    ]
-)
-
-
-
-java_library(
-    name = "libthrift",
-    exports = [
-        "//3rdparty/jvm/javax/servlet:servlet_api",
-        "//external:jar/com/twitter/libthrift"
     ],
     visibility = [
         "//visibility:public"
