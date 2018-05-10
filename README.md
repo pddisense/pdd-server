@@ -21,4 +21,4 @@ It allows to compile multiple languages (Java/Scala and Javascript in our case) 
 
 ## License
 
-Private Data Donor is made available under the Apache License Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
+Private Data Donor is made available under the terms of the GNU GPL v3: https://www.gnu.org/licenses/gpl-3.0.en.html
