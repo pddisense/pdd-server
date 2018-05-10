@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-export function appendToVocabulary(campaign, newQuery) {
+export function appendToVocabulary(campaign, newQuery, asTerm = false) {
   if (!campaign.vocabulary.queries) {
     campaign.vocabulary.queries = [];
   }
-  if (newQuery.indexOf(',') > -1) {
+  if (asTerm || newQuery.indexOf(',') > -1) {
     const terms = newQuery.split(',').map(s => s.trim()).filter(s => s.length > 0).sort();
     const previousIdx = campaign.vocabulary.queries.findIndex(q => q.terms && q.terms === terms);
     if (previousIdx === -1) {

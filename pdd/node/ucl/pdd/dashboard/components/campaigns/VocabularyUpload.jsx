@@ -16,7 +16,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Intent, FileInput } from '@blueprintjs/core';
+import { Intent, FileInput, Switch } from '@blueprintjs/core';
 import { cloneDeep } from 'lodash';
 import autobind from 'autobind-decorator';
 
@@ -28,7 +28,13 @@ class VocabularyUpload extends React.Component {
     super(props);
     this.state = {
       disabled: false,
+      asTerms: false,
     };
+  }
+
+  @autobind
+  handleSwitchChange() {
+    this.setState({ asTerms: !this.state.asTerms });
   }
 
   @autobind
@@ -45,7 +51,7 @@ class VocabularyUpload extends React.Component {
         .map(s => s.trim())
         .filter(s => s.length > 0)
         .forEach(newQuery => {
-          if (appendToVocabulary(campaign, newQuery)) {
+          if (appendToVocabulary(campaign, newQuery, this.state.asTerms)) {
             valid++;
           } else {
             invalid++;
@@ -77,6 +83,7 @@ class VocabularyUpload extends React.Component {
       <div className="pt-form-group">
         <div className="pt-form-content">
           <FileInput inputProps={{ accept: '.csv,.txt' }} onInputChange={this.handleUpload}/>
+          <Switch checked={this.state.asTerms} label="Force keywords as term" onChange={this.handleSwitchChange} />
           <div className="pt-form-helper-text">
             The selected file must be a CSV or TXT file containing one query per line.<br/>
             Commas are used to separate multiple terms.
