@@ -1,0 +1,50 @@
+options:
+  languages:
+  - java
+  - scala:2.11.12
+  buildHeader:
+  - load("@io_bazel_rules_scala//scala:scala_import.bzl", "scala_import")
+  resolverCache: bazel_output_base
+
+dependencies:
+  com.github.nscala-time:
+    nscala-time:
+      version: 2.18.0
+      lang: scala
+  com.google.guava:
+    guava:
+      version: "19.0"
+      lang: java
+  com.twitter:
+    finagle:
+      version: 18.2.0
+      lang: scala
+      modules: [mysql]
+    finatra:
+      version: 18.2.0
+      lang: scala
+      modules: [http, jackson]
+    inject:
+      version: 18.2.0
+      lang: scala
+      modules: [core, slf4j]
+    util:
+      version: 18.2.0
+      lang: scala
+      modules: [core, stats]
+  ch.qos.logback:
+    logback-classic:
+      version: 1.2.3
+      lang: java
+    logback-core:
+      version: 1.2.3
+      lang: java
+  org.quartz-scheduler:
+    quartz:
+      version: "2.3.0"
+      lang: java
+  io.sentry:
+    sentry:
+      version: "1.6.4"
+      modules: [logback]
+      lang: java

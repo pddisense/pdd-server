@@ -1,0 +1,4 @@
+common --color=yes
+
+build --strategy=Scalac=worker
+test --strategy=Scalac=worker

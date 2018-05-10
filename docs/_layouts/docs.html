@@ -1,0 +1,47 @@
+---
+layout: base
+---
+
+{% assign page_path = page.url | split: "/" %}
+
+<div id="page" class="container">
+<div class="row">
+  <div class="col-md-3 docs-sidebar">
+    <ul class="docs-menu">
+      {% assign entries = site.pages | where_exp: 'entry', 'entry.url contains page_path[1]' | sort: 'weight' %}
+      {% for entry in entries %}
+      {% assign entry_path = entry.url | split: "/" %}
+      {% unless entry_path[3] %}
+      {% if entry.separator %}<hr />{% endif %}
+      <li{% if page.url contains entry.url %} class="active"{% endif %}>
+      <a href="{{ entry.url | relative_url }}">
+        {{ entry.title }}
+      </a>
+      {% if page.url contains entry.url %}
+      {% assign subentries = site.pages | where_exp: 'subentry', 'subentry.url contains entry.url' %}
+      {% assign subentries = subentries | where_exp: 'subentry', 'subentry.url != entry.url' | sort: 'weight' %}
+      {% assign subentries_count = subentries | size %}
+      {% if subentries_count > 0 %}
+      <ul>
+        {% for subentry in subentries %}
+        <li{% if page.url contains subentry.url %} class="active"{% endif %}>
+        <a href="{{ subentry.url | relative_url }}">
+          {{ subentry.title }}
+        </a>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+      {% endif %}
+      </li>
+      {% endunless %}
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="col-md-9">
+    <h1 class="page-title">{{ page.title }}</h1>
+    <div class="docs">{{ content }}</div>
+  </div>
+</div>
+</div>

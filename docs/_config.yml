@@ -1,0 +1,18 @@
+title: Private Data Donor
+email: pddisense@ucl.ac.uk
+description: >
+  Private Data Donor is a research project whose goal is to collect data in a privacy-preserving way,
+  in order to identify outbreaks of infectious disease much earlier than ever before.
+baseurl: ""
+url: "https://ppd.cs.ucl.ac.uk"
+
+markdown: kramdown
+gems:
+  - jemoji
+  - jekyll-sitemap
+  - jekyll-feed
+include:
+  - content.json
+exclude:
+  - Gemfile
+  - Gemfile.lock
