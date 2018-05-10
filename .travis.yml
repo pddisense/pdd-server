@@ -1,0 +1,68 @@
+# PDD is a platform for privacy-preserving Web searches collection.
+# Copyright (C) 2016-2018 Vincent Primault <v.primault@ucl.ac.uk>
+#
+# PDD is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# PDD is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with PDD.  If not, see <http://www.gnu.org/licenses/>.
+
+# Cf. https://github.com/bazelbuild/rules_go#how-do-i-run-bazel-on-travis-ci
+
+dist: trusty
+sudo: false
+language: java
+
+cache:
+  yarn: true
+  directories:
+  - "$HOME/.bazel_repository_cache"
+
+services:
+- mysql
+
+env:
+  global:
+  - MYSQL_HOST=127.0.0.1
+  - MYSQL_USER=root
+  matrix:
+  - BAZEL_VERSION=0.11.0
+
+before_install:
+- |
+  wget -O install.sh "https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION}/bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh"
+  chmod +x install.sh
+  ./install.sh --user
+  rm -f install.sh
+script:
+- |
+  bazel \
+    --output_base=$HOME/.cache/bazel \
+    --batch \
+    --host_jvm_args=-Xmx500m \
+    --host_jvm_args=-Xms500m \
+    run \
+    --config=ci \
+    --experimental_repository_cache="$HOME/.bazel_repository_cache" \
+    --local_resources=400,1,1.0 \
+    @yarn//:yarn
+- |
+  bazel \
+    --output_base=$HOME/.cache/bazel \
+    --batch \
+    --host_jvm_args=-Xmx500m \
+    --host_jvm_args=-Xms500m \
+    test \
+    --config=ci \
+    --action_env MYSQL_HOST \
+    --action_env MYSQL_USER \
+    --experimental_repository_cache="$HOME/.bazel_repository_cache" \
+    --local_resources=400,1,1.0 \
+    //pdd/...

@@ -14,8 +14,8 @@ Private Data Donor is made of three components:
 This repository follows the mono-repository pattern, and all the code is compiled using Bazel.
 It allows to compile multiple languages (Java/Scala and Javascript in our case) using the same build tool.
 
-1. Clone this repository: `git clone git@gitlab.cs.ucl.ac.uk:pdd/pdd.git`
-2. [Install Bazel](https://docs.bazel.build/versions/master/install.html) on your machine.
+1. [Install Bazel](https://docs.bazel.build/versions/master/install.html) on your machine.
+2. Clone this repository: `git clone git@github.com:pddisense/pdd.git`
 3. Install the NodeJS dependencies: `bazel run @yarn//:yarn`
 4. Compile everything: `bazel build ...`
 
