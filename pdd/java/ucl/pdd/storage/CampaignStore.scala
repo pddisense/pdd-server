@@ -38,6 +38,13 @@ trait CampaignStore {
   def replace(campaign: Campaign): Future[Boolean]
 
   /**
+   * Delete an existing campaign.
+   *
+   * @param name A campaign name.
+   */
+  def delete(name: String): Future[Unit]
+
+  /**
    * Retrieve a single campaign by its name, if it exists.
    *
    * @param name A campaign name.

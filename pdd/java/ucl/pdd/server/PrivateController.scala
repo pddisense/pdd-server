@@ -73,6 +73,22 @@ final class PrivateController @Inject()(storage: Storage) extends Controller {
     storage.campaigns.get(req.name)
   }
 
+  delete("/api/campaigns/:name") { req: DeleteCampaignRequest =>
+    storage.campaigns.get(req.name).flatMap {
+      case None => Future.value(response.notFound)
+      case Some(campaign) =>
+        if (!campaign.isActive || req.force) {
+          Future.join(Seq(
+            storage.campaigns.delete(campaign.name),
+            storage.aggregations.delete(AggregationStore.Query(campaign.name))))
+            .map(_ => response.ok)
+        } else {
+          Future.value(response.badRequest(
+            ValidationResult.Invalid(Seq(ErrorCause("Cannot delete an active campaign.")))))
+        }
+    }
+  }
+
   get("/api/campaigns/:name/results") { req: GetResultsRequest =>
     storage.campaigns.get(req.name).flatMap {
       case None => Future.value(response.notFound)
@@ -185,6 +201,8 @@ final class PrivateController @Inject()(storage: Storage) extends Controller {
 case class GetStatisticsResponse(activeCampaigns: Int, activeClients: Int)
 
 case class GetCampaignRequest(@RouteParam name: String)
+
+case class DeleteCampaignRequest(@RouteParam name: String, @QueryParam force: Boolean = false)
 
 case class GetResultsRequest(
   @RouteParam name: String,

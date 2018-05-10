@@ -16,7 +16,7 @@
 
 package ucl.pdd.storage
 
-import com.twitter.util.Await
+import com.twitter.util.{Await, Future}
 import ucl.pdd.api.{Campaign, Vocabulary, VocabularyQuery}
 
 /**
@@ -70,8 +70,8 @@ abstract class CampaignStoreSpec extends StoreSpec {
 
   it should "count campaigns" in {
     Await.result(storage.campaigns.count()) shouldBe 0
+    Await.result(Future.join(campaigns.map(storage.campaigns.create)))
 
-    campaigns.foreach(campaign => Await.result(storage.campaigns.create(campaign)) shouldBe true)
     Await.result(storage.campaigns.count()) shouldBe 2
     Await.result(storage.campaigns.count(CampaignStore.Query(isActive = Some(true)))) shouldBe 1
     Await.result(storage.campaigns.count(CampaignStore.Query(isActive = Some(false)))) shouldBe 1
@@ -79,14 +79,22 @@ abstract class CampaignStoreSpec extends StoreSpec {
 
   it should "replace campaigns" in {
     Await.result(storage.campaigns.replace(campaigns.head)) shouldBe false
-
-    campaigns.foreach(campaign => Await.result(storage.campaigns.create(campaign)) shouldBe true)
+    Await.result(Future.join(campaigns.map(storage.campaigns.create)))
 
     val newCampaign1 = campaigns(0).copy(startTime = Some(now().minus(5000)))
     Await.result(storage.campaigns.replace(newCampaign1)) shouldBe true
     Await.result(storage.campaigns.get("campaign1")) shouldBe Some(newCampaign1)
     Await.result(storage.campaigns.get("campaign2")) shouldBe Some(campaigns(1))
     Await.result(storage.campaigns.list()) should contain theSameElementsInOrderAs Seq(campaigns(1), newCampaign1)
+  }
+
+  it should "delete campaigns" in {
+    campaigns.foreach(campaign => Await.result(storage.campaigns.create(campaign)) shouldBe true)
+
+    Await.result(storage.campaigns.delete("campaign1"))
+    Await.result(storage.campaigns.get("campaign1")) shouldBe None
+    Await.result(storage.campaigns.get("campaign2")) shouldBe Some(campaigns(1))
+    Await.result(storage.campaigns.list()) should contain theSameElementsInOrderAs Seq(campaigns(1))
   }
 
   it should "retrieve campaigns in batch" in {

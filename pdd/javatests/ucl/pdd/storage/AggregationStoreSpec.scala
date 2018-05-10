@@ -16,7 +16,7 @@
 
 package ucl.pdd.storage
 
-import com.twitter.util.Await
+import com.twitter.util.{Await, Future}
 import ucl.pdd.api.{Aggregation, AggregationStats}
 
 /**
@@ -63,7 +63,7 @@ abstract class AggregationStoreSpec extends StoreSpec {
   it should "replace aggregations" in {
     Await.result(storage.aggregations.replace(aggregations.head)) shouldBe false
 
-    aggregations.foreach(agg => Await.result(storage.aggregations.create(agg)) shouldBe true)
+    Await.result(Future.join(aggregations.map(storage.aggregations.create)))
 
     val newAgg1 = aggregations(0).copy(day = 2)
     Await.result(storage.aggregations.replace(newAgg1)) shouldBe true
@@ -71,5 +71,13 @@ abstract class AggregationStoreSpec extends StoreSpec {
     Await.result(storage.aggregations.get("agg2")) shouldBe Some(aggregations(1))
     Await.result(storage.aggregations.get("agg3")) shouldBe Some(aggregations(2))
     Await.result(storage.aggregations.list(AggregationStore.Query(campaignName = "campaign1"))) should contain theSameElementsInOrderAs Seq(newAgg1, aggregations(1))
+  }
+
+  it should "delete aggregations" in {
+    Await.result(Future.join(aggregations.map(storage.aggregations.create)))
+
+    Await.result(storage.aggregations.delete(AggregationStore.Query(campaignName = "campaign1")))
+    Await.result(storage.aggregations.list(AggregationStore.Query(campaignName = "campaign1"))) should have size 0
+    Await.result(storage.aggregations.list(AggregationStore.Query(campaignName = "campaign2"))) should contain theSameElementsInOrderAs Seq(aggregations(2))
   }
 }

@@ -22,13 +22,13 @@ package ucl.pdd.api
  * (hopefully) filled when clients send their sketches. Sketches should expected to be garbage
  * collected once an aggregation is expired.
  *
- * @param name
- * @param clientName The name of the client this sketch is about.
- * @param campaignName
+ * @param name         Sketch unique identifier.
+ * @param clientName   The name of the client this sketch is about.
+ * @param campaignName The name of the campaign this sketch is about.
  * @param group
  * @param day
  * @param publicKey
- * @param submitted  Whether this sketch has been submitted.
+ * @param submitted    Whether this sketch has been submitted.
  * @param encryptedValues
  * @param rawValues
  */

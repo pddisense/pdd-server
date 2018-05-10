@@ -36,6 +36,10 @@ private[memory] final class MemoryCampaignStore extends CampaignStore {
     index.replace(campaign.name, campaign).isDefined
   }
 
+  override def delete(name: String): Future[Unit] = Future {
+    index.remove(name)
+  }
+
   override def list(query: CampaignStore.Query): Future[Seq[Campaign]] = Future {
     index.values
       .filter(matches(query, _))

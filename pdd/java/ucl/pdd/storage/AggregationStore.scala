@@ -50,6 +50,13 @@ trait AggregationStore {
    * @param query A query to filter aggregations.
    */
   def list(query: AggregationStore.Query): Future[Seq[Aggregation]]
+
+  /**
+   * Delete several aggregations according to a query.
+   *
+   * @param query A query to filter aggregations.
+   */
+  def delete(query: AggregationStore.Query): Future[Unit]
 }
 
 object AggregationStore {

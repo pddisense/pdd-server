@@ -79,6 +79,13 @@ private[mysql] final class MysqlAggregationStore(mysql: MysqlClient) extends Agg
       .select(query.campaignName)(hydrate)
   }
 
+  override def delete(query: AggregationStore.Query): Future[Unit] = {
+    mysql
+      .prepare("delete from aggregations where campaignName = ?")
+      .apply(query.campaignName)
+      .unit
+  }
+
   private def hydrate(row: Row): Aggregation = {
     Aggregation(
       name = toString(row, "name"),

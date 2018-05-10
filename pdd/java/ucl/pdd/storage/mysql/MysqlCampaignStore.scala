@@ -47,6 +47,10 @@ private[mysql] final class MysqlCampaignStore(mysql: MysqlClient)
     qb.execute().map(_.headOption)
   }
 
+  override def delete(name: String): Future[Unit] = {
+    query.delete.where("name = ?", name).execute().unit
+  }
+
   override def batchGet(names: Seq[String]): Future[Seq[Option[Campaign]]] = {
     if (names.isEmpty) {
       Future.value(Seq.empty)

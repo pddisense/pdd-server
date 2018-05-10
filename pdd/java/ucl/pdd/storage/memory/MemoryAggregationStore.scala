@@ -46,6 +46,13 @@ private[memory] final class MemoryAggregationStore extends AggregationStore {
     index.get(name)
   }
 
+  override def delete(query: AggregationStore.Query): Future[Unit] = Future {
+    index
+      .filter { case (_, v) => matches(query, v) }
+      .keys
+      .foreach(index.remove)
+  }
+
   private def matches(query: AggregationStore.Query, aggregation: Aggregation): Boolean = {
     query.campaignName == aggregation.campaignName
   }

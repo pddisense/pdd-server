@@ -22,7 +22,7 @@ import org.joda.time.Instant
 /**
  * A campaign corresponds to a vocabulary tracked during a given period of time.
  *
- * @param name             Campaign name, unique among all campaigns.
+ * @param name             Campaign unique name.
  * @param createTime       Time at which the campaign was created.
  * @param displayName      Human-readable name of this campaign.
  * @param email            E-mail address associated with this campaign.
