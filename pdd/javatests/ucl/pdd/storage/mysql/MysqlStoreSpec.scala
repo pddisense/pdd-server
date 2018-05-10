@@ -28,32 +28,32 @@ import ucl.pdd.storage.{Storage, StoreSpec}
 
 private[mysql] trait MysqlStoreSpec extends StoreSpec with BeforeAndAfterEach {
   private[this] var initClient: MysqlClient = _
-  private[this] var base: String = _
+  private[this] var database: String = _
 
   override def beforeEach(): Unit = {
-    base = "test_" + UUID.randomUUID().getLeastSignificantBits.toHexString
-    initClient = Mysql.client.withCredentials("root", null).newRichClient("0.0.0.0:3306")
-    Await.result(initClient.query(s"create database $base"))
+    database = "test_" + UUID.randomUUID().getLeastSignificantBits.toHexString
+    initClient = Mysql.client.withCredentials(user, password).newRichClient(s"$host:3306")
+    Await.result(initClient.query(s"create database $database"))
 
     super.beforeEach()
   }
 
   override def afterEach(): Unit = {
-    Await.result(initClient.query(s"drop database $base"))
+    Await.result(initClient.query(s"drop database $database"))
     initClient.close()
-
     initClient = null
-    base = null
-
+    database = null
     super.afterEach()
   }
 
   override def createStorage: Storage = {
-    val client = MysqlClientFactory(
-      user = "root",
-      password = null,
-      database = base,
-      server = "0.0.0.0:3306")
+    val client = MysqlClientFactory(s"$host:3306", user, password, database)
     new MysqlStorage(client)
   }
+
+  private final def host = sys.env.getOrElse("MYSQL_HOST", "0.0.0.0")
+
+  private final def user = sys.env.getOrElse("MYSQL_USER", "root")
+
+  private final def password = sys.env.get("MYSQL_PASSWORD").orNull
 }
