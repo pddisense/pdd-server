@@ -18,8 +18,10 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Button, Icon, Intent } from '@blueprintjs/core';
+import { Alert, Button, Icon, Intent } from '@blueprintjs/core';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { withRouter } from 'react-router-dom';
+import toaster from '../toaster';
 import xhr from '../../util/xhr';
 
 function download(url, contentType, filename) {
@@ -34,11 +36,39 @@ function download(url, contentType, filename) {
     });
 }
 
+@withRouter
 class Title extends React.Component {
-  handleDownload() {
+  constructor(props) {
+    super(props);
+    this.state = {
+      showAlert: false,
+    };
+  }
+
+  handleDownloadClick() {
     const url = `/api/campaigns/${this.props.campaign.name}/results?export=1`;
     const filename = `${this.props.campaign.name}.csv`;
     download(url, 'application/csv', filename);
+  }
+
+  handleDeleteClick() {
+    this.setState({ showAlert: true });
+  }
+
+  handleCancelClick() {
+    this.setState({ showAlert: false });
+  }
+
+  handleConfirmClick() {
+    this.setState({ showAlert: false });
+    xhr(`/api/campaigns/${this.props.campaign.name}`, { method: 'DELETE' })
+      .then(resp => {
+        toaster.show({
+          message: `Campaign "${this.props.campaign.displayName}" has been deleted.`,
+          intent: Intent.SUCCESS,
+        });
+        this.props.history.push(`/campaigns`);
+      });
   }
 
   render() {
@@ -66,13 +96,21 @@ class Title extends React.Component {
       <div>
         <div className="actions">
           {campaign.started ?
-            <Button intent={Intent.PRIMARY} onClick={() => this.handleDownload()} icon="download">
+            <Button intent={Intent.PRIMARY}
+                    onClick={() => this.handleDownloadClick()}
+                    icon="download">
               Download results as CSV
             </Button> : null}
 
           <CopyToClipboard text={campaign.name}>
             <Button text="Copy name to clipboard" icon="clipboard"/>
           </CopyToClipboard>
+
+          <Button onClick={() => this.handleDeleteClick()}
+                  icon="delete"
+                  disabled={campaign.active}>
+            Delete campaign
+          </Button>
         </div>
 
         <h2>
@@ -83,6 +121,15 @@ class Title extends React.Component {
                 iconSize={20}
                 style={{ position: 'relative', top: '6px', marginLeft: '15px' }}/>
         </h2>
+
+        <Alert isOpen={this.state.showAlert}
+               cancelButtonText="Cancel"
+               intent={Intent.PRIMARY}
+               onCancel={() => this.handleCancelClick()}
+               onConfirm={() => this.handleConfirmClick()}>
+          Are you sure you want to delete this campaign?
+          This is permanent and cannot be undone, all associated results will be deleted as well.
+        </Alert>
       </div>
     );
   }

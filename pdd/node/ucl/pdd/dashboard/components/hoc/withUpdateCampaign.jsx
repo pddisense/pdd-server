@@ -43,7 +43,7 @@ export default function withUpdateCampaign(options = {}) {
       onSuccess(resp) {
         if (options.toast) {
           toaster.show({
-            message: `Campaign "${resp.displayName} has been updated.`,
+            message: `Campaign "${resp.displayName}" has been updated.`,
             intent: Intent.SUCCESS,
           });
         }

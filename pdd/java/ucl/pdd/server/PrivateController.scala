@@ -82,7 +82,10 @@ final class PrivateController @Inject()(storage: Storage) extends Controller {
         if (!campaign.isActive || req.force) {
           Future.join(Seq(
             storage.campaigns.delete(campaign.name),
-            storage.aggregations.delete(AggregationStore.Query(campaign.name))))
+            storage.aggregations.delete(AggregationStore.Query(campaign.name)),
+            storage.sketches
+              .list(SketchStore.Query(campaignName = Some(campaign.name)))
+              .flatMap(sketches => Future.join(sketches.map(s => storage.sketches.delete(s.name))))))
             .map(_ => response.ok)
         } else {
           Future.value(response.badRequest(
