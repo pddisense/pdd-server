@@ -36,15 +36,12 @@ export default class FaqSection extends React.Component {
         </p>
         <p>
           Our experiments may run in two different modes.
-          In the <i>encrypted mode</i>, the collected data is aggregated across multiple users
-          in order to protect the privacy of individuals, thanks to an encryption protocol.<br/>
-          In the <i>raw mode</i>, the collected data is only aggregated locally inside the browser
-          of each volunteer. The search queries are grouped by keyword and only the number of times
-          that each keyword was searched is sent to our servers. It means that we do <b>not</b>
-          send the list of the exact queries you performed, but only the number of times some keyword
-          or sentence appears.<br/>
-          Although we do our best to enabled the encrypted mode as much as possible, it may not
-          be the case for all our running experiments.
+          In the encrypted mode, the collected data is summed across multiple users and encrypted in order to protect the privacy of individuals.
+          Even when we decrypt the data we cannot tell which person in the group searched for what query.
+          In the raw mode, the collected data is not summed across multiple users.
+          Instead, we receive information on the number of times you searched for queries that contained specific keywords, e.g. "cough".
+          We do not send the list of the exact queries you performed, but only the number of times some keyword or sentence appears.
+          Although we enabled the encrypted mode as much as possible, it may not be the case for all our running experiments.
         </p>
 
         <p>
@@ -61,7 +58,7 @@ export default class FaqSection extends React.Component {
         </p>
         <p>
           Once the extension is disabled your search queries will no longer be monitored, and data
-          that has not yet be sent will never be sent to our servers.
+          that has not yet been sent will never be sent to our servers.
         </p>
 
         <p>
