@@ -88,3 +88,10 @@ h1 .pt-text-muted, h2 .pt-text-muted, h3 .pt-text-muted {
   text-align: center;
   font-style: italic;
 }
+
+.notes {
+  background-color: rgba(191, 204, 214, 0.2);
+  padding: 5px;
+  border-radius: 3px;
+  margin-bottom: 10px;
+}

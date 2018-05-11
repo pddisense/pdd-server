@@ -18,6 +18,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import marked from 'marked';
 
 import Tabs from './Tabs';
 import Title from './Title';
@@ -25,11 +26,17 @@ import Title from './Title';
 class ViewCampaign extends React.Component {
   render() {
     const { campaign } = this.props;
+    let notes = null;
+    if (campaign.notes) {
+      notes = <div className="notes" dangerouslySetInnerHTML={{__html: marked(campaign.notes)}} />
+    }
     return (
       <div>
         <Title campaign={campaign} />
 
         <Tabs campaign={campaign} />
+
+        {notes}
 
         <div className="attr-row">
           <div className="attr-name">Start date</div>
@@ -48,7 +55,7 @@ class ViewCampaign extends React.Component {
 
         <div className="attr-row">
           <div className="attr-name">Vocabulary size</div>
-          <div className="attr-value">{campaign.vocabulary.queries.length} word{campaign.vocabulary.queries.length > 1 ? 's' : ''}</div>
+          <div className="attr-value">{campaign.vocabulary.queries.length} keyword{campaign.vocabulary.queries.length > 1 ? 's' : ''}</div>
         </div>
 
         <div className="attr-row">

@@ -28,6 +28,7 @@ import org.joda.time.Instant
  * @param createTime       Time at which the campaign was created.
  * @param displayName      Human-readable name of this campaign.
  * @param email            E-mail address associated with this campaign.
+ * @param notes            Notes describing the purpose of this campaign.
  * @param vocabulary       Last version of the vocabulary tracked by this campaign. We do not keep
  *                         a history of the vocabularies here, this is implicitly tracked by the
  *                         various aggregations created as part of this campaign.
@@ -52,6 +53,7 @@ case class Campaign(
   createTime: Instant,
   displayName: String,
   email: Option[String],
+  notes: Option[String],
   vocabulary: Vocabulary,
   startTime: Option[Instant],
   endTime: Option[Instant],

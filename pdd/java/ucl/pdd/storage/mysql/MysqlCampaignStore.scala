@@ -72,6 +72,7 @@ private[mysql] final class MysqlCampaignStore(mysql: MysqlClient)
       .set("createTime", campaign.createTime)
       .set("displayName", campaign.displayName)
       .set("email", campaign.email)
+      .set("notes", campaign.notes)
       .set("vocabulary", encodeVocabulary(campaign.vocabulary))
       .set("startTime", campaign.startTime)
       .set("endTime", campaign.endTime)
@@ -96,6 +97,7 @@ private[mysql] final class MysqlCampaignStore(mysql: MysqlClient)
       .set("createTime", campaign.createTime)
       .set("displayName", campaign.displayName)
       .set("email", campaign.email)
+      .set("notes", campaign.notes)
       .set("vocabulary", encodeVocabulary(campaign.vocabulary))
       .set("startTime", campaign.startTime)
       .set("endTime", campaign.endTime)
@@ -122,6 +124,7 @@ private[mysql] final class MysqlCampaignStore(mysql: MysqlClient)
       createTime = toInstant(row, "createTime"),
       displayName = toString(row, "displayName"),
       email = getString(row, "email"),
+      notes = getString(row, "notes"),
       vocabulary = vocabulary,
       startTime = getInstant(row, "startTime"),
       endTime = getInstant(row, "endTime"),

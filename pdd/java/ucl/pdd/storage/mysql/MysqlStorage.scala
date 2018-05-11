@@ -58,6 +58,7 @@ object MysqlStorage {
       "createTime timestamp not null," +
       "displayName varchar(255) not null," +
       "email text not null," +
+      "notes text not null," +
       "vocabulary longtext not null," +
       "startTime timestamp null," +
       "endTime timestamp null," +

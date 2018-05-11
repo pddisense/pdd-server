@@ -85,7 +85,7 @@ class VocabularyUpload extends React.Component {
       <div className="pt-form-group">
         <div className="pt-form-content">
           <FileInput inputProps={{ accept: '.csv,.txt' }} onInputChange={this.handleUpload}/>
-          <Switch checked={this.state.asTerms} label="Force keywords as term" onChange={this.handleSwitchChange} />
+          <Switch checked={this.state.asTerms} label="Force all keywords as terms" onChange={this.handleSwitchChange} />
           <div className="pt-form-helper-text">
             The selected file must be a CSV or TXT file containing one query per line.<br/>
             Commas are used to separate multiple terms.

@@ -20,6 +20,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import autobind from 'autobind-decorator';
 import { isEqual } from 'lodash';
+import { TextArea } from '@blueprintjs/core';
 
 import FormGroup from '../form/FormGroup';
 import TextInput from '../form/TextInput';
@@ -28,6 +29,7 @@ function attrsToState(campaign) {
   return {
     displayName: campaign.displayName,
     email: campaign.email || '',
+    notes: campaign.notes || '',
   };
 }
 
@@ -35,6 +37,7 @@ function stateToAttrs(state) {
   return {
     displayName: state.displayName,
     email: state.email === '' ? null : state.email,
+    notes: state.notes === '' ? null : state.notes,
   };
 }
 
@@ -72,13 +75,22 @@ class CampaignForm extends React.Component {
             <TextInput
               value={this.state.displayName}
               required={true}
-              onChange={e => this.handleTextChange(e, 'displayName')} />
+              onChange={e => this.handleTextChange(e, 'displayName')}/>
           </FormGroup>
 
           <FormGroup
             title="E-mail address"
-            help="This address will be used by PDD to send notifications. It will not be publicly displayed.">
+            help="This address will be used by PDD to send notifications.">
             <TextInput value={this.state.email} onChange={e => this.handleTextChange(e, 'email')}/>
+          </FormGroup>
+
+          <FormGroup
+            title="Notes"
+            help="This is a notepad that can be used to describe the purpose of this campaign, any interesting outcomes, etc. Markdown is allowed.">
+            <TextArea value={this.state.notes}
+                      fill={true}
+                      style={{height: '150px'}}
+                      onChange={e => this.handleTextChange(e, 'notes')}/>
           </FormGroup>
 
           <button type="submit" className="pt-button pt-intent-primary">Submit</button>

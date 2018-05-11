@@ -49,6 +49,7 @@ final class PrivateController @Inject()(storage: Storage) extends Controller {
       // are left empty.
       displayName = req.displayName,
       email = req.email,
+      notes = req.notes,
       vocabulary = req.vocabulary,
       startTime = req.startTime,
       endTime = req.endTime,
@@ -148,6 +149,7 @@ final class PrivateController @Inject()(storage: Storage) extends Controller {
           // them have to be specified.
           displayName = req.displayName,
           email = req.email,
+          notes = req.notes,
           vocabulary = req.vocabulary,
           startTime = req.startTime,
           endTime = req.endTime,
@@ -229,6 +231,7 @@ case class ListCampaignsResponse(campaigns: Seq[Campaign])
 case class CreateCampaignRequest(
   displayName: String,
   email: Option[String],
+  notes: Option[String],
   vocabulary: Vocabulary = Vocabulary(),
   startTime: Option[Instant],
   endTime: Option[Instant],
@@ -243,6 +246,7 @@ case class UpdateCampaignRequest(
   @RouteParam name: String,
   displayName: String,
   email: Option[String],
+  notes: Option[String],
   vocabulary: Vocabulary,
   startTime: Option[Instant],
   endTime: Option[Instant],

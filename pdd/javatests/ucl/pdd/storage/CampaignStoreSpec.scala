@@ -32,6 +32,7 @@ abstract class CampaignStoreSpec extends StoreSpec {
       vocabulary = Vocabulary(),
       displayName = "first campaign",
       email = None,
+      notes = Some("some notes"),
       startTime = None,
       endTime = None,
       collectRaw = true,
@@ -46,6 +47,7 @@ abstract class CampaignStoreSpec extends StoreSpec {
       vocabulary = Vocabulary(queries = Seq(VocabularyQuery(exact = Some("foo")), VocabularyQuery(exact = Some("bar")), VocabularyQuery(terms = Some(Seq("a", "b"))))),
       displayName = "second campaign",
       email = Some("v@ucl.ac.uk"),
+      notes = None,
       startTime = Some(now()),
       endTime = Some(now().plus(3600 * 1000 * 24 * 5)),
       collectRaw = false,
@@ -83,7 +85,15 @@ abstract class CampaignStoreSpec extends StoreSpec {
     Await.result(storage.campaigns.replace(campaigns.head)) shouldBe false
     Await.result(Future.join(campaigns.map(storage.campaigns.create)))
 
-    val newCampaign1 = campaigns(0).copy(startTime = Some(now().minus(5000)))
+    val newCampaign1 = campaigns(0).copy(
+      startTime = Some(now().minus(5000)),
+      notes = Some("new notes"),
+      vocabulary = Vocabulary(queries = Seq(VocabularyQuery(exact = Some("bar")), VocabularyQuery(terms = Some(Seq("bar", "barbar"))))),
+      email = Some("other@ucl.ac.uk"),
+      delay = 3,
+      graceDelay = 5,
+      groupSize = 100,
+      samplingRate = Some(.5))
     Await.result(storage.campaigns.replace(newCampaign1)) shouldBe true
     Await.result(storage.campaigns.get("campaign1")) shouldBe Some(newCampaign1)
     Await.result(storage.campaigns.get("campaign2")) shouldBe Some(campaigns(1))
