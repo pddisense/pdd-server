@@ -19,7 +19,7 @@
 package ucl.pdd.service
 
 import com.twitter.util.{Await, Future}
-import org.joda.time.{DateTime, DateTimeZone, Duration}
+import org.joda.time.{DateTime, DateTimeZone}
 import org.scalatest.BeforeAndAfterEach
 import ucl.pdd.api.{Campaign, Sketch, Vocabulary, VocabularyQuery}
 import ucl.pdd.storage.memory.MemoryStorage
@@ -46,6 +46,7 @@ class AggregateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach {
       createTime = now.toInstant,
       displayName = "a campaign",
       email = None,
+      notes = None,
       vocabulary = Vocabulary(Seq(VocabularyQuery(exact = Some("foo")))),
       startTime = Some(startTime),
       endTime = None,

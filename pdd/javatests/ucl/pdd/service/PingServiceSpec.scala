@@ -19,7 +19,7 @@
 package ucl.pdd.service
 
 import com.twitter.util.{Await, Future}
-import org.joda.time.{DateTime, DateTimeZone, Instant}
+import org.joda.time.{DateTime, DateTimeZone}
 import org.scalatest.BeforeAndAfterEach
 import ucl.pdd.api.{Campaign, Client, Sketch, Vocabulary, VocabularyQuery}
 import ucl.pdd.storage.Storage
@@ -46,6 +46,7 @@ class PingServiceSpec extends UnitSpec with BeforeAndAfterEach {
       createTime = createTime,
       displayName = "a campaign",
       email = None,
+      notes = None,
       vocabulary = Vocabulary(Seq(VocabularyQuery(exact = Some("foo")))),
       startTime = Some(createTime),
       endTime = None,
