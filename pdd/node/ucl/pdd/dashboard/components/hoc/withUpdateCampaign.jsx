@@ -21,12 +21,11 @@ import autobind from 'autobind-decorator';
 import { Intent } from '@blueprintjs/core';
 import { withRouter } from 'react-router-dom';
 
-import withCampaign from './withCampaign';
 import toaster from '../toaster';
 import xhr from '../../util/xhr';
 
 export default function withUpdateCampaign(options = {}) {
-  options = { toast: true, redirect: true, ... options };
+  options = { toast: true, redirect: true, ...options };
 
   return function updateCampaignWrapper(WrappedComponent) {
     class UpdateCampaignContainer extends React.Component {
@@ -40,33 +39,54 @@ export default function withUpdateCampaign(options = {}) {
       }
 
       @autobind
-      onSuccess(resp) {
-        if (options.toast) {
-          toaster.show({
-            message: `Campaign "${resp.displayName}" has been updated.`,
-            intent: Intent.SUCCESS,
-          });
-        }
-        if (options.redirect) {
-          this.props.history.push(`/campaigns/view/${resp.name}`);
-        } else {
-          this.setState({ campaign: resp });
-        }
-      }
-
-      @autobind
-      onError(resp) {
-        toaster.show({ message: 'The campaign could not be updated.', intent: Intent.DANGER });
-        this.setState({ errors: resp.errors || [], isLoading: false });
-      }
-
-      @autobind
       onSubmit(campaign) {
         this.setState({ isLoading: true });
         return xhr(
           `/api/campaigns/${this.props.campaign.name}`,
           { method: 'PUT', body: JSON.stringify(campaign) }
-        ).then(this.onSuccess, this.onError);
+        ).then(
+          resp => {
+            if (options.toast) {
+              toaster.show({
+                message: `Campaign "${resp.displayName}" has been updated.`,
+                intent: Intent.SUCCESS,
+              });
+            }
+            if (options.redirect) {
+              this.props.history.push(`/campaigns/view/${resp.name}`);
+            } else {
+              this.setState({ campaign: resp, isLoading: false, errors: [] });
+            }
+          },
+          resp => {
+            toaster.show({ message: 'The campaign could not be updated.', intent: Intent.DANGER });
+            this.setState({ errors: resp.errors || [], isLoading: false });
+          });
+      }
+
+      @autobind
+      onDelete() {
+        this.setState({ isLoading: true });
+        xhr(`/api/campaigns/${this.props.campaign.name}`, { method: 'DELETE' })
+          .then(
+            resp => {
+              if (options.toast) {
+                toaster.show({
+                  message: `Campaign "${this.props.campaign.displayName}" has been deleted.`,
+                  intent: Intent.SUCCESS,
+                });
+              }
+              // Even if `options.redirect` is false, we have to redirect as the campaign doesn't
+              // exist anymore.
+              this.props.history.push('/campaigns');
+            },
+            resp => {
+              toaster.show({
+                message: 'The campaign could not be deleted.',
+                intent: Intent.DANGER
+              });
+              this.setState({ errors: resp.errors || [], isLoading: false });
+            });
       }
 
       componentWillReceiveProps() {
@@ -81,6 +101,6 @@ export default function withUpdateCampaign(options = {}) {
       }
     }
 
-    return withCampaign(withRouter(UpdateCampaignContainer));
+    return withRouter(UpdateCampaignContainer);
   };
 }

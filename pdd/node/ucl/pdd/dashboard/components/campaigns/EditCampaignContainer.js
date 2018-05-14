@@ -19,6 +19,7 @@
 import React from 'react';
 
 import EditCampaign from './EditCampaign';
+import withCampaign from './../hoc/withCampaign';
 import withUpdateCampaign from '../hoc/withUpdateCampaign';
 
-export default withUpdateCampaign()(EditCampaign);
+export default withCampaign(withUpdateCampaign()(EditCampaign));

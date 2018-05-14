@@ -159,7 +159,7 @@ final class PrivateController @Inject()(storage: Storage) extends Controller {
           graceDelay = req.graceDelay,
           groupSize = req.groupSize,
           samplingRate = req.samplingRate)
-        CampaignValidator.validate(campaign) match {
+        CampaignValidator.validateUpdate(campaign, previous) match {
           case ValidationResult.Valid =>
             storage.campaigns.replace(campaign).map {
               case true => response.ok(campaign)

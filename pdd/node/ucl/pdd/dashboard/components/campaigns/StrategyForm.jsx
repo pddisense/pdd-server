@@ -19,16 +19,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { noop } from 'lodash';
-import { NumericInput, Switch } from '@blueprintjs/core';
-import { DateInput } from '@blueprintjs/datetime';
+import { NumericInput, Switch, Callout, Intent } from '@blueprintjs/core';
 import autobind from 'autobind-decorator';
 
 import FormGroup from '../form/FormGroup';
 
 function attrsToState(campaign) {
   return {
-    startTime: campaign.startTime ? new Date(campaign.startTime) : null,
-    endTime: campaign.endTime ? new Date(campaign.endTime) : null,
     delay: campaign.delay,
     graceDelay: campaign.graceDelay,
     collectRaw: campaign.collectRaw,
@@ -41,8 +38,6 @@ function attrsToState(campaign) {
 
 function stateToAttrs(state) {
   return {
-    startTime: state.startTime ? state.startTime.toISOString() : null,
-    endTime: state.endTime ? state.endTime.toISOString() : null,
     delay: state.delay,
     graceDelay: state.graceDelay,
     collectRaw: state.collectRaw,
@@ -56,16 +51,6 @@ class StrategyForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = attrsToState(props.campaign);
-  }
-
-  @autobind
-  handleStartTimeChange(startTime) {
-    this.setState({ startTime });
-  }
-
-  @autobind
-  handleEndTimeChange(endTime) {
-    this.setState({ endTime });
   }
 
   @autobind
@@ -111,32 +96,18 @@ class StrategyForm extends React.Component {
   }
 
   render() {
-    const isStarted = this.props.campaign.started;
-    const isCompleted = this.props.campaign.completed;
+    if (this.props.campaign.started) {
+      return (
+        <Callout intent={Intent.DANGER}>
+          The strategy cannot be modified anymore because this campaign has already started.
+        </Callout>
+      );
+    }
     return (
       <form onSubmit={this.handleSubmit}>
-        <FormGroup
-          title="Start date"
-          help="The start of the period of interest during which queries are aggregated.
-                If left empty, the campaign will remain hidden.">
-          <DateInput value={this.state.startTime}
-                     onChange={this.handleStartTimeChange}
-                     disabled={isStarted}
-                     formatDate={date => date.toLocaleDateString()}
-                     parseDate={str => new Date(str)}/>
-        </FormGroup>
-
-        <FormGroup
-          title="End date"
-          help="The end of the period of interest during which queries are aggregated.
-                Because of delays that may be introduced by the system, users may still submit their
-                data after this date.
-                If left empty, it will be an open-ended campaign.">
-          <DateInput value={this.state.endTime}
-                     onChange={this.handleEndTimeChange}
-                     formatDate={date => date.toLocaleDateString()}
-                     parseDate={str => new Date(str)}/>
-        </FormGroup>
+        <p className="pt-ui-text-large" style={{ marginBottom: '25px' }}>
+          This page allows to configure the collection strategy that is deployed by this campaign.
+        </p>
 
         <FormGroup
           title="Delay"
@@ -145,7 +116,6 @@ class StrategyForm extends React.Component {
           <NumericInput
             value={this.state.delay}
             onValueChange={this.handleDelayChange}
-            disabled={isStarted}
             min={0}/>
         </FormGroup>
 
@@ -157,7 +127,6 @@ class StrategyForm extends React.Component {
           <NumericInput
             value={this.state.graceDelay}
             onValueChange={this.handleGraceDelayChange}
-            disabled={isStarted}
             min={0}/>
         </FormGroup>
 
@@ -165,16 +134,14 @@ class StrategyForm extends React.Component {
           <Switch
             checked={this.state.collectRaw}
             label="Enable raw data collection"
-            onChange={this.handleCollectRawClick}
-            disabled={isStarted}/>
+            onChange={this.handleCollectRawClick}/>
         </div>
 
         <div className="pt-form-group">
           <Switch
             checked={this.state.collectEncrypted}
             label="Enable privacy-preserving data collection"
-            onChange={this.handleCollectEncryptedClick}
-            disabled={isStarted}/>
+            onChange={this.handleCollectEncryptedClick}/>
         </div>
 
         {this.state.collectEncrypted ?
@@ -185,7 +152,6 @@ class StrategyForm extends React.Component {
             <NumericInput
               value={this.state.groupSize}
               onValueChange={this.handleGroupSizeChange}
-              disabled={isCompleted}
               min={2}/>
           </FormGroup> : null}
 
@@ -193,7 +159,6 @@ class StrategyForm extends React.Component {
           <Switch
             checked={this.state.hasSamplingRate}
             label="Enable sampling"
-            disabled={isCompleted}
             onChange={this.handleSamplingRateClick}/>
         </div>
 
@@ -206,7 +171,6 @@ class StrategyForm extends React.Component {
               onValueChange={this.handleSamplingRateChange}
               min={0}
               max={100}
-              disabled={isCompleted}
               stepSize={5}/>
           </FormGroup> : null}
 

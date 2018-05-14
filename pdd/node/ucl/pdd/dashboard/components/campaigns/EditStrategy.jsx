@@ -19,7 +19,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { noop } from 'lodash';
-import { Intent, Callout } from '@blueprintjs/core';
 
 import Tabs from './Tabs';
 import Title from './Title';
@@ -32,19 +31,6 @@ class EditStrategy extends React.Component {
         <Title campaign={this.props.campaign}/>
 
         <Tabs campaign={this.props.campaign}/>
-
-        <p className="pt-ui-text-large" style={{ marginBottom: '25px' }}>
-          This page allows to configure the collection strategy that is deployed by this campaign.
-        </p>
-
-        {this.props.campaign.completed ?
-          <Callout intent={Intent.PRIMARY}>
-            Because this campaign is completed, the strategy cannot be changed anymore.
-          </Callout> :
-          this.props.campaign.started ?
-            <Callout intent={Intent.PRIMARY}>
-              Because this campaign is running, some properties cannot be changed anymore.
-            </Callout> : null}
 
         <StrategyForm {...this.props} />
       </div>

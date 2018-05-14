@@ -18,10 +18,11 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Alert, Button, Icon, Intent } from '@blueprintjs/core';
+import moment from 'moment';
+import { Alert, Button, Intent } from '@blueprintjs/core';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { withRouter } from 'react-router-dom';
-import toaster from '../toaster';
+
+import withUpdateCampaign from '../hoc/withUpdateCampaign';
 import xhr from '../../util/xhr';
 
 function download(url, contentType, filename) {
@@ -36,12 +37,15 @@ function download(url, contentType, filename) {
     });
 }
 
-@withRouter
+@withUpdateCampaign({ redirect: false })
 class Title extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      showAlert: false,
+      showDeleteAlert: false,
+      showStartAlert: false,
+      showStopAlert: false,
+      showCopyButton: false,
     };
   }
 
@@ -51,47 +55,41 @@ class Title extends React.Component {
     download(url, 'application/csv', filename);
   }
 
-  handleDeleteClick() {
-    this.setState({ showAlert: true });
+  handleToggleCopyButton(shown) {
+    this.setState({ showCopyButton: shown });
   }
 
-  handleCancelClick() {
-    this.setState({ showAlert: false });
+  handleToggleDeleteAlert(shown) {
+    this.setState({ showDeleteAlert: shown });
   }
 
-  handleConfirmClick() {
-    this.setState({ showAlert: false });
-    xhr(`/api/campaigns/${this.props.campaign.name}`, { method: 'DELETE' })
-      .then(resp => {
-        toaster.show({
-          message: `Campaign "${this.props.campaign.displayName}" has been deleted.`,
-          intent: Intent.SUCCESS,
-        });
-        this.props.history.push(`/campaigns`);
-      });
+  handleToggleStartAlert(shown) {
+    this.setState({ showStartAlert: shown });
+  }
+
+  handleToggleStopAlert(shown) {
+    this.setState({ showStopAlert: shown });
+  }
+
+  handleDeleteConfirm() {
+    this.setState({ showDeleteAlert: false });
+    this.props.onDelete();
+  }
+
+  handleStartConfirm() {
+    this.setState({ showStartAlert: false });
+    const obj = { ...this.props.campaign, startTime: moment().format() };
+    this.props.onSubmit(obj);
+  }
+
+  handleStopConfirm() {
+    this.setState({ showStartAlert: false });
+    const obj = { ...this.props.campaign, endTime: moment().format() };
+    this.props.onSubmit(obj);
   }
 
   render() {
     const { campaign } = this.props;
-    let iconName;
-    let iconTitle;
-    if (campaign.completed) {
-      // Finished.
-      iconName = 'tick';
-      iconTitle = 'Finished campaign';
-    } else if (campaign.started) {
-      // Running.
-      iconName = 'repeat';
-      iconTitle = 'Running campaign';
-    } else if (campaign.startTime) {
-      // Scheduled.
-      iconName = 'time';
-      iconTitle = 'Scheduled campaign';
-    } else {
-      // Pending.
-      iconName = 'issue';
-      iconTitle = 'Pending campaign';
-    }
     return (
       <div>
         <div className="actions">
@@ -102,33 +100,56 @@ class Title extends React.Component {
               Download results as CSV
             </Button> : null}
 
-          <CopyToClipboard text={campaign.name}>
-            <Button text="Copy name to clipboard" icon="clipboard"/>
-          </CopyToClipboard>
-
-          <Button onClick={() => this.handleDeleteClick()}
-                  icon="delete"
-                  disabled={campaign.active}>
-            Delete campaign
-          </Button>
+          {campaign.completed ?
+            <Button onClick={() => this.handleToggleDeleteAlert(true)} icon="delete">
+              Delete campaign
+            </Button> :
+            campaign.started ?
+              <Button onClick={() => this.handleToggleStopAlert(true)} icon="stop">
+                Stop collection
+              </Button> :
+              <Button intent={Intent.PRIMARY}
+                      onClick={() => this.handleToggleStartAlert(true)}
+                      icon="play">
+                Start collection
+              </Button>}
         </div>
 
-        <h2>
+        <h2 onMouseEnter={() => this.handleToggleCopyButton(true)}
+            onMouseLeave={() => this.handleToggleCopyButton(false)}>
           {this.props.campaign.displayName}
-
-          <Icon icon={iconName}
-                title={iconTitle}
-                iconSize={20}
-                style={{ position: 'relative', top: '6px', marginLeft: '15px' }}/>
+          {this.state.showCopyButton ?
+            <CopyToClipboard text={campaign.name}>
+              <Button icon="clipboard" small={true} style={{ marginLeft: '10px' }}/>
+            </CopyToClipboard> : null}
         </h2>
 
-        <Alert isOpen={this.state.showAlert}
+        <Alert isOpen={this.state.showDeleteAlert}
                cancelButtonText="Cancel"
                intent={Intent.PRIMARY}
-               onCancel={() => this.handleCancelClick()}
-               onConfirm={() => this.handleConfirmClick()}>
+               onCancel={() => this.handleToggleDeleteAlert(false)}
+               onConfirm={() => this.handleDeleteConfirm()}>
           Are you sure you want to delete this campaign?
           This is permanent and cannot be undone, all associated results will be deleted as well.
+        </Alert>
+
+        <Alert isOpen={this.state.showStartAlert}
+               cancelButtonText="Start"
+               intent={Intent.PRIMARY}
+               onCancel={() => this.handleToggleStartAlert(false)}
+               onConfirm={() => this.handleStartConfirm()}>
+          Are you sure you want to start this campaign?
+          You will not be able to modify the campaign's strategy once it has started.
+          Only the vocabulary can still be modified on a running campaign.
+        </Alert>
+
+        <Alert isOpen={this.state.showStopAlert}
+               cancelButtonText="Stop"
+               intent={Intent.PRIMARY}
+               onCancel={() => this.handleToggleStopAlert(false)}
+               onConfirm={() => this.handleStopConfirm()}>
+          Are you sure you want to stop this campaign?
+          The campaign cannot be reactivated once it has been stopped.
         </Alert>
       </div>
     );

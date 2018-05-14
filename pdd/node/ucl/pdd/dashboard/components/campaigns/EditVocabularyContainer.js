@@ -19,6 +19,7 @@
 import React from 'react';
 
 import EditVocabulary from './EditVocabulary';
+import withCampaign from './../hoc/withCampaign';
 import withUpdateCampaign from '../hoc/withUpdateCampaign';
 
-export default withUpdateCampaign({ redirect: false })(EditVocabulary);
+export default withCampaign(withUpdateCampaign({ redirect: false })(EditVocabulary));

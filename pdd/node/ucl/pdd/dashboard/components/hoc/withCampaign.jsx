@@ -18,12 +18,13 @@
 
 import React from 'react';
 import autobind from 'autobind-decorator';
+import { withRouter } from 'react-router-dom';
 import { NonIdealState, Spinner } from '@blueprintjs/core';
 
 import xhr from '../../util/xhr';
 
 export default function withCampaign(WrappedComponent) {
-  return class WithCampaignContainer extends React.Component {
+  return withRouter(class WithCampaignContainer extends React.Component {
     constructor(props) {
       super(props);
       this.state = {
@@ -66,5 +67,5 @@ export default function withCampaign(WrappedComponent) {
       }
       return null;
     }
-  }
+  });
 }

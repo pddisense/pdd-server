@@ -18,10 +18,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withRouter } from 'react-router-dom';
-import autobind from 'autobind-decorator';
-import moment from 'moment';
-import { identity } from 'lodash';
+import { NonIdealState } from '@blueprintjs/core';
 
 class ResultTable extends React.Component {
   handleClick(item) {
@@ -29,6 +26,13 @@ class ResultTable extends React.Component {
   }
 
   render() {
+    if (this.props.results.length === 0) {
+      return (
+        <NonIdealState
+          title="Hold tight!"
+          description="The campaign is just getting started, results should appear here very soon."/>
+      );
+    }
     const rows = this.props.results.map((item, idx) => {
       //const wrap = (el) => item.startTime ? el : <span className="pt-text-muted">{el}</span>;
       const wrap = (el) => el;
