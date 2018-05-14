@@ -20,7 +20,22 @@ package ucl.pdd.domain
 
 /**
  * An aggregation is a request to collect searches during a given time period as part of a
- * campaign. Each campaign is divided in several aggregations, usually one per day.
+ * campaign. Each campaign is divided in several aggregations, usually one per day. Throughout the
+ * codebase and the documentation, aggregations may also be called "results".
+ *
+ * @param name            Aggregation unique name.
+ * @param campaignName    The name of the campaign this sketch is about.
+ * @param day             The day this aggregation is about. It is relative to the associated
+ *                        campaign's start time.
+ * @param decryptedValues The list of query counts decrypted from the encrypted counts. The first
+ *                        count represents the total number of searches over the associated day
+ *                        (all of them, not only the ones actively monitored), and then there is
+ *                        one count per monitored query on the associated day.
+ * @param rawValues       The list of query counts from the raw counts. The first count represents
+ *                        the total number of searches over the associated day (all of them, not
+ *                        only the ones actively monitored), and then there is one count per
+ *                        monitored query on the associated day.
+ * @param stats           Statistics.
  */
 case class Aggregation(
   name: String,

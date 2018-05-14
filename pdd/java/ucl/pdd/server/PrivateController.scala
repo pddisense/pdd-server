@@ -132,7 +132,7 @@ final class PrivateController @Inject()(storage: Storage) extends Controller {
       case ContentType.CSV =>
         val content = Exporter.csv(campaign, results)
         response.ok(content).contentType(ContentType.CSV.contentTypeName)
-      case ContentType.JSON => response.ok(Exporter.json(campaign, results))
+      case ContentType.JSON => response.ok(Exporter.collect(campaign, results))
       case _ => response.notAcceptable
     }
   }

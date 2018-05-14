@@ -26,37 +26,13 @@ object Exporter {
     rawCount: Option[Long] = None,
     decryptedCount: Option[Long] = None)
 
-  def json(campaign: Campaign, results: Seq[Aggregation]): Seq[Count] = {
+  def collect(campaign: Campaign, results: Seq[Aggregation]): Seq[Count] = {
     if (campaign.collectEncrypted && campaign.collectRaw) {
-      results.flatMap { result =>
-        val counts = result.rawValues.zip(result.decryptedValues)
-        val total = Count(result.day, "total", Some(counts.head._1), Some(counts.head._2))
-        val rows = counts.tail
-          .zipWithIndex
-          .filter { case ((rawCount, decryptedCount), _) => rawCount > 0 || decryptedCount > 0 }
-          .map { case ((rawCount, decryptedCount), idx) =>
-            Count(result.day, idx.toString, Some(rawCount), Some(decryptedCount))
-          }
-        total +: rows
-      }
+      collectBoth(results)
     } else if (campaign.collectEncrypted) {
-      results.flatMap { result =>
-        val total = Count(result.day, "total", decryptedCount = Some(result.decryptedValues.head))
-        val rows = result.decryptedValues.tail
-          .zipWithIndex
-          .filter { case (v, _) => v > 0 }
-          .map { case (v, idx) => Count(result.day, idx.toString, decryptedCount = Some(v)) }
-        total +: rows
-      }
+      collectEncrypted(results)
     } else if (campaign.collectRaw) {
-      results.flatMap { result =>
-        val total = Count(result.day, "total", rawCount = Some(result.rawValues.head))
-        val rows = result.rawValues.tail
-          .zipWithIndex
-          .filter { case (v, _) => v > 0 }
-          .map { case (v, idx) => Count(result.day, idx.toString, rawCount = Some(v)) }
-        total +: rows
-      }
+      collectRaw(results)
     } else {
       Seq.empty
     }
@@ -64,9 +40,72 @@ object Exporter {
 
   def csv(campaign: Campaign, results: Seq[Aggregation]): String = {
     val header = "day,query,raw count,decrypted count"
-    val lines = json(campaign, results).map { count =>
+    val lines = collect(campaign, results).map { count =>
       s"${count.day},${count.query},${count.rawCount.getOrElse("")},${count.decryptedCount.getOrElse("")}"
     }
     (header +: lines).mkString("\n")
+  }
+
+  private def collectBoth(results: Seq[Aggregation]): Seq[Count] = {
+    results.flatMap { result =>
+      if (result.decryptedValues.isEmpty && result.rawValues.isEmpty) {
+        // If for any reason we do not have data for that day, still return the total count.
+        Seq(Count(result.day, "total", rawCount = Some(0), decryptedCount = Some(0)))
+      } else if (result.decryptedValues.isEmpty) {
+        // There is an edge case, where the raw values are filled and the decrypted values are
+        // not filled. This happens when no value could be decrypted, the list might end up empty
+        // (instead of full of zeros).
+        val total = Count(result.day, "total", rawCount = Some(result.rawValues.head), decryptedCount = Some(0))
+        val rows = result.rawValues.tail
+          .zipWithIndex
+          .filter { case (v, _) => v > 0 }
+          .map { case (v, idx) =>
+            Count(result.day, idx.toString, rawCount = Some(v), decryptedCount = Some(0))
+          }
+        total +: rows
+      } else {
+        val counts = result.rawValues.zip(result.decryptedValues)
+        val total = Count(result.day, "total", rawCount = Some(counts.head._1), decryptedCount = Some(counts.head._2))
+        val rows = counts.tail
+          .zipWithIndex
+          .filter { case ((rawCount, decryptedCount), _) => rawCount > 0 || decryptedCount > 0 }
+          .map { case ((rawCount, decryptedCount), idx) =>
+            Count(result.day, idx.toString, rawCount = Some(rawCount), decryptedCount = Some(decryptedCount))
+          }
+        total +: rows
+      }
+    }
+  }
+
+  private def collectEncrypted(results: Seq[Aggregation]): Seq[Count] = {
+    results.flatMap { result =>
+      if (result.decryptedValues.isEmpty) {
+        // If for any reason we do not have data for that day, still return the total count.
+        Seq(Count(result.day, "total", decryptedCount = Some(0)))
+      } else {
+        val total = Count(result.day, "total", decryptedCount = Some(result.decryptedValues.head))
+        val rows = result.decryptedValues.tail
+          .zipWithIndex
+          .filter { case (v, _) => v > 0 }
+          .map { case (v, idx) => Count(result.day, idx.toString, decryptedCount = Some(v)) }
+        total +: rows
+      }
+    }
+  }
+
+  private def collectRaw(results: Seq[Aggregation]): Seq[Count] = {
+    results.flatMap { result =>
+      if (result.rawValues.isEmpty) {
+        // If for any reason we do not have data for that day, still return the total count.
+        Seq(Count(result.day, "total", rawCount = Some(0)))
+      } else {
+        val total = Count(result.day, "total", rawCount = Some(result.rawValues.head))
+        val rows = result.rawValues.tail
+          .zipWithIndex
+          .filter { case (v, _) => v > 0 }
+          .map { case (v, idx) => Count(result.day, idx.toString, rawCount = Some(v)) }
+        total +: rows
+      }
+    }
   }
 }
