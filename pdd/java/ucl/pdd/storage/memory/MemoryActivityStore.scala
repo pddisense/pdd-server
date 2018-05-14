@@ -21,7 +21,7 @@ package ucl.pdd.storage.memory
 import java.util.concurrent.ConcurrentLinkedQueue
 
 import com.twitter.util.Future
-import ucl.pdd.api.Activity
+import ucl.pdd.domain.Activity
 import ucl.pdd.storage.ActivityStore
 
 import scala.collection.JavaConverters._

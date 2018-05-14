@@ -19,7 +19,7 @@
 package ucl.pdd.storage
 
 import com.twitter.util.Future
-import ucl.pdd.api.Aggregation
+import ucl.pdd.domain.Aggregation
 
 trait AggregationStore {
   /**

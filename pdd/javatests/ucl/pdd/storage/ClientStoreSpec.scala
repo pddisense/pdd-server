@@ -19,7 +19,7 @@
 package ucl.pdd.storage
 
 import com.twitter.util.Await
-import ucl.pdd.api.Client
+import ucl.pdd.domain.Client
 
 /**
  * Common unit tests for implementations of [[ClientStore]].

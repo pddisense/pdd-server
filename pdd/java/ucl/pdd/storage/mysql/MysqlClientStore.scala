@@ -20,7 +20,7 @@ package ucl.pdd.storage.mysql
 
 import com.twitter.finagle.mysql.{OK, Row, ServerError, Client => MysqlClient}
 import com.twitter.util.Future
-import ucl.pdd.api.Client
+import ucl.pdd.domain.Client
 import ucl.pdd.storage.ClientStore
 
 private[mysql] final class MysqlClientStore(mysql: MysqlClient) extends ClientStore with MysqlStore {

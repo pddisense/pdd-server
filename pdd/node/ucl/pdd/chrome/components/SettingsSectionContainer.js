@@ -20,7 +20,7 @@ import React from 'react';
 import autobind from 'autobind-decorator';
 import { Intent } from '@blueprintjs/core';
 
-import { getClient, setClient } from '../browser/storage';
+import { getData, setData } from '../browser/storage';
 import SettingsSection from './SettingsSection';
 import xhr from '../util/xhr';
 import toaster from './toaster';
@@ -55,13 +55,13 @@ export default class SettingsSectionContainer extends React.Component {
       p = Promise.resolve();
     }
     p.then(
-      () => setClient({ ...this.state.data, ...client }),
+      () => setData({ ...this.state.data, ...client }),
       () => console.log('Cannot contact the server, changes are discarded.'),
     );
   }
 
   componentDidMount() {
-    getClient().then(data => this.setState({ data }));
+    getData().then(data => this.setState({ data }));
   }
 
   render() {

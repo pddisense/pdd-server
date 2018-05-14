@@ -20,7 +20,7 @@ package ucl.pdd.storage
 
 import com.twitter.util.Future
 import org.joda.time.Instant
-import ucl.pdd.api.Activity
+import ucl.pdd.domain.Activity
 
 trait ActivityStore {
   /**

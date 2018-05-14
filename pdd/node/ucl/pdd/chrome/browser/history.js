@@ -19,20 +19,14 @@
 import URL from 'url-parse';
 import moment from 'moment';
 
-function findIndices(q, vocabulary) {
-  return vocabulary.queries.map((query, idx) => {
-    if (query.exact) {
-      return q === query.exact ? idx : -1;
-    } else if (query.terms) {
-      // TODO: handle quotes.
-      const keywords = q.split(' ').map(s => s.trim());
-      return query.terms.every(v => keywords.indexOf(v) > -1) ? idx : -1;
-    }
-    return -1;
-  }).filter(idx => -1 !== idx);
-}
-
-export function searchHistory(startTime, endTime, vocabulary) {
+/**
+ * Search across the browser history to extract the Google searches performed during a given period.
+ *
+ * @param startTime Start of the period of interest.
+ * @param endTime End of the period of interest.
+ * @returns PromiseLike<object[]>
+ */
+export function searchHistory(startTime, endTime) {
   return new Promise((resolve, reject) => {
     // Chrome documentation does not indicate that chrome.history.search may fail, so the promise
     // always resolves.
@@ -61,29 +55,14 @@ export function searchHistory(startTime, endTime, vocabulary) {
           search.count += item.visitCount;
           search.lastTime = Math.max(search.lastTime, item.lastVisitTime);
         } else {
-          // Moreover, if a vocabulary to search against was provided, we validate that the query
-          // matches this vocabulary.
-          const indices = vocabulary ? findIndices(url.query.q, vocabulary) : [];
-          if (!vocabulary || indices.length > 0) {
-            searches[url.query.q] = {
-              indices,
-              query: url.query.q,
-              lastTime: item.lastVisitTime,
-              count: item.visitCount,
-            };
-          }
+          searches[url.query.q] = {
+            query: url.query.q,
+            lastTime: item.lastVisitTime,
+            count: item.visitCount,
+          };
         }
       });
       resolve(Object.values(searches));
     });
-  });
-}
-
-export function aggregateHistory(startTime, endTime, vocabulary) {
-  return searchHistory(startTime, endTime, vocabulary).then(searches => {
-    const counters = Array(vocabulary.queries.length);
-    counters.fill(0);
-    searches.forEach(search => search.indices.forEach(idx => counters[idx] += search.count));
-    return counters;
   });
 }

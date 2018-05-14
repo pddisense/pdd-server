@@ -20,7 +20,7 @@ package ucl.pdd.storage.mysql
 
 import com.twitter.finagle.mysql.{OK, Row, ServerError, Client => MysqlClient}
 import com.twitter.util.Future
-import ucl.pdd.api.{Aggregation, AggregationStats}
+import ucl.pdd.domain.Aggregation
 import ucl.pdd.storage.AggregationStore
 
 private[mysql] final class MysqlAggregationStore(mysql: MysqlClient) extends AggregationStore with MysqlStore {
@@ -95,7 +95,7 @@ private[mysql] final class MysqlAggregationStore(mysql: MysqlClient) extends Agg
       day = toInt(row, "day"),
       decryptedValues = toLongs(row, "decryptedValues"),
       rawValues = toLongs(row, "rawValues"),
-      stats = AggregationStats(
+      stats = Aggregation.Stats(
         activeCount = toLong(row, "activeCount"),
         submittedCount = toLong(row, "submittedCount"),
         decryptedCount = toLong(row, "decryptedCount")))

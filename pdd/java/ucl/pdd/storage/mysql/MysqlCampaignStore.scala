@@ -20,7 +20,7 @@ package ucl.pdd.storage.mysql
 
 import com.twitter.finagle.mysql.{OK, Row, ServerError, Client => MysqlClient}
 import com.twitter.util.Future
-import ucl.pdd.api.{Campaign, Vocabulary, VocabularyQuery}
+import ucl.pdd.domain.{Campaign, Vocabulary}
 import ucl.pdd.storage.CampaignStore
 
 private[mysql] final class MysqlCampaignStore(mysql: MysqlClient)
@@ -136,18 +136,18 @@ private[mysql] final class MysqlCampaignStore(mysql: MysqlClient)
       samplingRate = getDouble(row, "samplingRate"))
   }
 
-  private def decodeQuery(str: String): VocabularyQuery =
+  private def decodeQuery(str: String): Vocabulary.Query =
     if (str.contains(",")) {
-      VocabularyQuery(terms = Some(str.split(",").filter(_.nonEmpty)))
+      Vocabulary.Query(terms = Some(str.split(",").filter(_.nonEmpty)))
     } else {
-      VocabularyQuery(exact = Some(str))
+      Vocabulary.Query(exact = Some(str))
     }
 
   private def encodeVocabulary(vocabulary: Vocabulary) = {
     vocabulary.queries.map(encodeQuery).mkString("\n")
   }
 
-  private def encodeQuery(query: VocabularyQuery) = {
+  private def encodeQuery(query: Vocabulary.Query) = {
     if (query.terms.isDefined) {
       query.terms.get.mkString(",") + ","
     } else {

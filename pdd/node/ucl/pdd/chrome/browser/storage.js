@@ -17,22 +17,22 @@
  */
 
 // Key under which the data is actually stored inside Chrome local storage.
-const CLIENT_KEY = 'client';
+const DATA_KEY = 'client';
 
 // In-memory cache of the data.
 let loaded = false;
-let localClient = null;
+let localData = null;
 
 function reload() {
   if (loaded) {
     return Promise.resolve();
   }
   return new Promise((resolve, reject) => {
-    chrome.storage.local.get({ [CLIENT_KEY]: '{}' }, (items) => {
+    chrome.storage.local.get({ [DATA_KEY]: '{}' }, (items) => {
       if (chrome.runtime.lastError) {
         reject(chrome.runtime.lastError);
       } else {
-        localClient = JSON.parse(items[CLIENT_KEY]);
+        localData = JSON.parse(items[DATA_KEY]);
         loaded = true;
         resolve();
       }
@@ -53,22 +53,24 @@ function write(key, item) {
 }
 
 /**
+ * Return data from the browser local storage.
  *
  * @returns PromiseLike<object>
  */
-export function getClient() {
-  return reload().then(() => localClient);
+export function getData() {
+  return reload().then(() => localData);
 }
 
 /**
+ * Persist data to the browser local storage.
  *
- * @param client
+ * @param data Data to persist.
  * @returns PromiseLike<object>
  */
-export function setClient(client) {
-  return write(CLIENT_KEY, client).then(() => {
-    // console.log('Client data written to local storage', client);
-    localClient = client;
-    return client;
+export function setData(data) {
+  return write(DATA_KEY, data).then(() => {
+    console.log('Data written to local storage', data);
+    localData = data;
+    return data;
   });
 }

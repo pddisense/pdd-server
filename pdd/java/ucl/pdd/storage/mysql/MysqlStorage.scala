@@ -22,7 +22,7 @@ import com.twitter.finagle.mysql.{Client => MysqlClient}
 import com.twitter.util.Future
 import ucl.pdd.storage._
 
-final class MysqlStorage(mysql: MysqlClient) extends Storage {
+private[storage] class MysqlStorage(mysql: MysqlClient) extends Storage {
   override val clients = new MysqlClientStore(mysql)
   override val campaigns = new MysqlCampaignStore(mysql)
   override val aggregations = new MysqlAggregationStore(mysql)
@@ -94,6 +94,7 @@ object MysqlStorage {
       "`group` int not null," +
       "day int not null," +
       "publicKey varchar(255) not null," +
+      "queriesCount int not null," +
       "encryptedValues longtext not null," +
       "rawValues longtext not null," +
       "submitted tinyint not null," +

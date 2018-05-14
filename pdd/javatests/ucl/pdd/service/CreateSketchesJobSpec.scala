@@ -21,7 +21,7 @@ package ucl.pdd.service
 import com.twitter.util.{Await, Future}
 import org.joda.time.{DateTime, DateTimeZone}
 import org.scalatest.BeforeAndAfterEach
-import ucl.pdd.api.{Campaign, Client, Vocabulary, VocabularyQuery}
+import ucl.pdd.domain.{Campaign, Client, Vocabulary}
 import ucl.pdd.storage.Storage
 import ucl.pdd.storage.memory.MemoryStorage
 import ucl.pdd.strategy.RoundRobinStrategy
@@ -43,7 +43,7 @@ class CreateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach {
     displayName = "a campaign",
     email = None,
     notes = None,
-    vocabulary = Vocabulary(Seq(VocabularyQuery(exact = Some("foo")))),
+    vocabulary = Vocabulary(Seq(Vocabulary.Query(exact = Some("foo")))),
     startTime = Some(now),
     endTime = None,
     collectRaw = true,
@@ -54,7 +54,7 @@ class CreateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach {
     samplingRate = None)
 
   override def beforeEach(): Unit = {
-    storage = new MemoryStorage
+    storage = MemoryStorage.empty
     job = new CreateSketchesJob(storage, new RoundRobinStrategy, timezone, testingMode = false)
     super.beforeEach()
   }

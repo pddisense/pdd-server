@@ -20,7 +20,7 @@ scala_library(
   name = "strategy",
   srcs = glob(["*.scala"]),
   deps = [
-    "//pdd/java/ucl/pdd/api",
+    "//pdd/java/ucl/pdd/domain",
     "//pdd/java/ucl/pdd/storage",
     "//3rdparty/jvm/com/github/nscala_time",
     "//3rdparty/jvm/com/twitter:inject_core",

@@ -25,7 +25,7 @@ import com.google.inject.Inject
 import com.twitter.inject.Logging
 import com.twitter.util.{Await, Future}
 import org.joda.time.Instant
-import ucl.pdd.api._
+import ucl.pdd.domain._
 import ucl.pdd.storage.{CampaignStore, Storage}
 import ucl.pdd.strategy.{Strategy, StrategyAttrs}
 
@@ -95,6 +95,7 @@ final class CreateSketchesJob @Inject()(
               campaignName = campaign.name,
               group = groupIdx,
               submitted = false,
+              queriesCount = campaign.vocabulary.queries.size,
               day = day,
               publicKey = client.publicKey)
             storage.sketches.create(sketch).unit

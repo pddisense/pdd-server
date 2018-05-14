@@ -21,7 +21,7 @@ package ucl.pdd.service
 import com.twitter.util.{Await, Future}
 import org.joda.time.{DateTime, DateTimeZone}
 import org.scalatest.BeforeAndAfterEach
-import ucl.pdd.api.{Campaign, Client, Sketch, Vocabulary, VocabularyQuery}
+import ucl.pdd.domain.{Campaign, Client, PingResponse, Sketch, Vocabulary}
 import ucl.pdd.storage.Storage
 import ucl.pdd.storage.memory.MemoryStorage
 import ucl.testing.UnitSpec
@@ -32,23 +32,24 @@ import ucl.testing.UnitSpec
 class PingServiceSpec extends UnitSpec with BeforeAndAfterEach {
   behavior of "PingService"
 
-  private[this] var service: PingService = _
-  private[this] var storage: Storage = _
-  private[this] val timezone = DateTimeZone.forID("Europe/London")
-  private[this] val now = DateTime.now(timezone)
+  private var service: PingService = _
+  private var storage: Storage = _
+  private val timezone = DateTimeZone.forID("Europe/London")
 
   override def beforeEach(): Unit = {
-    storage = new MemoryStorage
+    storage = MemoryStorage.empty
     Await.ready(storage.startUp())
-    val createTime = now.minusDays(1).withHourOfDay(12).toInstant
+
     val campaign1 = Campaign(
       name = "campaign1",
-      createTime = createTime,
+      createTime = at("2018-05-10T15:53:00"), // Value does not matter.
       displayName = "a campaign",
       email = None,
       notes = None,
-      vocabulary = Vocabulary(Seq(VocabularyQuery(exact = Some("foo")))),
-      startTime = Some(createTime),
+      vocabulary = Vocabulary(Seq(
+        Vocabulary.Query(exact = Some("foo")),
+        Vocabulary.Query(exact = Some("bar")))),
+      startTime = Some(at("2018-05-11T15:00:00")),
       endTime = None,
       collectRaw = true,
       collectEncrypted = true,
@@ -56,26 +57,124 @@ class PingServiceSpec extends UnitSpec with BeforeAndAfterEach {
       graceDelay = 0,
       groupSize = 3,
       samplingRate = None)
-    val campaign2 = campaign1.copy(name = "campaign2", collectRaw = false)
+    val campaign2 = Campaign(
+      name = "campaign2",
+      createTime = at("2018-05-10T15:53:00"), // Value does not matter.
+      displayName = "another campaign",
+      email = None,
+      notes = None,
+      vocabulary = Vocabulary(Seq(
+        Vocabulary.Query(exact = Some("foo")),
+        Vocabulary.Query(exact = Some("bar")),
+        Vocabulary.Query(exact = Some("weather")))),
+      startTime = Some(at("2018-05-12T10:00:00")),
+      endTime = None,
+      collectRaw = true,
+      collectEncrypted = false,
+      delay = 0,
+      graceDelay = 0,
+      groupSize = 3,
+      samplingRate = None)
+
     val clients = Seq(
       Client(
         name = s"client1",
-        createTime = createTime,
+        createTime = at("2018-05-10T15:53:00"), // Value does not matter.
         publicKey = s"pubkey1",
         browser = "fake-browser"),
       Client(
         name = s"client2",
-        createTime = createTime,
+        createTime = at("2018-05-10T15:53:00"), // Value does not matter.
         publicKey = s"pubkey2",
         browser = "fake-browser"),
       Client(
         name = s"client3",
-        createTime = createTime,
+        createTime = at("2018-05-10T15:53:00"), // Value does not matter.
         publicKey = s"pubkey3",
         browser = "fake-browser"))
+
+    val sketches = Seq(
+      // campaign1 - day 0
+      Sketch(
+        name = "sketch1",
+        campaignName = "campaign1",
+        clientName = "client1",
+        day = 0,
+        group = 0,
+        queriesCount = 1,
+        rawValues = Some(Seq(4, 4)),
+        encryptedValues = Some(Seq("34", "-343")),
+        submitted = true,
+        publicKey = "pubkey1"),
+      Sketch(
+        name = "sketch2",
+        campaignName = "campaign1",
+        clientName = "client2",
+        day = 0,
+        group = 0,
+        queriesCount = 1,
+        submitted = false,
+        publicKey = "pubkey2"),
+
+      // campaign1 - day 1
+      Sketch(
+        name = "sketch6",
+        campaignName = "campaign1",
+        clientName = "client1",
+        day = 1,
+        group = 0,
+        queriesCount = 2,
+        submitted = false,
+        publicKey = "pubkey1"),
+      Sketch(
+        name = "sketch7",
+        campaignName = "campaign1",
+        clientName = "client2",
+        day = 1,
+        queriesCount = 2,
+        group = 0,
+        rawValues = None,
+        encryptedValues = None,
+        submitted = false,
+        publicKey = "pubkey2"),
+
+      // campaign2 - day 0
+      Sketch(
+        name = "sketch3",
+        campaignName = "campaign2",
+        clientName = "client1",
+        day = 0,
+        queriesCount = 3,
+        group = 0,
+        submitted = true,
+        rawValues = Some(Seq(6, 1, 2, 3)),
+        encryptedValues = None,
+        publicKey = "pubkey1"),
+      Sketch(
+        name = "sketch9",
+        campaignName = "campaign2",
+        clientName = "client3",
+        day = 0,
+        group = 0,
+        queriesCount = 3,
+        submitted = true,
+        rawValues = Some(Seq(1, 0, 0, 1)),
+        encryptedValues = None,
+        publicKey = "pubkey3"),
+      Sketch(
+        name = "sketch8",
+        campaignName = "campaign2",
+        clientName = "client2",
+        day = 0,
+        group = 0,
+        queriesCount = 3,
+        submitted = false,
+        publicKey = "pubkey2"))
+
     Await.ready(Future.join(
       Seq(storage.campaigns.create(campaign1), storage.campaigns.create(campaign2)) ++
-        clients.map(storage.clients.create)))
+        clients.map(storage.clients.create) ++
+        sketches.map(storage.sketches.create)))
 
     service = new PingService(storage, timezone, testingMode = false)
     super.beforeEach()
@@ -89,82 +188,73 @@ class PingServiceSpec extends UnitSpec with BeforeAndAfterEach {
   }
 
   it should "return commands to a client" in {
-    val sketches = Seq(
-      Sketch(
-        name = "sketch1",
-        campaignName = "campaign1",
-        clientName = "client1",
-        day = 0,
-        group = 0,
-        rawValues = Some(Seq.empty), // Not important
-        encryptedValues = Some(Seq.empty), // Not important
-        submitted = true, // Not important
-        publicKey = "pubkey1"),
-      Sketch(
-        name = "sketch2",
-        campaignName = "campaign1",
-        clientName = "client2",
-        day = 0,
-        group = 0,
-        submitted = false,
-        publicKey = "pubkey2"),
+    def runTests(now: String): Unit = {
+      var resp = Await.result(service.apply("client1", at(now))).get
+      resp.submit should contain theSameElementsAs Seq(
+        PingResponse.Command(
+          sketchName = "sketch6",
+          startTime = at("2018-05-12T00:00:00"),
+          endTime = at("2018-05-13T00:00:00"),
+          vocabulary = Vocabulary(Seq(
+            Vocabulary.Query(exact = Some("foo")),
+            Vocabulary.Query(exact = Some("bar")))),
+          publicKeys = Seq("pubkey1", "pubkey2"),
+          collectRaw = true,
+          collectEncrypted = true,
+          round = 1))
 
-      Sketch(
-        name = "sketch6",
-        campaignName = "campaign1",
-        clientName = "client1",
-        day = 1,
-        group = 0,
-        submitted = false,
-        publicKey = "pubkey1"),
-      Sketch(
-        name = "sketch7",
-        campaignName = "campaign1",
-        clientName = "client2",
-        day = 1,
-        group = 0,
-        rawValues = Some(Seq.empty), // Not important
-        encryptedValues = Some(Seq.empty), // Not important
-        submitted = true, // Not important
-        publicKey = "pubkey2"),
+      resp = Await.result(service.apply("client2", at(now))).get
+      resp.submit should contain theSameElementsAs Seq(
+        PingResponse.Command(
+          sketchName = "sketch2",
+          startTime = at("2018-05-11T00:00:00"),
+          endTime = at("2018-05-12T00:00:00"),
+          // Vocabulary is truncated to 1 on day 1.
+          vocabulary = Vocabulary(Seq(Vocabulary.Query(exact = Some("foo")))),
+          publicKeys = Seq("pubkey1", "pubkey2"),
+          collectRaw = true,
+          collectEncrypted = true,
+          round = 0),
+        PingResponse.Command(
+          sketchName = "sketch7",
+          startTime = at("2018-05-12T00:00:00"),
+          endTime = at("2018-05-13T00:00:00"),
+          vocabulary = Vocabulary(Seq(
+            Vocabulary.Query(exact = Some("foo")),
+            Vocabulary.Query(exact = Some("bar")))),
+          publicKeys = Seq("pubkey1", "pubkey2"),
+          collectRaw = true,
+          collectEncrypted = true,
+          round = 1),
+        PingResponse.Command(
+          sketchName = "sketch8",
+          startTime = at("2018-05-12T00:00:00"),
+          endTime = at("2018-05-13T00:00:00"),
+          vocabulary = Vocabulary(Seq(
+            Vocabulary.Query(exact = Some("foo")),
+            Vocabulary.Query(exact = Some("bar")),
+            Vocabulary.Query(exact = Some("weather")))),
+          publicKeys = Seq("pubkey1", "pubkey2", "pubkey3"),
+          collectRaw = true,
+          collectEncrypted = false,
+          round = 0))
 
-      Sketch(
-        name = "sketch3",
-        campaignName = "campaign2",
-        clientName = "client1",
-        day = 0,
-        group = 0,
-        submitted = false,
-        publicKey = "pubkey2"),
-      Sketch(
-        name = "sketch8",
-        campaignName = "campaign2",
-        clientName = "client2",
-        day = 0,
-        group = 0,
-        submitted = false,
-        publicKey = "pubkey2"),
-      Sketch(
-        name = "sketch9",
-        campaignName = "campaign2",
-        clientName = "client3",
-        day = 0,
-        group = 0,
-        submitted = true, // Not important
-        rawValues = Some(Seq.empty), // Not important
-        encryptedValues = Some(Seq.empty), // Not important
-        publicKey = "pubkey3"))
-    Await.result(Future.collect(sketches.map(storage.sketches.create)))
+      resp = Await.result(service.apply("client3", at(now))).get
+      // It does return something (the client exists), but it has nothing to do.
+      resp.submit should have size 0
+    }
 
-    val maybeResp = Await.result(service.apply("client1", now.toInstant))
-    maybeResp.isDefined shouldBe true
-    val resp = maybeResp.get
-
-    resp.submit should have size 2
+    // Test at several times of the day (including edge cases).
+    runTests("2018-05-13T11:12:34")
+    runTests("2018-05-13T01:10:00")
+    runTests("2018-05-13T23:59:31")
+    runTests("2018-05-14T00:45:17") // Next day, before next sketches have been generated.
   }
 
-  it should "return nothing if the client does not exist" in {
-    val maybeResp = Await.result(service.apply("client100", now.toInstant))
-    maybeResp.isDefined shouldBe false
+  it should "handle a non-existing client" in {
+    Await.result(service.apply("client100", at("2018-05-13T11:12:34"))) shouldBe None
   }
+
+  // All our operations should use the canonical timezone used by the service.
+  private def at(str: String) = new DateTime(str, timezone).toInstant
 }

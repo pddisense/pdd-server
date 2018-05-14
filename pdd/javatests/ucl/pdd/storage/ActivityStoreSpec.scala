@@ -19,7 +19,7 @@
 package ucl.pdd.storage
 
 import com.twitter.util.Await
-import ucl.pdd.api.Activity
+import ucl.pdd.domain.Activity
 
 /**
  * Common unit tests for implementations of [[ActivityStore]].

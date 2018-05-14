@@ -18,7 +18,8 @@
     "react-transition-group": "^2.2.1",
     "react-vis": "^1.8.1",
     "request": "^2.83.0",
-    "url-parse": "^1.2.0"
+    "url-parse": "^1.2.0",
+    "lodash": "^4.17.5"
   },
   "devDependencies": {
     "airbnb-browser-shims": "^2.0.0",

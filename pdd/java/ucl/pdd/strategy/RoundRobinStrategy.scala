@@ -18,7 +18,7 @@
 
 package ucl.pdd.strategy
 
-import ucl.pdd.api.Client
+import ucl.pdd.domain.Client
 
 final class RoundRobinStrategy extends Strategy {
   override def apply(clients: Seq[Client], attrs: StrategyAttrs): Seq[Seq[Client]] = {

@@ -16,42 +16,46 @@
  * along with PDD.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ucl.pdd.server
-
-import ucl.pdd.api.{Aggregation, Campaign}
+package ucl.pdd.domain
 
 object Exporter {
 
   case class Count(
     day: Int,
-    query: Int,
+    query: String,
     rawCount: Option[Long] = None,
     decryptedCount: Option[Long] = None)
 
   def json(campaign: Campaign, results: Seq[Aggregation]): Seq[Count] = {
     if (campaign.collectEncrypted && campaign.collectRaw) {
       results.flatMap { result =>
-        result.rawValues
-          .zip(result.decryptedValues)
+        val counts = result.rawValues.zip(result.decryptedValues)
+        val total = Count(result.day, "total", Some(counts.head._1), Some(counts.head._2))
+        val rows = counts.tail
           .zipWithIndex
           .filter { case ((rawCount, decryptedCount), _) => rawCount > 0 || decryptedCount > 0 }
           .map { case ((rawCount, decryptedCount), idx) =>
-            Count(result.day, idx, Some(rawCount), Some(decryptedCount))
+            Count(result.day, idx.toString, Some(rawCount), Some(decryptedCount))
           }
+        total +: rows
       }
     } else if (campaign.collectEncrypted) {
       results.flatMap { result =>
-        result.decryptedValues
+        val total = Count(result.day, "total", decryptedCount = Some(result.decryptedValues.head))
+        val rows = result.decryptedValues.tail
           .zipWithIndex
           .filter { case (v, _) => v > 0 }
-          .map { case (v, idx) => Count(result.day, idx, decryptedCount = Some(v)) }
+          .map { case (v, idx) => Count(result.day, idx.toString, decryptedCount = Some(v)) }
+        total +: rows
       }
     } else if (campaign.collectRaw) {
       results.flatMap { result =>
-        result.rawValues
+        val total = Count(result.day, "total", rawCount = Some(result.rawValues.head))
+        val rows = result.rawValues.tail
           .zipWithIndex
           .filter { case (v, _) => v > 0 }
-          .map { case (v, idx) => Count(result.day, idx, rawCount = Some(v)) }
+          .map { case (v, idx) => Count(result.day, idx.toString, rawCount = Some(v)) }
+        total +: rows
       }
     } else {
       Seq.empty

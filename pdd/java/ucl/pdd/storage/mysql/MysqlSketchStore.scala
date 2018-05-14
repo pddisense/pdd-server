@@ -20,7 +20,7 @@ package ucl.pdd.storage.mysql
 
 import com.twitter.finagle.mysql.{OK, Parameter, Row, ServerError, Client => MysqlClient}
 import com.twitter.util.Future
-import ucl.pdd.api.Sketch
+import ucl.pdd.domain.Sketch
 import ucl.pdd.storage.SketchStore
 
 import scala.collection.mutable
@@ -31,8 +31,8 @@ private[mysql] final class MysqlSketchStore(mysql: MysqlClient) extends SketchSt
 
   override def create(sketch: Sketch): Future[Boolean] = {
     val sql = "insert into sketches(name, clientName, campaignName, `group`, day, publicKey, " +
-      "encryptedValues, rawValues, submitted) " +
-      "values (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+      "queriesCount, encryptedValues, rawValues, submitted) " +
+      "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     mysql
       .prepare(sql)
       .apply(
@@ -42,6 +42,7 @@ private[mysql] final class MysqlSketchStore(mysql: MysqlClient) extends SketchSt
         sketch.group,
         sketch.day,
         sketch.publicKey,
+        sketch.queriesCount,
         sketch.encryptedValues,
         sketch.rawValues,
         sketch.submitted)
@@ -55,7 +56,7 @@ private[mysql] final class MysqlSketchStore(mysql: MysqlClient) extends SketchSt
   override def replace(sketch: Sketch): Future[Boolean] = {
     val sql = "update sketches " +
       "set clientName = ?, campaignName = ?, `group` = ?, day = ?, publicKey = ?, " +
-      "encryptedValues = ?, rawValues = ?, submitted = ? " +
+      "queriesCount = ?, encryptedValues = ?, rawValues = ?, submitted = ? " +
       "where name = ?"
     mysql
       .prepare(sql)
@@ -65,6 +66,7 @@ private[mysql] final class MysqlSketchStore(mysql: MysqlClient) extends SketchSt
         sketch.group,
         sketch.day,
         sketch.publicKey,
+        sketch.queriesCount,
         sketch.encryptedValues,
         sketch.rawValues,
         sketch.submitted,
@@ -132,6 +134,7 @@ private[mysql] final class MysqlSketchStore(mysql: MysqlClient) extends SketchSt
       group = toInt(row, "group"),
       day = toInt(row, "day"),
       publicKey = toString(row, "publicKey"),
+      queriesCount = toInt(row, "queriesCount"),
       encryptedValues = getStrings(row, "encryptedValues"),
       rawValues = getLongs(row, "rawValues"),
       submitted = toBoolean(row, "submitted"))

@@ -16,7 +16,7 @@
  * along with PDD.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ucl.pdd.api
+package ucl.pdd.domain
 
 import org.joda.time.Instant
 
@@ -46,15 +46,15 @@ object CampaignValidator {
     obj.email.foreach(email => validateTerm("email", email, errors))
     obj.vocabulary.queries.zipWithIndex.foreach { case (query, idx) =>
       query match {
-        case VocabularyQuery(Some(exact), None) =>
+        case Vocabulary.Query(Some(exact), None) =>
           validateTerm(s"vocabulary.queries.$idx.exact", exact, errors)
-        case VocabularyQuery(None, Some(terms)) =>
+        case Vocabulary.Query(None, Some(terms)) =>
           terms.zipWithIndex.foreach { case (term, idx2) =>
             validateTerm(s"vocabulary.queries.$idx.terms.$idx2", term, errors)
           }
-        case VocabularyQuery(None, None) =>
+        case Vocabulary.Query(None, None) =>
           errors += ErrorCause("should specify a query", s"vocabulary.queries.$idx")
-        case VocabularyQuery(Some(_), Some(_)) =>
+        case Vocabulary.Query(Some(_), Some(_)) =>
           errors += ErrorCause("should specify either an exact or terms query, not both", s"vocabulary.queries.$idx")
       }
     }

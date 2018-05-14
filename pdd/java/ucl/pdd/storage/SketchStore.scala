@@ -19,7 +19,7 @@
 package ucl.pdd.storage
 
 import com.twitter.util.Future
-import ucl.pdd.api.Sketch
+import ucl.pdd.domain.Sketch
 
 trait SketchStore {
   /**

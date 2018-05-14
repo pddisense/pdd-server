@@ -20,7 +20,7 @@ scala_library(
   name = "jackson",
   srcs = glob(["*.scala"]),
   deps = [
-    "//pdd/java/ucl/pdd/api",
+    "//pdd/java/ucl/pdd/domain",
     "//3rdparty/jvm/com/twitter:finatra_jackson",
   ],
 )

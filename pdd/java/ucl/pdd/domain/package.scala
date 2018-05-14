@@ -16,21 +16,12 @@
  * along with PDD.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ucl.pdd.api
+package ucl.pdd
 
-/**
- * A vocabulary is a list of search queries that are tracked. A vocabulary is append-only, queries
- * cannot be removed once they have been added to enforce traceability.
- *
- * @param queries List of search queries tracked by this vocabulary.
- */
-case class Vocabulary(queries: Seq[VocabularyQuery] = Seq.empty)
+import org.joda.time.Instant
 
-/**
- * A query of interest inside a vocabulary. Exactly one of the fields should be set.
- *
- * @param exact An exact query represent an entire search query.
- * @param terms Terms represent a list of tokens that must be simultaneously present in a search
- *              query. The order does not matter (as opposed to n-grams).
- */
-case class VocabularyQuery(exact: Option[String] = None, terms: Option[Seq[String]] = None)
+package object domain {
+  implicit val instantOrdering = new Ordering[Instant] {
+    override def compare(x: Instant, y: Instant): Int = x.compareTo(y)
+  }
+}

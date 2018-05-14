@@ -21,7 +21,7 @@ package ucl.pdd.storage.memory
 import com.twitter.util.Future
 import ucl.pdd.storage._
 
-final class MemoryStorage extends Storage {
+private[storage] class MemoryStorage extends Storage {
   override val clients: ClientStore = new MemoryClientStore
   override val campaigns: CampaignStore = new MemoryCampaignStore
   override val aggregations: AggregationStore = new MemoryAggregationStore
@@ -33,4 +33,6 @@ final class MemoryStorage extends Storage {
   override def shutDown(): Future[Unit] = Future.Done
 }
 
-
+object MemoryStorage {
+  def empty: MemoryStorage = new MemoryStorage
+}

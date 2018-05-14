@@ -19,7 +19,7 @@
 package ucl.pdd.storage
 
 import com.twitter.util.{Await, Future}
-import ucl.pdd.api.{Campaign, Vocabulary, VocabularyQuery}
+import ucl.pdd.domain.{Campaign, Vocabulary}
 
 /**
  * Common unit tests for implementations of [[CampaignStore]].
@@ -44,7 +44,7 @@ abstract class CampaignStoreSpec extends StoreSpec {
     Campaign(
       name = "campaign2",
       createTime = now().plus(1000),
-      vocabulary = Vocabulary(queries = Seq(VocabularyQuery(exact = Some("foo")), VocabularyQuery(exact = Some("bar")), VocabularyQuery(terms = Some(Seq("a", "b"))))),
+      vocabulary = Vocabulary(queries = Seq(Vocabulary.Query(exact = Some("foo")), Vocabulary.Query(exact = Some("bar")), Vocabulary.Query(terms = Some(Seq("a", "b"))))),
       displayName = "second campaign",
       email = Some("v@ucl.ac.uk"),
       notes = None,
@@ -88,7 +88,7 @@ abstract class CampaignStoreSpec extends StoreSpec {
     val newCampaign1 = campaigns(0).copy(
       startTime = Some(now().minus(5000)),
       notes = Some("new notes"),
-      vocabulary = Vocabulary(queries = Seq(VocabularyQuery(exact = Some("bar")), VocabularyQuery(terms = Some(Seq("bar", "barbar"))))),
+      vocabulary = Vocabulary(queries = Seq(Vocabulary.Query(exact = Some("bar")), Vocabulary.Query(terms = Some(Seq("bar", "barbar"))))),
       email = Some("other@ucl.ac.uk"),
       delay = 3,
       graceDelay = 5,

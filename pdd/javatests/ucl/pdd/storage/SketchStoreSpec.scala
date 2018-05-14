@@ -19,7 +19,7 @@
 package ucl.pdd.storage
 
 import com.twitter.util.Await
-import ucl.pdd.api.Sketch
+import ucl.pdd.domain.Sketch
 
 /**
  * Common unit tests for implementations of [[SketchStore]].
@@ -34,6 +34,7 @@ abstract class SketchStoreSpec extends StoreSpec {
       day = 0,
       publicKey = "foo-key==",
       submitted = true,
+      queriesCount = 2,
       encryptedValues = Some(Seq("1", "0", "0")),
       rawValues = Some(Seq(1, 1, 0))),
     Sketch(
@@ -44,6 +45,7 @@ abstract class SketchStoreSpec extends StoreSpec {
       day = 1,
       publicKey = "foo-key==",
       submitted = false,
+      queriesCount = 3,
       encryptedValues = None,
       rawValues = None),
     Sketch(
@@ -53,6 +55,7 @@ abstract class SketchStoreSpec extends StoreSpec {
       group = 0,
       day = 0,
       publicKey = "bar-key==",
+      queriesCount = 2,
       submitted = false,
       encryptedValues = None,
       rawValues = None),
@@ -64,6 +67,7 @@ abstract class SketchStoreSpec extends StoreSpec {
       day = 0,
       publicKey = "bar-key==",
       submitted = false,
+      queriesCount = 5,
       encryptedValues = None,
       rawValues = None))
 

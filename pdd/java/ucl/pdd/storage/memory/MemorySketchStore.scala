@@ -21,7 +21,7 @@ package ucl.pdd.storage.memory
 import java.util.concurrent.ConcurrentHashMap
 
 import com.twitter.util.Future
-import ucl.pdd.api.Sketch
+import ucl.pdd.domain.Sketch
 import ucl.pdd.storage.SketchStore
 
 import scala.collection.JavaConverters._

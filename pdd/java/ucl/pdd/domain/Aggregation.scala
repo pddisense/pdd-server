@@ -16,7 +16,7 @@
  * along with PDD.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ucl.pdd.api
+package ucl.pdd.domain
 
 /**
  * An aggregation is a request to collect searches during a given time period as part of a
@@ -28,12 +28,13 @@ case class Aggregation(
   day: Int,
   decryptedValues: Seq[Long],
   rawValues: Seq[Long],
-  stats: AggregationStats) {
+  stats: Aggregation.Stats) {
 
   def withoutValues: Aggregation = copy(decryptedValues = Seq.empty, rawValues = Seq.empty)
 }
 
-case class AggregationStats(
-  activeCount: Long,
-  submittedCount: Long,
-  decryptedCount: Long)
+object Aggregation {
+
+  case class Stats(activeCount: Long, submittedCount: Long, decryptedCount: Long)
+
+}

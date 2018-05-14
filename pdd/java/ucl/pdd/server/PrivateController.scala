@@ -28,7 +28,7 @@ import com.twitter.finatra.http.request.RequestUtils
 import com.twitter.finatra.request.{ContentType, QueryParam, RouteParam}
 import com.twitter.util.Future
 import org.joda.time.Instant
-import ucl.pdd.api._
+import ucl.pdd.domain._
 import ucl.pdd.storage._
 
 @Singleton

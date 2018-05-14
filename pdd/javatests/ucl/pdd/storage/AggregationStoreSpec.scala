@@ -19,7 +19,7 @@
 package ucl.pdd.storage
 
 import com.twitter.util.{Await, Future}
-import ucl.pdd.api.{Aggregation, AggregationStats}
+import ucl.pdd.domain.Aggregation
 
 /**
  * Common unit tests for implementations of [[AggregationStore]].
@@ -32,21 +32,21 @@ abstract class AggregationStoreSpec extends StoreSpec {
       day = 0,
       decryptedValues = Seq(0, 2, 0, 0),
       rawValues = Seq(0, 1, 0, 0),
-      stats = AggregationStats(2, 2, 1)),
+      stats = Aggregation.Stats(2, 2, 1)),
     Aggregation(
       name = "agg2",
       campaignName = "campaign1",
       day = 1,
       decryptedValues = Seq(0, 2, 0, 5),
       rawValues = Seq(0, 2, 0, 10),
-      stats = AggregationStats(3, 2, 1)),
+      stats = Aggregation.Stats(3, 2, 1)),
     Aggregation(
       name = "agg3",
       campaignName = "campaign2",
       day = 0,
       decryptedValues = Seq(0, 0),
       rawValues = Seq(0, 1),
-      stats = AggregationStats(2, 1, 1)))
+      stats = Aggregation.Stats(2, 1, 1)))
 
   it should "create and retrieve aggregations" in {
     Await.result(storage.aggregations.list(AggregationStore.Query(campaignName = "campaign1"))) should have size 0

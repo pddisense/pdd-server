@@ -20,7 +20,7 @@ load("@io_bazel_rules_docker//container:push.bzl", "container_push")
 srcs = glob(["*.scala"])
 deps = [
   ":annotations",
-  "//pdd/java/ucl/pdd/api",
+  "//pdd/java/ucl/pdd/domain",
   "//pdd/java/ucl/pdd/jackson",
   "//pdd/java/ucl/pdd/strategy",
   "//pdd/java/ucl/pdd/logging",

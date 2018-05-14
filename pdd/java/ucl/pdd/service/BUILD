@@ -21,7 +21,7 @@ scala_library(
   srcs = glob(["*.scala"]),
   deps = [
     ":annotations",
-    "//pdd/java/ucl/pdd/api",
+    "//pdd/java/ucl/pdd/domain",
     "//pdd/java/ucl/pdd/storage",
     "//pdd/java/ucl/pdd/strategy",
     "//pdd/java/ucl/pdd/util",

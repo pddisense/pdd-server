@@ -26,7 +26,7 @@ import com.twitter.finatra.http.Controller
 import com.twitter.finatra.request.RouteParam
 import com.twitter.util.Future
 import org.joda.time.Instant
-import ucl.pdd.api._
+import ucl.pdd.domain._
 import ucl.pdd.service.PingService
 import ucl.pdd.storage.{ActivityStore, Storage}
 

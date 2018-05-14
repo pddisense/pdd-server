@@ -23,9 +23,19 @@ import com.google.inject.Inject
 import com.twitter.inject.Logging
 import com.twitter.util.{Await, Future}
 import org.joda.time.Instant
-import ucl.pdd.api.{Aggregation, AggregationStats, Campaign, Sketch}
+import ucl.pdd.domain.{Aggregation, Campaign, Sketch}
 import ucl.pdd.storage.{SketchStore, Storage}
 
+/**
+ * The role of this job is to periodically aggregate the pending sketches. While a [[Sketch]]
+ * represent data sent by the clients, an [[Aggregation]] is what is ultimately presented to the
+ * analysts. Sketches are expected to be garbage-collected once the relevant aggregations have been
+ * formed and the campaign's grace delay is expired.
+ *
+ * @param storage     Persistent storage.
+ * @param timezone    Reference timezone.
+ * @param testingMode Whether we are in testing mode, where days are shorter.
+ */
 final class AggregateSketchesJob @Inject()(
   storage: Storage,
   @Timezone timezone: DateTimeZone,
@@ -40,20 +50,29 @@ final class AggregateSketchesJob @Inject()(
     val now = fireTime.toDateTime(timezone)
     val f = storage.campaigns
       .list()
-      .flatMap(results => Future.join(results.map(handleCampaign(now, _))))
+      .flatMap(results => Future.join(results.map(aggregate(_, now))))
     Await.result(f)
 
     logger.info(s"$prefix Completed job")
   }
 
-  private def handleCampaign(now: DateTime, campaign: Campaign): Future[Unit] = {
-    // On a given day `d`, we aggregate the sketches from day `d - 2 - campaign.delay - campaign.graceDelay`
-    // to `d - 2 - campaign.delay`.
+  private def aggregate(campaign: Campaign, now: DateTime): Future[Unit] = {
     campaign.startTime match {
       case None =>
         // This campaign was never started, nothing to do.
         Future.Done
       case Some(startTime) =>
+        // On a given day `d`, we aggregate the sketches from day `d - 2 - campaign.delay -
+        // campaign.graceDelay` to `d - 2 - campaign.delay`.
+        //
+        // Indeed, it takes at least one full day to collect the sketches of the previous day
+        // (given there is no delay). Therefore, on a given day `d`, we are collecting the sketches
+        // for day `d - 1`, which means we can expect them to be available on `d + 1` (hence the
+        // base `d - 2` in the above formula.
+        // If we have further delay, we do not compute the sketches before that delay is elapsed
+        // (because the aggregations won't be available anyway). The grace delay means that the
+        // aggregations are made available but might still evolve. We hence need to recompute those
+        // every during during the grace delay window.
         val actualDay = if (testingMode) {
           (startTime.toDateTime(timezone) to now).duration.minutes.toInt / 5
         } else {
@@ -66,36 +85,40 @@ final class AggregateSketchesJob @Inject()(
         } else {
           val startDay = math.max(0, actualDay - 2 - campaign.delay - campaign.graceDelay)
           val days = startDay to endDay
-          Future.join(days.map(aggregate(_, campaign)))
+          Future.join(days.map(aggregate(campaign, _)))
         }
       //TODO: backfill.
       //TODO: clean old sketches.
     }
   }
 
-  private def aggregate(day: Int, campaign: Campaign): Future[Unit] = {
+  private def aggregate(campaign: Campaign, day: Int): Future[Unit] = {
     storage
       .sketches
       .list(SketchStore.Query(campaignName = Some(campaign.name), day = Some(day)))
-      .flatMap(sketches => aggregate(day, campaign, sketches))
+      .flatMap(sketches => aggregate(campaign, day, sketches))
   }
 
-  private def aggregate(day: Int, campaign: Campaign, sketches: Seq[Sketch]): Future[Unit] = {
+  private def aggregate(campaign: Campaign, day: Int, sketches: Seq[Sketch]): Future[Unit] = {
+    // We only aggregate raw values if the campaign was expecting so.
     val rawValues = if (campaign.collectRaw) {
-      foldRaw(sketches.map(_.rawValues.toSeq.flatten))
+      sumRawValues(sketches.map(_.rawValues.toSeq.flatten))
     } else {
       Seq.empty
     }
+    // We only aggregate and decrypt encrypted values if the campaign was expecting so.
     val (decryptedValues, decryptedCount) = if (campaign.collectEncrypted) {
       // TODO: raise a warning if submitted but no encrypted values?
+      // Encrypted values of a group can only be decrypted if in possession of all values of this
+      // group. First step is then to filter the groups for which we have all submissions.
       val decryptedByGroup = sketches
         .groupBy(_.group)
         .values
         .filter(_.forall(s => s.submitted && s.encryptedValues.isDefined))
       val valuesByGroup = decryptedByGroup.map { groupSketches =>
-        foldEncrypted(groupSketches.map(_.encryptedValues.toSeq.flatten))
+        sumEncryptedValues(groupSketches.map(_.encryptedValues.toSeq.flatten))
       }
-      (foldRaw(valuesByGroup), decryptedByGroup.map(_.size).sum.toLong)
+      (sumRawValues(valuesByGroup), decryptedByGroup.map(_.size).sum.toLong)
     } else {
       (Seq.empty, 0L)
     }
@@ -106,13 +129,13 @@ final class AggregateSketchesJob @Inject()(
       day = day,
       decryptedValues = decryptedValues,
       rawValues = rawValues,
-      stats = AggregationStats(
+      stats = Aggregation.Stats(
         activeCount = sketches.size,
         submittedCount = sketches.count(_.submitted),
         decryptedCount = decryptedCount))
 
     storage.aggregations
-      .get(s"${campaign.name}-$day")
+      .get(aggregation.name)
       .map {
         case Some(_) => storage.aggregations.replace(aggregation)
         case None => storage.aggregations.create(aggregation)
@@ -123,18 +146,16 @@ final class AggregateSketchesJob @Inject()(
       .unit
   }
 
-  private def foldRaw(values: Iterable[Seq[Long]]): Seq[Long] = {
+  private def sumRawValues(values: Iterable[Seq[Long]]): Seq[Long] = {
     val nonEmptyValues = values.filter(_.nonEmpty)
     if (nonEmptyValues.isEmpty) {
       Seq.empty
     } else {
-      nonEmptyValues.reduce[Seq[Long]] { case (a, b) =>
-        a.zip(b).map { case (n1, n2) => n1 + n2 }
-      }
+      nonEmptyValues.reduce[Seq[Long]] { case (a, b) => a.zip(b).map { case (n1, n2) => n1 + n2 } }
     }
   }
 
-  private def foldEncrypted(values: Iterable[Seq[String]]): Seq[Long] = {
+  private def sumEncryptedValues(values: Iterable[Seq[String]]): Seq[Long] = {
     val nonEmptyValues = values.filter(_.nonEmpty)
     if (nonEmptyValues.isEmpty) {
       Seq.empty

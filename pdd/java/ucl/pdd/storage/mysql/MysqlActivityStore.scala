@@ -20,7 +20,7 @@ package ucl.pdd.storage.mysql
 
 import com.twitter.finagle.mysql.{OK, Parameter, Row, Client => MysqlClient}
 import com.twitter.util.Future
-import ucl.pdd.api.Activity
+import ucl.pdd.domain.Activity
 import ucl.pdd.storage.ActivityStore
 
 import scala.collection.mutable

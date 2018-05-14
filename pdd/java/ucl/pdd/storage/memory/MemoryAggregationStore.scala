@@ -21,7 +21,7 @@ package ucl.pdd.storage.memory
 import java.util.concurrent.ConcurrentHashMap
 
 import com.twitter.util.Future
-import ucl.pdd.api.Aggregation
+import ucl.pdd.domain.Aggregation
 import ucl.pdd.storage.AggregationStore
 
 import scala.collection.JavaConverters._

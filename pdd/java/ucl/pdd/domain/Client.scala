@@ -16,7 +16,7 @@
  * along with PDD.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ucl.pdd.api
+package ucl.pdd.domain
 
 import org.joda.time.Instant
 

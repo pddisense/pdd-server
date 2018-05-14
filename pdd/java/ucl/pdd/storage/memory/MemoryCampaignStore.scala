@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 import com.github.nscala_time.time.Imports._
 import com.twitter.util.Future
-import ucl.pdd.api.Campaign
+import ucl.pdd.domain.Campaign
 import ucl.pdd.storage.CampaignStore
 
 import scala.collection.JavaConverters._

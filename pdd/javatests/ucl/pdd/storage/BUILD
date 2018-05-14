@@ -20,7 +20,7 @@ scala_library(
   name = "storage",
   srcs = glob(["*.scala"]),
   deps = [
-    "//pdd/java/ucl/pdd/api",
+    "//pdd/java/ucl/pdd/domain",
     "//pdd/java/ucl/pdd/storage",
     "//pdd/javatests/ucl/testing",
     "//3rdparty/jvm/com/github/nscala_time",

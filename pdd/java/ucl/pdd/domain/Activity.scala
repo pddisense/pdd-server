@@ -16,19 +16,20 @@
  * along with PDD.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ucl.pdd.api
+package ucl.pdd.domain
 
-import scala.collection.mutable
+import org.joda.time.Instant
 
-object ClientValidator {
-  def validate(obj: Client): ValidationResult = {
-    val errors = mutable.ListBuffer.empty[ErrorCause]
-    if (obj.publicKey.isEmpty) {
-      errors += ErrorCause("should not be empty", "publicKey")
-    }
-    if (obj.browser.isEmpty) {
-      errors += ErrorCause("should not be empty", "browser")
-    }
-    if (errors.isEmpty) ValidationResult.Valid else ValidationResult.Invalid(errors.toList)
-  }
-}
+/**
+ * Record the activity of a client. It is later used to create "optimal" groups when dealing with
+ * encrypted sketches collection. An activity is recorded when a client sends a ping request
+ * to the server. There might be some rate-limiting built on top of it.
+ *
+ * @param clientName  Client unique identifier.
+ * @param time        Time of the interaction.
+ * @param countryCode Code of the country the client is currently located in.
+ */
+case class Activity(
+  clientName: String,
+  time: Instant,
+  countryCode: Option[String])
