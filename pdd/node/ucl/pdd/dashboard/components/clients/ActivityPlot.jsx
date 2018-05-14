@@ -27,8 +27,8 @@ import {
   YAxis
 } from 'react-vis';
 import 'react-vis/dist/style.css';
+import { max, range } from 'lodash';
 import moment from 'moment';
-import { range } from 'lodash';
 
 const DAYS_COUNT = 14;
 
@@ -43,9 +43,11 @@ class ActivityPlot extends React.Component {
       const count = activity.days.filter(item => moment(item.time).isBetween(startTime, endTime)).length;
       data.push({ x: startTime.valueOf(), y: count });
     });
+    const yMax = max(data.map(pt => pt.y));
+
     return (
       <div className="plot-container">
-        <XYPlot xType="time" width={800} height={200}>
+        <XYPlot xType="time" yDomain={[0, yMax]} width={800} height={200}>
           <HorizontalGridLines/>
           <VerticalGridLines/>
           <XAxis tickTotal={DAYS_COUNT}/>
