@@ -5,43 +5,58 @@ layout: base
 {% assign page_path = page.url | split: "/" %}
 
 <div id="page" class="container">
-<div class="row">
-  <div class="col-md-3 docs-sidebar">
-    <ul class="docs-menu">
-      {% assign entries = site.pages | where_exp: 'entry', 'entry.url contains page_path[1]' | sort: 'weight' %}
-      {% for entry in entries %}
-      {% assign entry_path = entry.url | split: "/" %}
-      {% unless entry_path[3] %}
-      {% if entry.separator %}<hr />{% endif %}
-      <li{% if page.url contains entry.url %} class="active"{% endif %}>
-      <a href="{{ entry.url | relative_url }}">
-        {{ entry.title }}
-      </a>
-      {% if page.url contains entry.url %}
-      {% assign subentries = site.pages | where_exp: 'subentry', 'subentry.url contains entry.url' %}
-      {% assign subentries = subentries | where_exp: 'subentry', 'subentry.url != entry.url' | sort: 'weight' %}
-      {% assign subentries_count = subentries | size %}
-      {% if subentries_count > 0 %}
-      <ul>
-        {% for subentry in subentries %}
-        <li{% if page.url contains subentry.url %} class="active"{% endif %}>
-        <a href="{{ subentry.url | relative_url }}">
-          {{ subentry.title }}
-        </a>
-        </li>
-        {% endfor %}
-      </ul>
-      {% endif %}
-      {% endif %}
-      </li>
-      {% endunless %}
-      {% endfor %}
-    </ul>
-  </div>
+  <div class="row">
+    <div class="col-md-3 docs-sidebar">
 
-  <div class="col-md-9">
-    <h1 class="page-title">{{ page.title }}</h1>
-    <div class="docs">{{ content }}</div>
+      {% if page.url contains "/docs/users/" %}
+      <h5>User guide</h5>
+      <ul class="docs-menu">
+        <li {% if page.url == "/docs/users/" %}class="active"{% endif %}>
+        <a href="/docs/users/">Getting started</a>
+        </li>
+      </ul>
+      {% else %}
+      <h5><a href="/docs/users/">User guide</a></h5>
+      {% endif %}
+
+      {% if page.url contains "/docs/admins/" %}
+      <h5>Administrator guide</h5>
+      <ul class="docs-menu">
+        <li {% if page.url == "/docs/admins/" %}class="active"{% endif %}>
+        <a href="/docs/admins/">Getting started</a>
+        </li>
+        <li {% if page.url == "/docs/admins/architecture.html" %}class="active"{% endif %}>
+        <a href="/docs/admins/architecture.html">Architecture</a>
+        </li>
+        <li {% if page.url == "/docs/admins/install.html" %}class="active"{% endif %}>
+        <a href="/docs/admins/install.html">Installation</a>
+        </li>
+        <li {% if page.url == "/docs/admins/update.html" %}class="active"{% endif %}>
+        <a href="/docs/admins/update.html">Updating</a>
+        </li>
+        <li {% if page.url == "/docs/admins/monitoring.html" %}class="active"{% endif %}>
+        <a href="/docs/admins/monitoring.html">Monitoring</a>
+        </li>
+      </ul>
+      {% else %}
+      <h5><a href="/docs/admins/">Administrator guide</a></h5>
+      {% endif %}
+
+      {% if page.url contains "/docs/developers/" %}
+      <h5>Developer guide</h5>
+      <ul class="docs-menu">
+        <li {% if page.url == "/docs/developers/" %}class="active"{% endif %}>
+        <a href="/docs/developers/">Getting started</a>
+        </li>
+      </ul>
+      {% else %}
+      <h5><a href="/docs/developers/">Developer guide</a></h5>
+      {% endif %}
+    </div>
+
+    <div class="col-md-9">
+      <h1 class="page-title">{{ page.title }}</h1>
+      <div class="docs">{{ content }}</div>
+    </div>
   </div>
-</div>
 </div>

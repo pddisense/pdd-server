@@ -89,6 +89,10 @@ nav.navbar {
   border-bottom: 1px solid rgba(0,0,0,.2);
 }
 
+.feature-1 {
+  border-top: 1px solid rgba(0,0,0,.2);
+}
+
 .feature-image {
   background-size: cover;
   height: 300px;
@@ -246,6 +250,10 @@ nav.navbar {
   margin-bottom: 15px;
 }
 
+.docs {
+  margin-bottom: 30px;
+}
+
 .center {
   text-align: center;
 }
@@ -274,6 +282,11 @@ nav.navbar {
   text-decoration: none;
   background-color: #98a2ac;
   border-color: #adb5bd;
+}
+
+div.highlight {
+  padding: 10px;
+  border-radius: 3px;
 }
 
 /**

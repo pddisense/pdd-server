@@ -26,24 +26,15 @@ We need to have access to your browsing in order to monitor the search queries y
 But do not worry, you can [view the data we collect](./history) in real-time and even delete a search query before it is sent if you do not want to share it with us.
 Moreover, most of the collection campaigns come with [a privacy-preserving encryption layer](./privacy) that helps protect your privacy.
 
-## 2. Join your first campaign
-Once the extension is installed, you probably want to join a collection campaign.
-Campaigns are launched by researchers who are interested in monitoring certain keywords, in order to detect or follow the evolution of infectious diseases. 
-You choose which campaigns you want to participate to, and can join and leave campaigns at any time.
-However, for your contribution to be helpful and help us advance the research, we recommend that you commit to a campaign for a certain amount of time (e.g., a couple of weeks).
+## 2. You're done!
 
-To join a campaign, head to the "Campaigns" tab of the extension options.
-The options are open when you first install the extension, and otherwise accessible through the PDD button that appeared at the right side of the address bar.
-
-![Campaigns](/assets/screenshots/chrome_campaigns.jpeg)
-
-To join a campaign, click on its name, review its information, and if you agree click on the "Join the campaign" button.
-A final dialog opens, asking for a confirmation.
-Click again on the "Join this campaign" button, and *voilà*!
-
-![Campaigns](/assets/screenshots/chrome_join.jpeg)
-
-## 3. Next steps
+Once the extension is installed, you are pretty much done.
 Now, the PDD extension is running and monitoring your search queries in the background.
-You have nothing more to do, everything is automated.
-If you want to learn more about how the extension works, you can use the links in the left menu.
+Your browser will automatically contact our server about once a day to get instructions about which queries are actually being monitoring, and send back collect data.
+ 
+The extension also comes with an interface providing answers to the questions you may have, as well as some insights about what the extension is doing.
+These options can be accessed by clicking on the extension's logo that should have appeared at the right-hand side of the address bar.
+
+![Options button](/assets/screenshots/chrome_address_bar2.jpg) 
+
+If this button is not visible, you may alternatively access the options by using [Chrome's extensions page](chrome://extensions/).
