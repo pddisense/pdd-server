@@ -106,12 +106,12 @@ class Title extends React.Component {
             </Button> :
             campaign.started ?
               <Button onClick={() => this.handleToggleStopAlert(true)} icon="stop">
-                Stop collection
+                Stop campaign
               </Button> :
               <Button intent={Intent.PRIMARY}
                       onClick={() => this.handleToggleStartAlert(true)}
                       icon="play">
-                Start collection
+                Start campaign
               </Button>}
         </div>
 

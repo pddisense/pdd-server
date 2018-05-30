@@ -70,7 +70,20 @@ final class PublicController @Inject()(storage: Storage, pingService: PingServic
   }
 
   get("/api/clients/:name/ping") { req: PingClientRequest =>
-    pingService.apply(req.name, Instant.now).map {
+    val ping = PingRequest(req.name, req.request.remoteAddress)
+    pingService.apply(ping, Instant.now).map {
+      case None => response.notFound
+      case Some(resp) => resp
+    }
+  }
+
+  post("/api/clients/:name/ping") { req: PingClientRequest =>
+    val ping = PingRequest(
+      req.name,
+      req.request.remoteAddress,
+      extensionVersion = req.extensionVersion,
+      timezone = req.timezone)
+    pingService.apply(ping, Instant.now).map {
       case None => response.notFound
       case Some(resp) => resp
     }
@@ -107,7 +120,11 @@ final class PublicController @Inject()(storage: Storage, pingService: PingServic
   }
 }
 
-case class PingClientRequest(@RouteParam name: String)
+case class PingClientRequest(
+  @RouteParam name: String,
+  request: Request,
+  extensionVersion: Option[String],
+  timezone: Option[String])
 
 case class CreateClientRequest(
   publicKey: String,

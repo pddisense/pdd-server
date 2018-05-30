@@ -18,22 +18,20 @@
 
 package ucl.pdd.domain
 
-import org.joda.time.Instant
+import java.net.InetAddress
 
 /**
- * Record the activity of a client. It is later used to create "optimal" groups when dealing with
- * encrypted sketches collection. An activity is recorded when a client sends a ping request
- * to the server. There might be some rate-limiting built on top of it.
+ * Payload of the request send by clients when pinging the server.
  *
  * @param clientName       Client unique identifier.
- * @param time             Time of the interaction.
- * @param countryCode      Code of the country the client is currently located in (ISO 3166-1 alpha-2).
- * @param extensionVersion Version of the Chrome extension the client is actually using.
- * @param timezone         Name of the timezone the client is currently located in.
+ * @param ipAddress        Client IP address (automatically detected).
+ * @param extensionVersion Version of the Chrome extension the client is actually using (provided
+ *                         by the client).
+ * @param timezone         Name of the timezone the client is currently located in (provided by
+ *                         the client).
  */
-case class Activity(
+case class PingRequest(
   clientName: String,
-  time: Instant,
-  countryCode: Option[String],
-  extensionVersion: Option[String],
-  timezone: Option[String])
+  ipAddress: InetAddress,
+  extensionVersion: Option[String] = None,
+  timezone: Option[String] = None)

@@ -40,30 +40,39 @@ import scala.util.Random
  * load to be low (except if somebody tries a DDoS...), it is simpler like this for now.
  *
  * @param storage     Persistent storage.
+ * @param geocoder    Geocodern used to infer the country from an IP address.
  * @param timezone    Reference timezone.
  * @param testingMode Whether we are in testing mode, where days are shorter.
  */
 @Singleton
 final class PingService @Inject()(
   storage: Storage,
+  geocoder: Geocoder,
   @Timezone timezone: DateTimeZone,
   @TestingMode testingMode: Boolean) {
 
-  def apply(clientName: String, now: Instant): Future[Option[PingResponse]] = {
-    storage.clients.get(clientName).flatMap {
+  def apply(request: PingRequest, now: Instant): Future[Option[PingResponse]] = {
+    storage.clients.get(request.clientName).flatMap {
       case None => Future.value(None)
       case Some(client) =>
         Future
-          .join(recordActivity(client, now), createResponse(client, now))
+          .join(recordActivity(request, now), createResponse(client, now))
           .map { case (_, resp) => Some(resp) }
     }
   }
 
-  private def recordActivity(client: Client, now: Instant): Future[Unit] = {
+  private def recordActivity(request: PingRequest, now: Instant): Future[Unit] = {
     // We keep a log of times at which clients send their pings. This is useful both for
     // debugging purposes, and to the algorithm in charge of creating groups. The latter may
     // use historical activity to optimize groups (i.e., by pruning long-inactive users).
-    storage.activity.create(Activity(client.name, now, None))
+    geocoder.geocode(request.ipAddress).flatMap { countryCode =>
+      storage.activity.create(Activity(
+        request.clientName,
+        now,
+        countryCode = countryCode,
+        extensionVersion = request.extensionVersion,
+        timezone = request.timezone))
+    }
   }
 
   private def createResponse(client: Client, now: Instant): Future[PingResponse] = {

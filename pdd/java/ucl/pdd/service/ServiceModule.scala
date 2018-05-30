@@ -32,12 +32,19 @@ object ServiceModule extends TwitterModule {
     "api.testing_mode",
     false,
     "Whether to switch the server to testing mode (where days only last 5 minutes). It should be only activated for testing purposes.")
+  private[this] val geocoderFlag = flag[String]("geocoder", "Which geocoder to use to map IP addresses to a country code")
 
   override def configure(): Unit = {
     bind[DateTimeZone].annotatedWith[Timezone].toInstance(DateTimeZone.forID(timezoneFlag()))
     bind[Boolean].annotatedWith[TestingMode].toInstance(testingModeFlag())
     if (testingModeFlag()) {
       logger.warn("Running in TESTING mode. Days will only last 5 minutes!")
+    }
+
+    geocoderFlag.get match {
+      case Some("maxmind") => bind[Geocoder].to[MaxmindGeocoder]
+      case Some(invalid) => throw new IllegalArgumentException(s"Invalid geocoder type: $invalid")
+      case None => bind[Geocoder].toInstance(NullGeocoder)
     }
   }
 
@@ -50,5 +57,6 @@ object ServiceModule extends TwitterModule {
 
   override def singletonShutdown(injector: Injector): Unit = {
     Await.ready(injector.instance[CronManager].shutDown())
+    Await.ready(injector.instance[Geocoder].close())
   }
 }

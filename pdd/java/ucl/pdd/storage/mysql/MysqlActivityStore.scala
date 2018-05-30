@@ -30,10 +30,11 @@ private[mysql] final class MysqlActivityStore(mysql: MysqlClient) extends Activi
   import MysqlStore._
 
   override def create(activity: Activity): Future[Unit] = {
-    val sql = "insert into activity(clientName, time, countryCode) values (?, ?, ?)"
+    val sql = "insert into activity(clientName, time, countryCode, extensionVersion, timezone) " +
+      "values (?, ?, ?, ?, ?)"
     mysql
       .prepare(sql)
-      .apply(activity.clientName, activity.time, activity.countryCode)
+      .apply(activity.clientName, activity.time, activity.countryCode, activity.extensionVersion, activity.timezone)
       .unit
   }
 
@@ -101,6 +102,8 @@ private[mysql] final class MysqlActivityStore(mysql: MysqlClient) extends Activi
     Activity(
       clientName = toString(row, "clientName"),
       time = toInstant(row, "time"),
-      countryCode = getString(row, "countryCode"))
+      countryCode = getString(row, "countryCode"),
+      extensionVersion = getString(row, "extensionVersion"),
+      timezone = getString(row, "timezone"))
   }
 }

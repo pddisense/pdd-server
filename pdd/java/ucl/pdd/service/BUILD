@@ -29,6 +29,10 @@ scala_library(
     "//3rdparty/jvm/com/twitter:inject_core",
     "//3rdparty/jvm/com/twitter:inject_slf4j",
     "//3rdparty/jvm/com/github/nscala_time",
+    "//3rdparty/jvm/com/maxmind/geoip2",
+  ],
+  resources = [
+    "GeoLite2-Country.mmdb",
   ],
 )
 

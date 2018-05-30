@@ -18,10 +18,12 @@
 
 package ucl.pdd.service
 
+import java.net.InetAddress
+
 import com.twitter.util.{Await, Future}
 import org.joda.time.{DateTime, DateTimeZone}
 import org.scalatest.BeforeAndAfterEach
-import ucl.pdd.domain.{Campaign, Client, PingResponse, Sketch, Vocabulary}
+import ucl.pdd.domain.{Campaign, Client, PingRequest, PingResponse, Sketch, Vocabulary}
 import ucl.pdd.storage.Storage
 import ucl.pdd.storage.memory.MemoryStorage
 import ucl.testing.UnitSpec
@@ -176,7 +178,7 @@ class PingServiceSpec extends UnitSpec with BeforeAndAfterEach {
         clients.map(storage.clients.create) ++
         sketches.map(storage.sketches.create)))
 
-    service = new PingService(storage, timezone, testingMode = false)
+    service = new PingService(storage, NullGeocoder, timezone, testingMode = false)
     super.beforeEach()
   }
 
@@ -189,7 +191,7 @@ class PingServiceSpec extends UnitSpec with BeforeAndAfterEach {
 
   it should "return commands to a client" in {
     def runTests(now: String): Unit = {
-      var resp = Await.result(service.apply("client1", at(now))).get
+      var resp = Await.result(service.apply(PingRequest("client1", InetAddress.getByName("0.0.0.0")), at(now))).get
       resp.submit should contain theSameElementsAs Seq(
         PingResponse.Command(
           sketchName = "sketch6",
@@ -203,7 +205,7 @@ class PingServiceSpec extends UnitSpec with BeforeAndAfterEach {
           collectEncrypted = true,
           round = 1))
 
-      resp = Await.result(service.apply("client2", at(now))).get
+      resp = Await.result(service.apply(PingRequest("client2", InetAddress.getByName("0.0.0.0")), at(now))).get
       resp.submit should contain theSameElementsAs Seq(
         PingResponse.Command(
           sketchName = "sketch2",
@@ -239,7 +241,7 @@ class PingServiceSpec extends UnitSpec with BeforeAndAfterEach {
           collectEncrypted = false,
           round = 0))
 
-      resp = Await.result(service.apply("client3", at(now))).get
+      resp = Await.result(service.apply(PingRequest("client3", InetAddress.getByName("0.0.0.0")), at(now))).get
       // It does return something (the client exists), but it has nothing to do.
       resp.submit should have size 0
     }
@@ -252,7 +254,7 @@ class PingServiceSpec extends UnitSpec with BeforeAndAfterEach {
   }
 
   it should "handle a non-existing client" in {
-    Await.result(service.apply("client100", at("2018-05-13T11:12:34"))) shouldBe None
+    Await.result(service.apply(PingRequest("client100", InetAddress.getByName("0.0.0.0")), at("2018-05-13T11:12:34"))) shouldBe None
   }
 
   // All our operations should use the canonical timezone used by the service.

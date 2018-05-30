@@ -68,3 +68,15 @@ dependencies:
     jwt-core:
       version: "0.16.0"
       lang: scala
+  com.maxmind.geoip2:
+    geoip2:
+      version: "2.12.0"
+      lang: java
+  # Although we do no use that dependency directly, we need to specify it here to force version
+  # 2.8.4 to be used, as it is required by Jackson's Scala module and Maxmind would other pull a
+  # too recent version.
+  com.fasterxml.jackson.core:
+    jackson:
+      version: "2.8.4"
+      lang: java
+      modules: [databind, core, annotations]

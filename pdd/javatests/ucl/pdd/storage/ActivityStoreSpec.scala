@@ -30,18 +30,18 @@ abstract class ActivityStoreSpec extends StoreSpec {
 
     val t = now()
     val activity = Seq(
-      Activity("client1", t, None),
-      Activity("client1", t.plus(5000), None),
-      Activity("client1", t.plus(10000), Some("uk")),
-      Activity("client2", t.plus(6000), Some("uk")),
-      Activity("client2", t.plus(12000), Some("uk")))
+      Activity("client1", t, None, Some("1.2.0"), Some("Europe/London")),
+      Activity("client1", t.plus(5000), None, Some("1.2.1"), Some("Europe/London")),
+      Activity("client1", t.plus(10000), Some("UK"), Some("1.3.0"), Some("Europe/London")),
+      Activity("client2", t.plus(6000), Some("FR"), Some("1.3.0"), Some("Europe/Paris")),
+      Activity("client2", t.plus(12000), Some("UK"), Some("1.3.1"), Some("Europe/London")))
     activity.foreach(act => Await.result(storage.activity.create(act)))
 
     Await.result(storage.activity.list()) should contain theSameElementsAs activity
 
     Await.result(storage.activity.list(ActivityStore.Query(clientName = Some("client1")))) should contain theSameElementsAs activity.take(3)
-    Await.result(storage.activity.list(ActivityStore.Query(countryCode = Some("uk")))) should contain theSameElementsAs Seq(activity(2), activity(3), activity(4))
-    Await.result(storage.activity.list(ActivityStore.Query(startTime = Some(now.plus(1000)), endTime = Some(now.plus(11000))))) should contain theSameElementsAs Seq(activity(1), activity(2), activity(3))
+    Await.result(storage.activity.list(ActivityStore.Query(countryCode = Some("UK")))) should contain theSameElementsAs Seq(activity(2), activity(4))
+    Await.result(storage.activity.list(ActivityStore.Query(startTime = Some(now().plus(1000)), endTime = Some(now().plus(11000))))) should contain theSameElementsAs Seq(activity(1), activity(2), activity(3))
   }
 
   it should "delete activity" in {
@@ -49,11 +49,11 @@ abstract class ActivityStoreSpec extends StoreSpec {
 
     val t = now()
     val activity = Seq(
-      Activity("client1", t, None),
-      Activity("client1", t.plus(5000), None),
-      Activity("client1", t.plus(10000), Some("uk")),
-      Activity("client2", t.plus(6000), Some("uk")),
-      Activity("client2", t.plus(12000), Some("uk")))
+      Activity("client1", t, None, Some("1.2.0"), Some("Europe/London")),
+      Activity("client1", t.plus(5000), None, Some("1.2.1"), Some("Europe/London")),
+      Activity("client1", t.plus(10000), Some("UK"), Some("1.3.0"), Some("Europe/London")),
+      Activity("client2", t.plus(6000), Some("FR"), Some("1.3.0"), Some("Europe/Paris")),
+      Activity("client2", t.plus(12000), Some("UK"), Some("1.3.1"), Some("Europe/London")))
     activity.foreach(act => Await.result(storage.activity.create(act)))
 
     Await.result(storage.activity.delete(ActivityStore.Query(clientName = Some("client3")))) shouldBe 0

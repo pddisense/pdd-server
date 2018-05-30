@@ -106,7 +106,9 @@ object MysqlStorage {
       "unused_id int not null auto_increment," +
       "clientName varchar(255) not null," +
       "time timestamp not null," +
-      "countryCode varchar(255) not null," +
+      "countryCode varchar(2) not null," +
+      "timezone varchar(50) not null," +
+      "extensionVersion varchar(50) not null," +
       "primary key (unused_id)" +
       ") ENGINE=InnoDB DEFAULT CHARSET=utf8")
 }
