@@ -19,7 +19,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import autobind from 'autobind-decorator';
+import { Button } from '@blueprintjs/core';
 import { noop } from 'lodash';
+
+import sendPing from '../protocol/ping.js';
 
 function attrsToState(client) {
   return {
@@ -51,6 +54,13 @@ class SettingsSection extends React.Component {
   @autobind
   handleBlur() {
     this.props.onChange(stateToAttrs(this.state));
+  }
+
+  @autobind
+  handleClick() {
+    if (this.props.client.name) {
+      sendPing(this.props.client);
+    }
   }
 
   render() {
@@ -88,6 +98,18 @@ class SettingsSection extends React.Component {
               This is the internal name that is used to identify you from our server.
               Should you encounter any issues, our support may ask you this name.
             </div>
+          </div>
+        </div>
+
+        <div className="pt-form-group">
+          <Button fill={true}
+                  onClick={this.handleClick}
+                  text="Force synchronization now"
+                  icon="refresh"/>
+          <div className="pt-form-helper-text">
+            By clicking on this button, you will force a data synchronization now.
+            You should not need to use that button under normal conditions.
+            It may be used by power users, or in case our technical support asks you to do so.
           </div>
         </div>
       </div>

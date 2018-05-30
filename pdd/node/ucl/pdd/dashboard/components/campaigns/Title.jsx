@@ -117,7 +117,7 @@ class Title extends React.Component {
 
         <h2 onMouseEnter={() => this.handleToggleCopyButton(true)}
             onMouseLeave={() => this.handleToggleCopyButton(false)}>
-          {this.props.campaign.displayName}
+          {campaign.displayName}
           {this.state.showCopyButton ?
             <CopyToClipboard text={campaign.name}>
               <Button icon="clipboard" small={true} style={{ marginLeft: '10px' }}/>

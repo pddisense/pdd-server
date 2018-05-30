@@ -28,14 +28,13 @@ import com.twitter.finatra.http.request.RequestUtils
 import com.twitter.finatra.request.{ContentType, QueryParam, RouteParam}
 import com.twitter.util.Future
 import org.joda.time.Instant
-import ucl.pdd.domain._
+import ucl.pdd.domain.{instantOrdering, _}
 import ucl.pdd.storage._
 
 @Singleton
 final class PrivateController @Inject()(storage: Storage) extends Controller {
   get("/api/campaigns") { req: ListCampaignsRequest =>
-    storage
-      .campaigns
+    storage.campaigns
       .list(CampaignStore.Query(isActive = req.active))
       .map(campaigns => ListCampaignsResponse(campaigns.map(_.withoutVocabulary)))
   }
@@ -61,13 +60,10 @@ final class PrivateController @Inject()(storage: Storage) extends Controller {
       samplingRate = req.samplingRate)
     CampaignValidator.validate(campaign) match {
       case ValidationResult.Valid =>
-        storage
-          .campaigns
-          .create(campaign)
-          .map {
-            case true => response.ok(campaign)
-            case false => response.conflict
-          }
+        storage.campaigns.create(campaign).map {
+          case true => response.ok(campaign)
+          case false => response.conflict
+        }
       case err: ValidationResult.Invalid => response.badRequest(err)
     }
   }
@@ -99,8 +95,7 @@ final class PrivateController @Inject()(storage: Storage) extends Controller {
     storage.campaigns.get(req.name).flatMap {
       case None => Future.value(response.notFound)
       case Some(campaign) =>
-        storage
-          .aggregations
+        storage.aggregations
           .list(AggregationStore.Query(campaignName = req.name))
           .map { aggregations =>
             if (req.export) {
@@ -116,14 +111,11 @@ final class PrivateController @Inject()(storage: Storage) extends Controller {
     storage.campaigns.get(req.name).flatMap {
       case None => Future.value(response.notFound)
       case Some(campaign) =>
-        storage
-          .aggregations
-          .get(s"${req.name}-${req.day}")
-          .map {
-            case None => response.notFound
-            case Some(aggregation) =>
-              if (req.export) export(req.request, campaign, Seq(aggregation)) else aggregation
-          }
+        storage.aggregations.get(s"${req.name}-${req.day}").map {
+          case None => response.notFound
+          case Some(aggregation) =>
+            if (req.export) export(req.request, campaign, Seq(aggregation)) else aggregation
+        }
     }
   }
 
@@ -175,21 +167,43 @@ final class PrivateController @Inject()(storage: Storage) extends Controller {
   }
 
   get("/api/clients/:name") { req: GetClientRequest =>
-    storage.clients.get(req.name)
+    storage.clients.get(req.name).flatMap {
+      case None => Future.value(None)
+      case Some(client) =>
+        storage.activity
+          .list(ActivityStore.Query(clientName = Some(client.name)))
+          .map { activity =>
+            if (activity.nonEmpty) {
+              val lastActivity = activity.maxBy(_.time)
+              GetClientResponse(
+                name = client.name,
+                createTime = client.createTime,
+                browser = client.browser,
+                externalName = client.externalName,
+                timezone = lastActivity.timezone,
+                countryCode = lastActivity.countryCode,
+                extensionVersion = lastActivity.extensionVersion)
+            } else {
+              GetClientResponse(
+                name = client.name,
+                createTime = client.createTime,
+                browser = client.browser,
+                externalName = client.externalName)
+            }
+          }
+    }
   }
 
   get("/api/clients/:name/activity") { req: GetClientActivityRequest =>
     val startTime = req.tail.map(n => DateTime.now().withTimeAtStartOfDay().minusDays(n - 1).toInstant)
-    storage
-      .activity
+    storage.activity
       .list(ActivityStore.Query(clientName = Some(req.name), startTime = startTime))
       .map(GetActivityResponse.apply)
   }
 
   get("/api/activity") { req: GetActivityRequest =>
     val startTime = req.tail.map(n => DateTime.now().withTimeAtStartOfDay().minusDays(n - 1).toInstant)
-    storage
-      .activity
+    storage.activity
       .list(ActivityStore.Query(startTime = startTime))
       .map(GetActivityResponse.apply)
   }
@@ -258,6 +272,15 @@ case class UpdateCampaignRequest(
   samplingRate: Option[Double])
 
 case class GetClientRequest(@RouteParam name: String)
+
+case class GetClientResponse(
+  name: String,
+  createTime: Instant,
+  browser: String,
+  externalName: Option[String],
+  timezone: Option[String] = None,
+  countryCode: Option[String] = None,
+  extensionVersion: Option[String] = None)
 
 case class GetClientActivityRequest(@RouteParam name: String, @QueryParam tail: Option[Int])
 

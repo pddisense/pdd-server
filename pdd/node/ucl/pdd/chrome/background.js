@@ -19,11 +19,13 @@
 import Raven from 'raven-js';
 import moment from 'moment';
 import { sum } from 'lodash';
+import jstz from 'jstz';
 
 import { getData, setData } from './browser/storage';
 import { searchHistory } from './browser/history';
 import xhr from './util/xhr';
-import { encryptCounters, generateKeyPair } from './crypto';
+import { encryptCounters, generateKeyPair } from './protocol/crypto';
+import sendPing from './protocol/ping';
 
 // Configure Sentry reporting. The environment variables are provided at build time.
 Raven.config(process.env.SENTRY_DSN, { environment: process.env.NODE_ENV }).install();
@@ -56,16 +58,22 @@ chrome.alarms.onAlarm.addListener(alarm => {
   if ('ping' === alarm.name) {
     getOrRegisterClient()
       .then(client => ping(client))
-      .catch(reason => {
-        // There has been an unhandled error, and it can be anything...
-        console.log('Unexpected error while pinging the server');
-        console.error(reason);
+      .then(
+        nextPingTime => {
+          chrome.alarms.create('ping', { when: nextPingTime.valueOf() });
+          console.log(`Next ping will be on ${nextPingTime.format()}`);
+        },
+        reason => {
+          // There has been an unhandled error, and it can be anything...
+          console.log('Unexpected error while pinging the server');
+          console.error(reason);
 
-        // Schedule a ping during the next hour to try recovering. It is important to do so when
-        // an error occurs, otherwise the extension will simply stop sending data.
-        const nextPingTime = moment().add(30, 'minutes').add((Math.random() * 30) | 0, 'minutes');
-        chrome.alarms.create('ping', { when: nextPingTime.valueOf() });
-      });
+          // Schedule a ping during the next hour to try recovering. It is important to do so when
+          // an error occurs, otherwise the extension will simply stop sending data.
+          const nextPingTime = moment().add(30, 'minutes').add((Math.random() * 30) | 0, 'minutes');
+          chrome.alarms.create('ping', { when: nextPingTime.valueOf() });
+        }
+      );
   }
 });
 
@@ -80,23 +88,8 @@ chrome.alarms.create('ping', { when: moment().add(1, 'minute').valueOf() });
  * @param client Current client.
  */
 function ping(client) {
-  console.log(`Pinging the server for client ${client.name}...`);
-  return xhr(`/api/clients/${client.name}/ping`).then(
-    resp => {
-      // Submit each sketch that was requested.
-      resp.submit.forEach(command => submitSketch(client, command));
-
-      // Schedule next ping time. Normally, the response comes with a suggested time. If for any
-      // reason it is not present, we still schedule one for the next day (otherwise the extension
-      // will simply stop sending data).
-      const nextPingTime = resp.nextPingTime
-        ? moment(resp.nextPingTime)
-        : moment().add(1, 'day').hours(2);
-      chrome.alarms.create('ping', { when: nextPingTime.valueOf() });
-      console.log(`Next ping will be on ${nextPingTime.format()}`);
-      return Promise.resolve();
-    },
-    reason => {
+  return sendPing(client)
+    .catch(reason => {
       if (reason.httpStatus === 404) {
         // A 404 means that the client is not registered, or more likely has been deleted by the
         // server (either manually or due to inactivity). We need to re-register.

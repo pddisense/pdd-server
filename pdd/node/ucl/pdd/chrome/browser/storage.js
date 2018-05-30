@@ -69,7 +69,7 @@ export function getData() {
  */
 export function setData(data) {
   return write(DATA_KEY, data).then(() => {
-    console.log('Data written to local storage', data);
+    //console.log('Data written to local storage', data);
     localData = data;
     return data;
   });

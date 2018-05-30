@@ -18,9 +18,9 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import autobind from 'autobind-decorator';
 import { Button, Alert, Intent } from '@blueprintjs/core';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { countries } from 'country-data';
 
 import ActivityPlot from './ActivityPlot';
 import toaster from '../toaster';
@@ -30,18 +30,21 @@ class ViewClient extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      isOpen: false,
+      showDeleteAlert: false,
+      showCopyButton: false,
     };
   }
 
-  @autobind
-  handleClick() {
-    this.setState({ isOpen: true });
+  handleToggleDeleteAlert(shown) {
+    this.setState({ showDeleteAlert: shown });
   }
 
-  @autobind
+  handleToggleCopyButton(shown) {
+    this.setState({ showCopyButton: shown });
+  }
+
   handleConfirm() {
-    this.setState({ isOpen: false });
+    this.setState({ showDeleteAlert: false });
     xhr(`/api/clients/${this.props.client.name}`, { method: 'DELETE' })
       .then(() => {
         toaster.show({
@@ -52,33 +55,35 @@ class ViewClient extends React.Component {
       })
   }
 
-  @autobind
-  handleCancel() {
-    this.setState({ isOpen: false });
-  }
-
   render() {
     const { client, activity } = this.props;
+    const country = client.countryCode ? countries[client.countryCode] : null;
     return (
       <div>
         <div className="actions">
-          <CopyToClipboard text={client.name}>
-            <Button text="Copy name to clipboard" icon="clipboard"/>
-          </CopyToClipboard>
-          <Button text="Delete client" icon="delete" onClick={this.handleClick}/>
+          <Button text="Delete client"
+                  icon="delete"
+                  onClick={() => this.handleToggleDeleteAlert(true)}/>
         </div>
 
-        <Alert onConfirm={this.handleConfirm}
+        <h2 onMouseEnter={() => this.handleToggleCopyButton(true)}
+            onMouseLeave={() => this.handleToggleCopyButton(false)}>
+          Client {client.name}
+          {this.state.showCopyButton ?
+            <CopyToClipboard text={client.name}>
+              <Button icon="clipboard" small={true} style={{ marginLeft: '10px' }}/>
+            </CopyToClipboard> : null}
+        </h2>
+
+        <Alert onConfirm={() => this.handleConfirm()}
                intent={Intent.PRIMARY}
                confirmButtonText="Yes"
                cancelButtonText="Cancel"
-               onCancel={this.handleCancel}
-               isOpen={this.state.isOpen}>
+               onCancel={() => this.handleToggleDeleteAlert(false)}
+               isOpen={this.state.showDeleteAlert}>
           Are you sure you want to delete this client? It will not prevent it from sending further
           data (if doing so, it will automatically register again under a new name).
         </Alert>
-
-        <h2>Client {client.name}</h2>
 
         <div className="attr-row">
           <div className="attr-name">Join time</div>
@@ -87,12 +92,25 @@ class ViewClient extends React.Component {
 
         <div className="attr-row">
           <div className="attr-name">Browser</div>
-          <div className="attr-value">{client.browser}</div>
+          <div className="attr-value">
+            {client.browser}
+            {client.extensionVersion ? ` (extension v${client.extensionVersion})` : null}
+          </div>
         </div>
 
         <div className="attr-row">
           <div className="attr-name">External name</div>
           <div className="attr-value">{client.externalName || '–'}</div>
+        </div>
+
+        <div className="attr-row">
+          <div className="attr-name">Last known timezone</div>
+          <div className="attr-value">{client.timezone || '–'}</div>
+        </div>
+
+        <div className="attr-row">
+          <div className="attr-name">Last known country</div>
+          <div className="attr-value">{country ? `${country.emoji} ${country.name}` : '–'}</div>
         </div>
 
         <ActivityPlot activity={activity}/>

@@ -32,7 +32,7 @@ object ServiceModule extends TwitterModule {
     "api.testing_mode",
     false,
     "Whether to switch the server to testing mode (where days only last 5 minutes). It should be only activated for testing purposes.")
-  private[this] val geocoderFlag = flag[String]("geocoder", "Which geocoder to use to map IP addresses to a country code")
+  private[this] val geocoderFlag = flag[String]("geocoder.type", "Which geocoder to use to map IP addresses to a country code")
 
   override def configure(): Unit = {
     bind[DateTimeZone].annotatedWith[Timezone].toInstance(DateTimeZone.forID(timezoneFlag()))
