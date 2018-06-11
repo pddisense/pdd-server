@@ -12,6 +12,8 @@ To participate to the study, you should fulfil the following requirements:
 * Be using Chrome (or Chromium) as your main Web browser.
 * Be using Google on a daily basis to perform searches.
 
+Note that we do not require participants to modify their behaviour in any way, just to use these tools as they would normally for two weeks.
+
 Please follow carefully the instructions until the end.
 It should not take more than 15 minutes.
 
@@ -44,20 +46,20 @@ Then click on the "Settings" tab, and fill in your Prolific ID:
 ![Fill prolific ID](assets/screenshots/fill_prolific_id.jpeg)
 {: .center}
 
-**Take care of mentioning the actual Prolific ID that has been assigned to you by the platform.**
+Take care of mentioning the actual Prolific ID that has been assigned to you by the platform.
 This step allow us to verify that you actually installed the extension, validate your participation and ultimately allow your payment.
+**We cannot allow your payment if this step is not fulfilled correctly.**
 
 ## 3. Confirm your participation on Prolific
 
 Now that the extension is installed and configured, please confirm your participation on the Prolific platform, by visiting the following page:
 [https://www.prolific.ac/submissions/complete?cc=ANVMDG4N](https://www.prolific.ac/submissions/complete?cc=ANVMDG4N)
 
-## 4. Keep using Chrome and Google for a week
+## 4. Keep using Chrome and Google for two weeks
 
-The only thing we ask you is to use Chrome to perform Google searches on a daily basis.
-We simply ask you to **search for "flu" on Google at least once a day**, so that we are sure to receive some relevant data for each participant.
-You otherwise do not have to change your behaviour, the extension is running in the background.
+The only thing we ask you is to use Chrome to keep performing Google searches on a daily basis, as you would normally do.
+As the extension is running in the background, you do not have anything else to do.
 
-For your payment to be performed in full, we require to receive at least **6 days of data (out of 7)**.
+For your payment to be performed in full, we require to receive at least **10 days of data (out of 14)**.
 
 After that period of time, you may freely remove the extension from your browser.
