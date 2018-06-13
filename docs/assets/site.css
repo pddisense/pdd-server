@@ -10,7 +10,7 @@ body, body p, body li {
   font-size: 16px;
 }
 
-footer .license {
+footer .license p {
   font-size: 0.8em;
   color: #adb5bd;
 }
@@ -237,6 +237,10 @@ nav.navbar {
   margin-top: 25px;
   margin-bottom: 25px;
   font-size: 24px;
+}
+
+#page p {
+  text-align: justify;
 }
 
 /**
