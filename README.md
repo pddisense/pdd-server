@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.com/pddisense/pdd.svg?branch=master)](https://travis-ci.com/pddisense/pdd)
 
-This repository contains the source code for the Private Data Donor platform, whose goal is to collect web search queries, in order to identify outbreaks of infectious disease much earlier than ever before.
+This repository contains the source code for the Private Data Donor platform, whose goal is to collect web search queries, in order to identify outbreaks of infectious diseases much earlier than ever before.
 It is a research project conducted in the frame of the broader [i-sense project](https://www.i-sense.org.uk/), the EPSRC IRC in Early Warning Sensing Systems for Infectious Diseases.
 Private Data Donor is developed conjointly by research teams from [UCL's CS department](http://www.cs.ucl.ac.uk/home/).
 
