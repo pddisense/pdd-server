@@ -19,7 +19,6 @@
 import Raven from 'raven-js';
 import moment from 'moment';
 import { sum } from 'lodash';
-import jstz from 'jstz';
 
 import { getData, setData } from './browser/storage';
 import { searchHistory } from './browser/history';
