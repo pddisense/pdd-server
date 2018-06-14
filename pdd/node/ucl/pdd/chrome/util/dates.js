@@ -16,23 +16,12 @@
  * along with PDD.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import Raven from 'raven-js';
+import moment from 'moment';
 
-import OptionsPage from './components/OptionsPage';
-import RavenBoundary from './components/RavenBoundary';
+export function isToday(date) {
+  return moment(date).startOf('day').isSame(moment().startOf('day'));
+}
 
-// Import stylesheets.
-import 'normalize.css/normalize.css';
-import '@blueprintjs/core/lib/css/blueprint.css';
-import '@blueprintjs/icons/lib/css/blueprint-icons.css';
-import '@blueprintjs/datetime/lib/css/blueprint-datetime.css';
-
-// Configure Sentry reporting. The environment variables are provided at build time.
-Raven.config(process.env.SENTRY_DSN, { environment: process.env.NODE_ENV }).install();
-
-ReactDOM.render(
-  <RavenBoundary><OptionsPage/></RavenBoundary>,
-  document.getElementById('app')
-);
+export function isBefore1am(date) {
+  return isToday(date) && moment(date).hour() < 1;
+}

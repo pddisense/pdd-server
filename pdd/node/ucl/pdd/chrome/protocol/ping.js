@@ -59,6 +59,8 @@ function submitSketch(client, command) {
   return searchHistory(startTime, endTime)
     .then(history => aggregateHistory(history, command.vocabulary))
     .then(rawValues => {
+      console.log(`Counters from ${startTime.format()} to ${endTime.format()}`);
+      console.log(rawValues);
       const encryptedValues = command.collectEncrypted
         ? encryptCounters(command.publicKeys, command.round, client.keyPair, rawValues)
         : [];

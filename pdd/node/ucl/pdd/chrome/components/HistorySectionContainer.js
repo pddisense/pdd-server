@@ -18,33 +18,48 @@
 
 import React from 'react';
 import moment from 'moment';
-
 import { searchHistory } from '../browser/history';
 import HistorySection from './HistorySection';
+import { isBefore1am } from '../util/dates';
 
 export default class HistorySectionContainer extends React.Component {
   constructor(props) {
     super(props);
+
     this.state = {
       data: [],
+      date: new Date(),
     };
   }
 
-  componentDidMount() {
-    const now = moment();
-    let startTime;
-    if (now.hour() < 1) {
+  fetchData() {
+    // Weirdly, it does not work when passing directory the JS date object.
+    let startTime = moment(this.state.date.valueOf()).startOf('day');
+    if (isBefore1am(this.state.date.valueOf())) {
       // We are between midnight and 1 o'clock. We hence display yesterday's searches.
-      startTime = now.clone().subtract(1, 'day').startOf('day');
-    } else {
-      startTime = now.startOf('day');
+      startTime = startTime.subtract(1, 'day');
     }
-    const endTime = startTime.clone().endOf('day');
-    // TODO: which vocabulary to use?
+    const endTime = startTime.clone().add(1, 'day');
     searchHistory(startTime, endTime).then(data => this.setState({ data }));
   }
 
+  handleChange(date) {
+    this.setState({ date });
+  }
+
+  componentDidMount() {
+    this.fetchData();
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.date.valueOf() !== this.state.date.valueOf()) {
+      this.fetchData();
+    }
+  }
+
   render() {
-    return <HistorySection searches={this.state.data} />;
+    return <HistorySection searches={this.state.data}
+                           date={this.state.date}
+                           onChange={date => this.handleChange(date)}/>;
   }
 }

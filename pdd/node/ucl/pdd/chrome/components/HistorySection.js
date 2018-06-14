@@ -19,7 +19,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
-import { flatMap } from 'lodash';
+import { sum } from 'lodash';
+import { DateInput } from '@blueprintjs/datetime';
+import { isToday, isBefore1am } from '../util/dates';
+
+function getMomentFormatter(format: string) {
+  return {
+    formatDate: (date) => moment(date).format(format),
+    parseDate: (str) => moment(str, format).toDate(),
+    placeholder: format,
+  }
+}
 
 class HistorySection extends React.Component {
   handleHistoryClick(e) {
@@ -28,7 +38,9 @@ class HistorySection extends React.Component {
   }
 
   render() {
-    const yesterday = moment().hour() < 1;
+    const today = isToday(this.props.date);
+    const yesterday = isBefore1am(this.props.date);
+    const total = sum(this.props.searches.map(item => item.count));
     const rows = this.props.searches.map((item, idx) => {
       return (
         <tr key={idx}>
@@ -41,15 +53,25 @@ class HistorySection extends React.Component {
     return (
       <div>
         <h1>History</h1>
-        <p>
+        <div>
+          <label className="pt-label pt-inline">
+            Display history for
+            <DateInput {...getMomentFormatter("YYYY-MM-DD")}
+                       canClearSelection={false}
+                       maxDate={new Date()}
+                       value={this.props.date}
+                       keepFocus={false}
+                       onChange={this.props.onChange}/>
+          </label>
+        </div>
+        {today ? <p>
           Here are the search queries that Private Data Donor has detected for {yesterday ? 'yesterday' : 'today'}.
           Those that are of interest will be automatically sent {yesterday ? '' : 'tomorrow'} at 1am.
           If you wish to delete some of them, please remove the corresponding activity
           from <a onClick={this.handleHistoryClick}>your browsing history</a>.
-        </p>
+        </p> : null}
         <p>
-          <b>{this.props.searches.length} quer{this.props.searches.length === 1 ? 'y' : 'ies'}</b> have
-           been detected so far.
+          <b>{total} search{total === 1 ? '' : 'es'}</b> {total === 1 ? 'has' : 'have'} been detected{today ? ' so far' : ''}.
         </p>
         <table className="pt-html-table">
           <thead>
@@ -68,6 +90,8 @@ class HistorySection extends React.Component {
 
 HistorySection.propTypes = {
   searches: PropTypes.array.isRequired,
+  onChange: PropTypes.func.isRequired,
+  date: PropTypes.object.isRequired,
 };
 
 export default HistorySection;

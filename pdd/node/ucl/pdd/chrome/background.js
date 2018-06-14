@@ -18,12 +18,9 @@
 
 import Raven from 'raven-js';
 import moment from 'moment';
-import { sum } from 'lodash';
-
 import { getData, setData } from './browser/storage';
-import { searchHistory } from './browser/history';
 import xhr from './util/xhr';
-import { encryptCounters, generateKeyPair } from './protocol/crypto';
+import { generateKeyPair } from './protocol/crypto';
 import sendPing from './protocol/ping';
 
 // Configure Sentry reporting. The environment variables are provided at build time.
@@ -142,56 +139,4 @@ function registerClient(data) {
       console.log(`Registered as client ${client.name}`);
       return client;
     });
-}
-
-function submitSketch(client, command) {
-  console.log(`Submitting sketch ${command.sketchName}...`);
-  const startTime = moment(command.startTime);
-  const endTime = moment(command.endTime);
-  return searchHistory(startTime, endTime)
-    .then(history => aggregateHistory(history, command.vocabulary))
-    .then(rawValues => {
-      const encryptedValues = command.collectEncrypted
-        ? encryptCounters(command.publicKeys, command.round, client.keyPair, rawValues)
-        : [];
-      const sketch = { rawValues, encryptedValues };
-      return xhr(
-        `/api/sketches/${command.sketchName}`,
-        { method: 'PATCH', body: JSON.stringify(sketch) }
-      );
-    });
-}
-
-/**
- * Aggregate the complete search history according to a given vocabulary.
- *
- * @param history Search history.
- * @param vocabulary Monitored vocabulary.
- * @returns int[]
- */
-function aggregateHistory(history, vocabulary) {
-  // The first counter is always the total number of searches performed across the period, whether
-  // or not they are actually monitored. Then there is one counter per query in the vocabulary
-  // (even if no search was performed for that query).
-  const counters = Array(vocabulary.queries.length + 1);
-  counters.fill(0);
-  counters[0] = sum(history.map(search => search.count));
-  history.forEach(search => {
-    const indices = findIndices(search.query, vocabulary);
-    indices.forEach(idx => counters[idx + 1] += search.count);
-  });
-  return counters;
-}
-
-function findIndices(q, vocabulary) {
-  return vocabulary.queries.map((query, idx) => {
-    if (query.exact) {
-      return q === query.exact ? idx : -1;
-    } else if (query.terms) {
-      // TODO: tokenize to handle quotes.
-      const keywords = q.split(' ').map(s => s.trim());
-      return query.terms.every(v => keywords.indexOf(v) > -1) ? idx : -1;
-    }
-    return -1;
-  }).filter(idx => -1 !== idx);
 }

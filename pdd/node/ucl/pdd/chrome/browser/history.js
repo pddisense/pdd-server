@@ -59,6 +59,12 @@ export function searchHistory(startTime, endTime) {
     };
 
     chrome.history.search(query, (items) => {
+      // If there are no items found, resolve the promise now.
+      if (items.length === 0) {
+        resolve([]);
+        return;
+      }
+
       const searches = {};
       let completed = 0;
       items.forEach((item) => {
@@ -67,6 +73,7 @@ export function searchHistory(startTime, endTime) {
         // (we may have false positives otherwise).
         const url = new URL(item.url, true);
         if (!url.host.startsWith('www.google.') || url.pathname !== '/search' || !url.query.q) {
+          completed++;
           return;
         }
 
