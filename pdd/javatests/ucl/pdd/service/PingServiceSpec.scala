@@ -99,6 +99,7 @@ class PingServiceSpec extends UnitSpec with BeforeAndAfterEach {
       // campaign1 - day 0
       Sketch(
         name = "sketch1",
+        createTime = at("2018-05-10T15:53:00"), // Value does not matter.
         campaignName = "campaign1",
         clientName = "client1",
         day = 0,
@@ -110,6 +111,7 @@ class PingServiceSpec extends UnitSpec with BeforeAndAfterEach {
         publicKey = "pubkey1"),
       Sketch(
         name = "sketch2",
+        createTime = at("2018-05-10T15:53:00"), // Value does not matter.
         campaignName = "campaign1",
         clientName = "client2",
         day = 0,
@@ -121,6 +123,7 @@ class PingServiceSpec extends UnitSpec with BeforeAndAfterEach {
       // campaign1 - day 1
       Sketch(
         name = "sketch6",
+        createTime = at("2018-05-10T15:53:00"), // Value does not matter.
         campaignName = "campaign1",
         clientName = "client1",
         day = 1,
@@ -130,6 +133,7 @@ class PingServiceSpec extends UnitSpec with BeforeAndAfterEach {
         publicKey = "pubkey1"),
       Sketch(
         name = "sketch7",
+        createTime = at("2018-05-10T15:53:00"), // Value does not matter.
         campaignName = "campaign1",
         clientName = "client2",
         day = 1,
@@ -143,6 +147,7 @@ class PingServiceSpec extends UnitSpec with BeforeAndAfterEach {
       // campaign2 - day 0
       Sketch(
         name = "sketch3",
+        createTime = at("2018-05-10T15:53:00"), // Value does not matter.
         campaignName = "campaign2",
         clientName = "client1",
         day = 0,
@@ -154,6 +159,7 @@ class PingServiceSpec extends UnitSpec with BeforeAndAfterEach {
         publicKey = "pubkey1"),
       Sketch(
         name = "sketch9",
+        createTime = at("2018-05-10T15:53:00"), // Value does not matter.
         campaignName = "campaign2",
         clientName = "client3",
         day = 0,
@@ -165,6 +171,7 @@ class PingServiceSpec extends UnitSpec with BeforeAndAfterEach {
         publicKey = "pubkey3"),
       Sketch(
         name = "sketch8",
+        createTime = at("2018-05-10T15:53:00"), // Value does not matter.
         campaignName = "campaign2",
         clientName = "client2",
         day = 0,

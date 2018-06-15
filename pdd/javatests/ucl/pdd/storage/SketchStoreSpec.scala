@@ -19,6 +19,7 @@
 package ucl.pdd.storage
 
 import com.twitter.util.Await
+import org.joda.time.{DateTime, DateTimeZone}
 import ucl.pdd.domain.Sketch
 
 /**
@@ -28,6 +29,7 @@ abstract class SketchStoreSpec extends StoreSpec {
   private[this] val sketches = Seq(
     Sketch(
       name = "sketch1",
+      createTime = at("2018-05-10T15:53:00"),
       clientName = "client1",
       campaignName = "campaign1",
       group = 0,
@@ -39,6 +41,7 @@ abstract class SketchStoreSpec extends StoreSpec {
       rawValues = Some(Seq(1, 1, 0))),
     Sketch(
       name = "sketch2",
+      createTime = at("2018-05-10T15:53:02"),
       clientName = "client1",
       campaignName = "campaign1",
       group = 0,
@@ -50,6 +53,7 @@ abstract class SketchStoreSpec extends StoreSpec {
       rawValues = None),
     Sketch(
       name = "sketch3",
+      createTime = at("2018-05-10T15:53:03"),
       clientName = "client2",
       campaignName = "campaign1",
       group = 0,
@@ -61,6 +65,7 @@ abstract class SketchStoreSpec extends StoreSpec {
       rawValues = None),
     Sketch(
       name = "sketch4",
+      createTime = at("2018-05-10T15:53:04"),
       clientName = "client2",
       campaignName = "campaign2",
       group = 0,
@@ -107,4 +112,8 @@ abstract class SketchStoreSpec extends StoreSpec {
     Await.result(storage.sketches.get("sketch2")) shouldBe Some(sketches(1))
     Await.result(storage.sketches.list()) should contain theSameElementsAs Seq(sketches(1))
   }
+
+  private val timezone = DateTimeZone.forID("Europe/London")
+
+  private def at(str: String) = new DateTime(str, timezone).toInstant
 }

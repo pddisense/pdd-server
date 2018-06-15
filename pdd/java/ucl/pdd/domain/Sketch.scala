@@ -18,6 +18,8 @@
 
 package ucl.pdd.domain
 
+import org.joda.time.Instant
+
 /**
  * A sketch is an individual request to collect searches during a given time period
  * concerning a given client. Sketches are created at the same moment than aggregations, and
@@ -32,6 +34,8 @@ package ucl.pdd.domain
  * may increase day after day.
  *
  * @param name            Sketch unique name.
+ * @param createTime      Time at which the sketch was created. This is not needed nor actually
+ *                        used, but was added to ease debugging.
  * @param clientName      The name of the client this sketch is about.
  * @param campaignName    The name of the campaign this sketch is about.
  * @param group           The identifier of the group the client belongs to for that particular day.
@@ -54,6 +58,7 @@ package ucl.pdd.domain
  */
 case class Sketch(
   name: String,
+  createTime: Instant,
   clientName: String,
   campaignName: String,
   group: Int,

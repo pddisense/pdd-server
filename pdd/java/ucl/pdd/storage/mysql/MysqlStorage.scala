@@ -89,6 +89,7 @@ object MysqlStorage {
     "create table if not exists sketches(" +
       "unused_id int not null auto_increment," +
       "name varchar(255) not null," +
+      "createTime timestamp not null," +
       "clientName varchar(255) not null," +
       "campaignName varchar(255) not null," +
       "`group` int not null," +

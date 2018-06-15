@@ -46,10 +46,8 @@ final class CreateSketchesJob @Inject()(
   @TestingMode testingMode: Boolean)
   extends Logging {
 
-  private[this] val prefix = s"[${getClass.getSimpleName}]"
-
   def execute(fireTime: Instant): Unit = {
-    logger.info(s"$prefix Starting job")
+    logger.info(s"Starting ${getClass.getSimpleName}")
 
     val now = fireTime.toDateTime(timezone)
     val f = storage.campaigns
@@ -57,7 +55,7 @@ final class CreateSketchesJob @Inject()(
       .flatMap(results => Future.join(results.map(handleCampaign(now, _))))
     Await.result(f)
 
-    logger.info(s"$prefix Completed job")
+    logger.info(s"Completed ${getClass.getSimpleName}")
   }
 
   private def handleCampaign(now: DateTime, campaign: Campaign): Future[Unit] = {
@@ -70,7 +68,7 @@ final class CreateSketchesJob @Inject()(
     }
     val day = currentDay - 1
     if (day < 0) {
-      logger.info(s"$prefix Nothing to do for campaign ${campaign.name} (just started)")
+      logger.info(s"Nothing to do for campaign ${campaign.name} (just started)")
       Future.Done
     } else {
       handleCampaign(day, campaign)
@@ -91,6 +89,7 @@ final class CreateSketchesJob @Inject()(
           groupClients.map { client =>
             val sketch = Sketch(
               name = UUID.randomUUID().toString,
+              createTime = Instant.now(),
               clientName = client.name,
               campaignName = campaign.name,
               group = groupIdx,
@@ -101,12 +100,9 @@ final class CreateSketchesJob @Inject()(
             storage.sketches.create(sketch).unit
           }
         }
-        Future
-          .collect(fs)
-          .onSuccess { res =>
-            logger.info(s"$prefix Created ${res.size} sketches for campaign ${campaign.name} (day $day)")
-          }
-          .unit
+        Future.collect(fs).onSuccess { res =>
+          logger.info(s"Created ${res.size} sketches for campaign ${campaign.name} (day $day)")
+        }.unit
       }
   }
 }

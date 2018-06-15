@@ -87,6 +87,7 @@ final class AggregateSketchesJob @Inject()(
           val days = startDay to endDay
           Future.join(days.map(aggregate(campaign, _)))
         }
+      //TODO: don't do it for stopped campaigns.
       //TODO: backfill.
       //TODO: clean old sketches.
     }

@@ -84,6 +84,7 @@ class SettingsSection extends React.Component {
             <div className="pt-form-helper-text">
               If you are participating to a study and have been assigned an identifier, please
               indicate it here.
+              You should leave it empty if you have not been instructed to fill this field.
             </div>
           </div>
         </div>
@@ -95,8 +96,8 @@ class SettingsSection extends React.Component {
           <div className="pt-form-content">
             {this.props.client.name || '(not yet registered)'}
             <div className="pt-form-helper-text">
-              This is the internal name that is used to identify you from our server.
-              Should you encounter any issues, our support may ask you this name.
+              This is the internal name that is used to identify the data you contribute.
+              Should you encounter any issues, our technical support may ask you this value.
             </div>
           </div>
         </div>

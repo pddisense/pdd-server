@@ -101,22 +101,19 @@ final class PublicController @Inject()(storage: Storage, pingService: PingServic
   }
 
   patch("/api/sketches/:name") { req: UpdateSketchRequest =>
-    // In practice this corresponds to a JSON merge patch.
-    storage
-      .sketches
-      .get(req.name)
-      .flatMap {
-        case None => Future.value(response.notFound)
-        case Some(sketch) =>
-          val updated = sketch.copy(
-            submitted = true,
-            encryptedValues = req.encryptedValues,
-            rawValues = req.rawValues)
-          storage.sketches.replace(updated).map {
-            case true => response.ok
-            case false => response.notFound
-          }
-      }
+    storage.sketches.get(req.name).flatMap {
+      case None => Future.value(response.notFound)
+      case Some(sketch) =>
+        // In practice this corresponds to a JSON merge patch.
+        val updated = sketch.copy(
+          submitted = true,
+          encryptedValues = req.encryptedValues,
+          rawValues = req.rawValues)
+        storage.sketches.replace(updated).map {
+          case true => response.ok
+          case false => response.notFound
+        }
+    }
   }
 }
 

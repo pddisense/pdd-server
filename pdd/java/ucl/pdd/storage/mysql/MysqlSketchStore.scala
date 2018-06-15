@@ -30,13 +30,14 @@ private[mysql] final class MysqlSketchStore(mysql: MysqlClient) extends SketchSt
   import MysqlStore._
 
   override def create(sketch: Sketch): Future[Boolean] = {
-    val sql = "insert into sketches(name, clientName, campaignName, `group`, day, publicKey, " +
+    val sql = "insert into sketches(name, createTime, clientName, campaignName, `group`, day, publicKey, " +
       "queriesCount, encryptedValues, rawValues, submitted) " +
-      "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+      "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     mysql
       .prepare(sql)
       .apply(
         sketch.name,
+        sketch.createTime,
         sketch.clientName,
         sketch.campaignName,
         sketch.group,
@@ -55,12 +56,13 @@ private[mysql] final class MysqlSketchStore(mysql: MysqlClient) extends SketchSt
 
   override def replace(sketch: Sketch): Future[Boolean] = {
     val sql = "update sketches " +
-      "set clientName = ?, campaignName = ?, `group` = ?, day = ?, publicKey = ?, " +
+      "set createTime = ?, clientName = ?, campaignName = ?, `group` = ?, day = ?, publicKey = ?, " +
       "queriesCount = ?, encryptedValues = ?, rawValues = ?, submitted = ? " +
       "where name = ?"
     mysql
       .prepare(sql)
       .apply(
+        sketch.createTime,
         sketch.clientName,
         sketch.campaignName,
         sketch.group,
@@ -129,6 +131,7 @@ private[mysql] final class MysqlSketchStore(mysql: MysqlClient) extends SketchSt
   private def hydrate(row: Row): Sketch = {
     Sketch(
       name = toString(row, "name"),
+      createTime = toInstant(row, "createTime"),
       clientName = toString(row, "clientName"),
       campaignName = toString(row, "campaignName"),
       group = toInt(row, "group"),
