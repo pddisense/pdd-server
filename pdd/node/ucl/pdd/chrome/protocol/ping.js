@@ -21,6 +21,7 @@ import { sum } from 'lodash';
 import jstz from 'jstz';
 
 import { searchHistory } from '../browser/history';
+import { setData } from '../browser/storage';
 import xhr from '../util/xhr';
 import { encryptCounters } from './crypto';
 
@@ -39,16 +40,22 @@ export default function sendPing(client) {
   return xhr(
     `/api/clients/${client.name}/ping`,
     { method: 'POST', body: JSON.stringify(obj) }
-  ).then(
-    resp => {
-      // Submit each sketch that was requested.
-      resp.submit.forEach(command => submitSketch(client, command));
+  ).then(resp => {
+    // Store the latest vocabulary version, if present.
+    if (resp.vocabulary) {
+      return setData({ vocabulary: resp.vocabulary });
+    } else {
+      return Promise.resolve();
+    }
+  }).then(resp => {
+    // Submit each sketch that was requested.
+    resp.submit.forEach(command => submitSketch(client, command));
 
-      // Schedule next ping time. Normally, the response comes with a suggested time. If for any
-      // reason it is not present, we still schedule one for the next day (otherwise the extension
-      // will simply stop sending data).
-      return resp.nextPingTime ? moment(resp.nextPingTime) : moment().add(1, 'day').hours(2);
-    });
+    // Schedule next ping time. Normally, the response comes with a suggested time. If for any
+    // reason it is not present, we still schedule one for the next day (otherwise the extension
+    // will simply stop sending data).
+    return resp.nextPingTime ? moment(resp.nextPingTime) : moment().add(1, 'day').hours(2);
+  });
 }
 
 function submitSketch(client, command) {

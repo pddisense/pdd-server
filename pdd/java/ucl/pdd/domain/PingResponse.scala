@@ -24,10 +24,15 @@ import org.joda.time.Instant
  * A response that sent back to the client when the latter pings the server.
  *
  * @param submit       A list of commands the client should execute.
+ * @param vocabulary   Latest version of the vocabulary, used by the client to provide transparency.
+ *                     This is essentially a merge of vocabularies of all active campaigns.
  * @param nextPingTime Next time at which the client should ping the server.
  * @see [[ucl.pdd.service.PingService]]
  */
-case class PingResponse(submit: Seq[PingResponse.Command], nextPingTime: Option[Instant] = None)
+case class PingResponse(
+  submit: Seq[PingResponse.Command],
+  vocabulary: Vocabulary,
+  nextPingTime: Option[Instant] = None)
 
 object PingResponse {
 

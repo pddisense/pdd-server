@@ -73,10 +73,9 @@ chrome.alarms.onAlarm.addListener(alarm => {
   }
 });
 
-// We schedule a first ping in 1 minute. Normally, scheduling it the next day would be sufficient,
-// but for testing purposes the duration of a "day" may be reduced at first. So we prefer to do a
-// first useless ping query, that will give us the next ping time.
-chrome.alarms.create('ping', { when: moment().add(1, 'minute').valueOf() });
+// We schedule a first ping in 30 seconds. We schedule one very soon after installing the extension
+// because it will contain the latest vocabulary and accurate time for the next ping.
+chrome.alarms.create('ping', { when: moment().add(30, 'seconds').valueOf() });
 
 /**
  * Contact the API server to get instructions, and perform them.

@@ -34,12 +34,12 @@ export default class SettingsSectionContainer extends React.Component {
   }
 
   @autobind
-  handleChange(client) {
+  handleChange(data) {
     let p;
     if (this.state.data.name) {
       p = xhr(
         `/api/clients/${this.state.data.name}`,
-        { method: 'PATCH', body: JSON.stringify(client) }
+        { method: 'PATCH', body: JSON.stringify(data) }
       ).then(
         () => {
           toaster.show({ message: 'The settings have been updated.', intent: Intent.SUCCESS });
@@ -55,7 +55,7 @@ export default class SettingsSectionContainer extends React.Component {
       p = Promise.resolve();
     }
     p.then(
-      () => setData({ ...this.state.data, ...client }),
+      () => setData({ ...data }),
       () => console.log('Cannot contact the server, changes are discarded.'),
     );
   }

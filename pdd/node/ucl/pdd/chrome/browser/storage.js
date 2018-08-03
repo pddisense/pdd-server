@@ -46,7 +46,8 @@ function write(key, item) {
       if (chrome.runtime.lastError) {
         reject(chrome.runtime.lastError);
       } else {
-        resolve();
+        localData = item;
+        resolve(item);
       }
     });
   });
@@ -64,13 +65,9 @@ export function getData() {
 /**
  * Persist data to the browser local storage.
  *
- * @param data Data to persist.
+ * @param data Data to persist. It must be an object, and can contain only the keys to update.
  * @returns PromiseLike<object>
  */
 export function setData(data) {
-  return write(DATA_KEY, data).then(() => {
-    //console.log('Data written to local storage', data);
-    localData = data;
-    return data;
-  });
+  return reload().then(() => write(DATA_KEY, { ...localData, ...data }));
 }

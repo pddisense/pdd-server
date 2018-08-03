@@ -42,7 +42,7 @@ export default class AboutSection extends React.Component {
           <b>Encrypted mode</b>.
           We are currently testing a privacy-preserving tool to collect how many users search for
           certain keywords on Google, but not who. This makes it impossible for us to see individual
-          data related to each user: We can only see aggregated data from groups of users.
+          data related to each user; We can only see summed counts from groups of users.
         </p>
 
         <p>
@@ -53,14 +53,14 @@ export default class AboutSection extends React.Component {
           which they were made, but only the number of times some specific keywords were searched.
         </p>
 
-        <p>If you need more information, please contact us via e-mail: <a href="mailto:ppdisense@cs.ucl.ac.uk">ppdisense@cs.ucl.ac.uk</a>.</p>
-
         <p>
           <b>About us</b>.
           We are a group of researchers from the University College London.
           You can find out more about our project on the <a
           target="_blank" href="https://ppd.cs.ucl.ac.uk/">Private Data Donor website</a>.
         </p>
+
+        <p>If you need more information, please contact us via e-mail: <a href="mailto:ppdisense@cs.ucl.ac.uk">ppdisense@cs.ucl.ac.uk</a>.</p>
       </div>
     );
   }

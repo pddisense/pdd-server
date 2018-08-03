@@ -23,7 +23,7 @@ import com.google.inject.{Inject, Singleton}
 import com.twitter.util.Future
 import org.joda.time.Instant
 import ucl.pdd.domain._
-import ucl.pdd.storage.{SketchStore, Storage}
+import ucl.pdd.storage.{CampaignStore, SketchStore, Storage}
 
 import scala.util.Random
 
@@ -40,7 +40,7 @@ import scala.util.Random
  * load to be low (except if somebody tries a DDoS...), it is simpler like this for now.
  *
  * @param storage     Persistent storage.
- * @param geocoder    Geocodern used to infer the country from an IP address.
+ * @param geocoder    Geocoder used to infer the country from an IP address.
  * @param timezone    Reference timezone.
  * @param testingMode Whether we are in testing mode, where days are shorter.
  */
@@ -55,8 +55,7 @@ final class PingService @Inject()(
     storage.clients.get(request.clientName).flatMap {
       case None => Future.value(None)
       case Some(client) =>
-        Future
-          .join(recordActivity(request, now), createResponse(client, now))
+        Future.join(recordActivity(request, now), createResponse(client, now))
           .map { case (_, resp) => Some(resp) }
     }
   }
@@ -65,19 +64,27 @@ final class PingService @Inject()(
     // We keep a log of times at which clients send their pings. This is useful both for
     // debugging purposes, and to the algorithm in charge of creating groups. The latter may
     // use historical activity to optimize groups (i.e., by pruning long-inactive users).
-    geocoder.geocode(request.ipAddress).flatMap { countryCode =>
-      storage.activity.create(Activity(
-        request.clientName,
-        now,
-        countryCode = countryCode,
-        extensionVersion = request.extensionVersion,
-        timezone = request.timezone))
-    }
+    geocoder.geocode(request.ipAddress)
+      .flatMap { countryCode =>
+        storage.activity.create(Activity(
+          request.clientName,
+          now,
+          countryCode = countryCode,
+          extensionVersion = request.extensionVersion,
+          timezone = request.timezone))
+      }
   }
 
   private def createResponse(client: Client, now: Instant): Future[PingResponse] = {
-    // Here happens the main work: for each non-submitted sketch of this client, a command is
-    // generated instructing the client what to do.
+    Future.join(getCommands(client, now), getVocabulary(client))
+      .map { case (commands, vocabulary) =>
+        PingResponse(commands, vocabulary, Some(getNextPingTime(now)))
+      }
+  }
+
+  private def getCommands(client: Client, now: Instant): Future[Seq[PingResponse.Command]] = {
+    // For each non-submitted sketch of this client, a command is generated instructing the client
+    // what to submit.
     storage.sketches
       .list(SketchStore.Query(clientName = Some(client.name), submitted = Some(false)))
       .flatMap { sketches =>
@@ -90,30 +97,31 @@ final class PingService @Inject()(
             Future.collect(fs)
           }
       }
-      .map { commands =>
-        val nextPingTime = if (testingMode) {
-          now.plus(Duration.standardMinutes(5).millis)
-        } else {
-          // The sketches are generated at 1:00, so we ask the clients to contact the server
-          // between 2:00 and 3:00 to get their instructions.
-          //
-          // We add some randomness to avoid all clients contacting the server at the same time.
-          // Although people are expected to be sleeping at 2:00, their computer might still be
-          // on and we prefer to avoid all clients sending their ping at the exact same moment.
-          now.toDateTime(timezone)
-            .plusDays(1)
-            .withTimeAtStartOfDay
-            .plusHours(2)
-            .plusMinutes(Random.nextInt(60)) // <- Randomness.
-        }
-        PingResponse(commands, Some(nextPingTime.toInstant))
-      }
   }
 
-  private def batchGetCampaigns(ids: Seq[String]): Future[Map[String, Campaign]] = {
+  private def getVocabulary(client: Client): Future[Vocabulary] = {
     storage.campaigns
-      .batchGet(ids)
-      .map(_.flatMap(_.toSeq).map(campaign => campaign.name -> campaign).toMap)
+      .list(CampaignStore.Query(isActive = Some(true)))
+      .map(campaigns => Vocabulary(campaigns.flatMap(_.vocabulary.queries).distinct))
+  }
+
+  private def getNextPingTime(now: Instant): Instant = {
+    if (testingMode) {
+      now.plus(Duration.standardMinutes(5).millis).toInstant
+    } else {
+      // The sketches are generated at 1:00, so we ask the clients to contact the server
+      // between 2:00 and 3:00 to get their instructions.
+      //
+      // We add some randomness to avoid all clients contacting the server at the same time.
+      // Although people are expected to be sleeping at 2:00, their computer might still be
+      // on and we prefer to avoid all clients sending their ping at the exact same moment.
+      now.toDateTime(timezone)
+        .plusDays(1)
+        .withTimeAtStartOfDay
+        .plusHours(2)
+        .plusMinutes(Random.nextInt(60)) // <- Randomness.
+        .toInstant
+    }
   }
 
   private def createCommand(campaign: Campaign, client: Client, sketch: Sketch): Future[PingResponse.Command] = {
@@ -140,6 +148,12 @@ final class PingService @Inject()(
           collectEncrypted = campaign.collectEncrypted,
           round = sketch.day)
       }
+  }
+
+  private def batchGetCampaigns(ids: Seq[String]): Future[Map[String, Campaign]] = {
+    storage.campaigns
+      .batchGet(ids)
+      .map(_.flatMap(_.toSeq).map(campaign => campaign.name -> campaign).toMap)
   }
 
   private def collectGroupKeys(clientName: String, campaignName: String, day: Int, group: Int): Future[Seq[String]] = {
