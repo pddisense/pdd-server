@@ -20,7 +20,14 @@ scala_library(
   name = "testing",
   srcs = glob(["*.scala"]),
   deps = [
+    "@io_bazel_rules_scala_scalatest//jar",
+    "@io_bazel_rules_scala_scalactic//jar",
+  ],
+  exports = [
+    "@io_bazel_rules_scala_scalatest//jar",
+    "@io_bazel_rules_scala_scalactic//jar",
+  ],
+  runtime_deps = [
     "//3rdparty/jvm/ch/qos/logback:logback_classic",
-    "@scalatest//jar:jar",
-  ]
+  ],
 )

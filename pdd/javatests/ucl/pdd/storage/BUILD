@@ -24,6 +24,6 @@ scala_library(
     "//pdd/java/ucl/pdd/storage",
     "//pdd/javatests/ucl/testing",
     "//3rdparty/jvm/com/github/nscala_time",
-    "@scalatest//jar:jar",
+    "@io_bazel_rules_scala_scalatest//jar",
   ]
 )

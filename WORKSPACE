@@ -18,7 +18,7 @@ workspace(name = "ucl_pdd")
 
 ## Download and load the rules bringing Scala support.
 # https://github.com/bazelbuild/rules_scala
-rules_scala_version = "827124ad15cfc9da87506de989f6ef2ba70ec0c6"
+rules_scala_version = "b537bddc58a77318b34165812a0311ef52806318"
 http_archive(
   name = "io_bazel_rules_scala",
   url = "https://github.com/bazelbuild/rules_scala/archive/%s.zip" % rules_scala_version,
