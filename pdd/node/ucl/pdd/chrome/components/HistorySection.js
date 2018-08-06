@@ -20,16 +20,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import { sum } from 'lodash';
-import { DateInput } from '@blueprintjs/datetime';
-import { isToday, isBefore1am } from '../util/dates';
-
-function getMomentFormatter(format: string) {
-  return {
-    formatDate: (date) => moment(date).format(format),
-    parseDate: (str) => moment(str, format).toDate(),
-    placeholder: format,
-  }
-}
+import { isBefore1am } from '../util/dates';
 
 class HistorySection extends React.Component {
   handleHistoryClick(e) {
@@ -38,46 +29,40 @@ class HistorySection extends React.Component {
   }
 
   render() {
-    const today = isToday(this.props.date);
-    const yesterday = isBefore1am(this.props.date);
-    const total = sum(this.props.searches.map(item => item.count));
-    const rows = this.props.searches.map((item, idx) => {
-      return (
-        <tr key={idx}>
-          <td>{item.query}</td>
-          <td>{moment(item.lastTime).fromNow()}</td>
-          <td>{item.count}</td>
-        </tr>
-      );
+    const yesterday = isBefore1am(moment());
+    const total = this.props.history.length > 0 ? this.props.history.shift() : 0;
+    const rows = [];
+    this.props.history.forEach((v, idx) => {
+      if (v > 0) {
+        const query = this.props.vocabulary.queries[idx];
+        let keywords;
+        if (query.terms) {
+          keywords = query.terms.join(', ');
+        } else if (query.exact) {
+          keywords = query.exact;
+        }
+        rows.push(<tr key={idx}><td>{keywords}</td><td>{v}</td></tr>);
+      }
     });
     return (
       <div>
         <h1>History</h1>
-        <div>
-          <label className="pt-label pt-inline">
-            Display history for
-            <DateInput {...getMomentFormatter("YYYY-MM-DD")}
-                       canClearSelection={false}
-                       maxDate={new Date()}
-                       value={this.props.date}
-                       keepFocus={false}
-                       onChange={this.props.onChange}/>
-          </label>
-        </div>
-        {today ? <p>
-          Here are the search queries that Private Data Donor has detected for {yesterday ? 'yesterday' : 'today'}.
-          Those that are of interest will be automatically sent {yesterday ? '' : 'tomorrow'} at 1am.
+        <p>
+          Here are the search queries that Private Data Donor has detected
+          for {yesterday ? 'yesterday' : 'today'}.
+          Those that are of interest will be automatically sent {yesterday ? '' : 'tomorrow'} at
+          1am.
           If you wish to delete some of them, please remove the corresponding activity
           from <a onClick={this.handleHistoryClick}>your browsing history</a>.
-        </p> : null}
+        </p>
         <p>
-          <b>{total} search{total === 1 ? '' : 'es'}</b> {total === 1 ? 'has' : 'have'} been detected{today ? ' so far' : ''}.
+          <b>{total} search{total === 1 ? '' : 'es'}</b> {total === 1 ? 'has' : 'have'} been
+          detected so far.
         </p>
         <table className="pt-html-table">
           <thead>
           <tr>
-            <th>Query</th>
-            <th>Last time</th>
+            <th>Keywords</th>
             <th>Occurrences</th>
           </tr>
           </thead>
@@ -89,9 +74,8 @@ class HistorySection extends React.Component {
 }
 
 HistorySection.propTypes = {
-  searches: PropTypes.array.isRequired,
-  onChange: PropTypes.func.isRequired,
-  date: PropTypes.object.isRequired,
+  history: PropTypes.array.isRequired,
+  vocabulary: PropTypes.array.isRequired,
 };
 
 export default HistorySection;

@@ -17,8 +17,24 @@
  */
 
 import React from 'react';
-import HistorySection from './HistorySection';
-import withSearchHistory from './withSearchHistory';
-import withVocabulary from './withVocabulary';
 
-export default withVocabulary(withSearchHistory(HistorySection));
+import { getData } from '../browser/storage';
+
+export default function withLocalData(WrappedComponent) {
+  return class WithLocalDataContainer extends React.Component {
+    constructor(props) {
+      super(props);
+      this.state = {
+        data: {},
+      };
+    }
+
+    componentDidMount() {
+      getData().then(data => this.setState({ data }));
+    }
+
+    render() {
+      return <WrappedComponent localData={this.state.data} />;
+    }
+  };
+}

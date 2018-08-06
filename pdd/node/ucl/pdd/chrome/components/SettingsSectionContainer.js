@@ -20,25 +20,20 @@ import React from 'react';
 import autobind from 'autobind-decorator';
 import { Intent } from '@blueprintjs/core';
 
-import { getData, setData } from '../browser/storage';
+import { setData } from '../browser/storage';
 import SettingsSection from './SettingsSection';
+import withLocalData from './withLocalData';
 import xhr from '../util/xhr';
 import toaster from './toaster';
 
+@withLocalData
 export default class SettingsSectionContainer extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      data: {},
-    };
-  }
-
   @autobind
   handleChange(data) {
     let p;
-    if (this.state.data.name) {
+    if (this.props.localData.name) {
       p = xhr(
-        `/api/clients/${this.state.data.name}`,
+        `/api/clients/${this.props.localData.name}`,
         { method: 'PATCH', body: JSON.stringify(data) }
       ).then(
         () => {
@@ -51,20 +46,16 @@ export default class SettingsSectionContainer extends React.Component {
         }
       );
     } else {
-      // It means that the client is not (yet) registered against the server.
+      // It means that the client is not (yet) registered with the server.
       p = Promise.resolve();
     }
     p.then(
-      () => setData({ ...data }),
+      () => setData(data),
       () => console.log('Cannot contact the server, changes are discarded.'),
     );
   }
 
-  componentDidMount() {
-    getData().then(data => this.setState({ data }));
-  }
-
   render() {
-    return <SettingsSection client={this.state.data} onChange={this.handleChange}/>;
+    return <SettingsSection client={this.props.localData} onChange={this.handleChange}/>;
   }
 }

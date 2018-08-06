@@ -17,8 +17,28 @@
  */
 
 import React from 'react';
-import HistorySection from './HistorySection';
-import withSearchHistory from './withSearchHistory';
-import withVocabulary from './withVocabulary';
 
-export default withVocabulary(withSearchHistory(HistorySection));
+import { getData } from '../browser/storage';
+
+export default function withVocabulary(WrappedComponent) {
+  return class WithVocabularyContainer extends React.Component {
+    constructor(props) {
+      super(props);
+      this.state = {
+        vocabulary: {queries: []},
+      };
+    }
+
+    componentDidMount() {
+      getData().then(data => {
+        if (data.vocabulary) {
+          this.setState({ vocabulary: data.vocabulary });
+        }
+      });
+    }
+
+    render() {
+      return <WrappedComponent {...this.props} {...this.state}/>;
+    }
+  };
+}

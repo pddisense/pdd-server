@@ -106,6 +106,7 @@ class SettingsSection extends React.Component {
           <Button fill={true}
                   onClick={this.handleClick}
                   text="Force synchronization now"
+                  disabled={!this.props.client.name}
                   icon="refresh"/>
           <div className="pt-form-helper-text">
             By clicking on this button, you will force a data synchronization now.

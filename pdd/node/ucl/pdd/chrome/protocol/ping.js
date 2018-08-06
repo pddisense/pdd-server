@@ -17,20 +17,23 @@
  */
 
 import moment from 'moment';
-import { sum } from 'lodash';
 import jstz from 'jstz';
 
 import { searchHistory } from '../browser/history';
+import { aggregateHistory } from './history';
 import { setData } from '../browser/storage';
 import xhr from '../util/xhr';
 import { encryptCounters } from './crypto';
 
 /**
- * Contact the API server to get instructions, and perform them.
+ * Contact the API server to get instructions, and rect to them by sending data. We do not handle
+ * retries in this function, as it is to be handled by the background pings only (and not those
+ * sent manually by the user).
  *
  * @param client Current client.
  */
 export default function sendPing(client) {
+  // First send a ping request, in order to get instructions from the server.
   console.log(`Pinging the server for client ${client.name}...`);
   const timezone = jstz.determine();
   const obj = {
@@ -48,9 +51,15 @@ export default function sendPing(client) {
       return Promise.resolve();
     }
   }).then(resp => {
-    // Submit each sketch that was requested.
-    resp.submit.forEach(command => submitSketch(client, command));
-
+    if (resp.submit) {
+      // Submit each sketch that was requested. This ensures that we capture the outcome of
+      // every sketch submitted, but we still return the original response. If there is an error,
+      // another attempt will be done later on, this is managed in `background.js`.
+      return Promise.all(resp.submit.map(command => submitSketch(client, command))).then(_ => resp);
+    } else {
+      return Promise.resolve(resp);
+    }
+  }).then(resp => {
     // Schedule next ping time. Normally, the response comes with a suggested time. If for any
     // reason it is not present, we still schedule one for the next day (otherwise the extension
     // will simply stop sending data).
@@ -77,38 +86,4 @@ function submitSketch(client, command) {
         { method: 'PATCH', body: JSON.stringify(sketch) }
       );
     });
-}
-
-/**
- * Aggregate the complete search history according to a given vocabulary.
- *
- * @param history Search history.
- * @param vocabulary Monitored vocabulary.
- * @returns int[]
- */
-function aggregateHistory(history, vocabulary) {
-  // The first counter is always the total number of searches performed across the period, whether
-  // or not they are actually monitored. Then there is one counter per query in the vocabulary
-  // (even if no search was performed for that query).
-  const counters = Array(vocabulary.queries.length + 1);
-  counters.fill(0);
-  counters[0] = sum(history.map(search => search.count));
-  history.forEach(search => {
-    const indices = findIndices(search.query, vocabulary);
-    indices.forEach(idx => counters[idx + 1] += search.count);
-  });
-  return counters;
-}
-
-function findIndices(q, vocabulary) {
-  return vocabulary.queries.map((query, idx) => {
-    if (query.exact) {
-      return q === query.exact ? idx : -1;
-    } else if (query.terms) {
-      // TODO: tokenize to handle quotes.
-      const keywords = q.split(' ').map(s => s.trim());
-      return query.terms.every(v => keywords.indexOf(v) > -1) ? idx : -1;
-    }
-    return -1;
-  }).filter(idx => -1 !== idx);
 }
