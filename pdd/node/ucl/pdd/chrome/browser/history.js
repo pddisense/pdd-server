@@ -19,6 +19,10 @@
 import URL from 'url-parse';
 import moment from 'moment';
 
+// Preliminary note: The history API provides two types of objects: HistoryItem, which represents a
+// URL, and VisitItem, which represents a visit to a particular URL (i.e., a HistoryItem).
+// HistoryItem's come with the total number of visits and the last time the URL was visited.
+
 /**
  * Search across the browser history to extract the Google searches performed during a given period.
  *
@@ -34,6 +38,13 @@ export function searchHistory(startTime, endTime) {
   // Chrome documentation does not indicate that chrome.history.search may fail, so the promise
   // always resolves.
   return new Promise((resolve, reject) => {
+    // The workflow is the following:
+    // 1) We retrieve a list of HistoryItem's that "look like" Google searches;
+    // 2) Because this is a fuzzy free-text search, we filter them to ensure they are indeed Google
+    // searches;
+    // 3) We retrieve the VisitItem's associated with each HistoryItem and count those falling
+    // within the window of interest.
+
     const query = {
       // This is set to the maximum signed int32. We have to override its default value otherwise
       // set to 100. We do have a problem if the user hit Google more than that many times, but it
@@ -46,14 +57,13 @@ export function searchHistory(startTime, endTime) {
 
       // The `startTime` and `endTime` are used to retrieve only history items that were visited
       // at least once during a given period. The Chrome API is under-specified and is was not made
-      // clear whether the range restriction was applied on individual visits or on the the
-      // `lastVisitTime` of each history item. I checked the implementation and as of today (06/2018)
-      // the range restriction is indeed applied on individual visits:
+      // clear whether the range restriction was applied on visits or on the HistoryItem's last
+      // visit time. According to the implementation (in June 2018) the range restriction is
+      // indeed applied on individual visits:
       // https://github.com/chromium/chromium/blob/e0a597faf7cdc0b1a909545c19235e947d44fc66/components/history/core/browser/history_backend.cc#L1300
       //
-      // Note: According to Mozilla's documentation, the opposite choice was made, although the API
-      // provides the same interface:
-      // https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/history/search
+      // As a side not, according to Mozilla's documentation, the opposite choice was made in Firefox,
+      // although the API comes with the same interface.
       startTime: startTime.valueOf(),
       endTime: endTime.valueOf(),
     };
@@ -68,22 +78,20 @@ export function searchHistory(startTime, endTime) {
       const searches = {};
       let completed = 0;
       items.forEach((item) => {
-        // Because the above `text` filter behavior is not completed specified, we need to perform
-        // a second pass to ensure that the returned results actually correspond to a Google search
-        // (we may have false positives otherwise).
+        // Because the above free-text filter does not allow for a precise filtering, we need to
+        // perform a second pass to ensure that the returned results actually correspond to a
+        // Google search (we may have false positives otherwise).
         const url = new URL(item.url, true);
         if (!url.host.startsWith('www.google.') || url.pathname !== '/search' || !url.query.q) {
           completed++;
           return;
         }
 
-        // The `history.search` is quite tricky. Indeed, although `startTime` and `endTime` filters
-        // do apply on individual visits (cf. the note above), the `visitCount` field of each
-        // history item contains the total number of visits of all time (and hence ignores the
-        // range restriction imposed by the `startTime` and `endTime` filters). This is why we have
-        // to retrieve for every history item the associated visits, filter them by time (the API
-        // does not provide a way to do it) and count them, in order to have an accurate visits
-        // count for that specific history item.
+        // Although `startTime` and `endTime` filters do apply on individual visits (cf. the note
+        // above), the `visitCount` field of each history item is immutable and still contains the
+        // total number of visits of all time (and hence ignores the time range restriction). This
+        // is why we have to retrieve for every history item all the associated visits, filter them
+        // by time (the API does not provide a way to do it) and count them.
         chrome.history.getVisits({ url: item.url }, (visits) => {
           const count = visits.filter(visit => {
             if (!visit.visitTime) {
@@ -95,8 +103,9 @@ export function searchHistory(startTime, endTime) {
             return visitTime.isAfter(startTime) && visitTime.isBefore(endTime);
           }).length;
 
-          // Different Google URLs may in fact contain the same query. We take care of merging
-          // those identical queries.
+          // The actual query is embedded into the `q` query string parameter, but there are other
+          // possible parameters. Therefore, different Google URLs may in fact contain the same
+          // query, so we take care of merging those identical queries.
           if (url.query.q in searches) {
             const search = searches[url.query.q];
             search.count += count;

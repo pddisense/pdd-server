@@ -36,10 +36,10 @@ class HistorySection extends React.Component {
       if (v > 0) {
         const query = this.props.vocabulary.queries[idx];
         let keywords;
-        if (query.terms) {
-          keywords = query.terms.join(', ');
-        } else if (query.exact) {
+        if (query.exact) {
           keywords = query.exact;
+        } else if (query.terms) {
+          keywords = query.terms.join(', ');
         }
         rows.push(<tr key={idx}><td>{keywords}</td><td>{v}</td></tr>);
       }
