@@ -87,6 +87,13 @@ export function searchHistory(startTime, endTime) {
           return;
         }
 
+        // The `start` query string parameter is filled when the user navigates across Google's
+        // search results pages. We ignore such pages and do not count them as a new search.
+        if (url.query.start) {
+          completed++;
+          return;
+        }
+
         // Although `startTime` and `endTime` filters do apply on individual visits (cf. the note
         // above), the `visitCount` field of each history item is immutable and still contains the
         // total number of visits of all time (and hence ignores the time range restriction). This
