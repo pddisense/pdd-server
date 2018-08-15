@@ -64,10 +64,16 @@ export default function withSearchHistory(WrappedComponent) {
     }
 
     componentDidUpdate(prevProps) {
-      if (!this.props.localData.vocabulary) {
-        return;
+      if (!prevProps.localData.vocabulary && this.props.localData.vocabulary) {
+        // A vocabulary has been retrieved.
+        this.fetchData();
       }
-      if (!prevProps.localData.vocabulary) {
+      if (!prevProps.localData.blacklist && this.props.localData.blacklist) {
+        // A blacklist has been retrieved.
+        this.fetchData();
+      }
+      if (prevProps.localData.blacklist && prevProps.localData.blacklist.queries.length !== this.props.localData.blacklist.queries.length) {
+        // The blacklist has changed.
         this.fetchData();
       }
     }
