@@ -17,7 +17,6 @@
  */
 
 import React from 'react';
-import autobind from 'autobind-decorator';
 import { Intent } from '@blueprintjs/core';
 import { keys, pick } from 'lodash';
 
@@ -38,7 +37,6 @@ export default function withLocalData(WrappedComponent) {
       getData().then(data => this.setState({ data }));
     }
 
-    @autobind
     handleChange(data) {
       const patch = pick(data, [ 'externalName' ]);
       patchClient(this.state.data.name, patch).then(
@@ -51,7 +49,8 @@ export default function withLocalData(WrappedComponent) {
     }
 
     render() {
-      return <WrappedComponent localData={this.state.data} onChange={this.handleChange}/>;
+      return <WrappedComponent localData={this.state.data}
+                               onChange={data => this.handleChange(data)}/>;
     }
   };
 }

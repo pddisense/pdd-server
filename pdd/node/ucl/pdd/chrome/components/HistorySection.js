@@ -19,15 +19,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
-import { Icon } from '@blueprintjs/core';
 import { noop } from 'lodash';
 
+import HistoryTableContainer from './HistoryTableContainer';
 import { isBefore1am } from '../util/dates';
-import { formatQuery } from '../protocol/history';
 
 class HistorySection extends React.Component {
-  handleClick(e, idx) {
-    e.preventDefault();
+  handleClick(idx) {
     const blacklist = this.props.localData.blacklist
       ? { queries: this.props.localData.blacklist.queries.slice() }
       : { queries: [] };
@@ -37,25 +35,6 @@ class HistorySection extends React.Component {
 
   render() {
     const yesterday = isBefore1am(moment());
-    const total = this.props.history.length > 0 ? this.props.history[0] : 0;
-    const rows = [];
-    if (this.props.localData.vocabulary) {
-      // If the vocabulary is not available locally, we cannot extract the search history yet.
-      this.props.history.forEach((v, idx) => {
-        // Don't display first count, which is the total number of searches, and...
-        // don't display keywords with a null count.
-        if (idx > 0 && v > 0) {
-          const query = this.props.localData.vocabulary.queries[idx - 1];
-          rows.push(
-            <tr key={idx}>
-              <td>{formatQuery(query)}</td>
-              <td>{v}</td>
-              <td style={{textAlign: 'center'}}><a onClick={e => this.handleClick(e, idx - 1)}><Icon icon="remove"/></a></td>
-            </tr>
-          );
-        }
-      });
-    }
     return (
       <div>
         <h1>History</h1>
@@ -68,27 +47,13 @@ class HistorySection extends React.Component {
           clicking on the button on the right-hand side of each keyword.
           They will be permanently blocked.
         </p>
-        <p>
-          <b>{total} search{total === 1 ? '' : 'es'}</b> {total === 1 ? 'has' : 'have'} been
-          detected so far.
-        </p>
-        <table className="pt-html-table">
-          <thead>
-          <tr>
-            <th>Keywords</th>
-            <th>Occurrences</th>
-            <th style={{textAlign: 'center'}}>Blacklist</th>
-          </tr>
-          </thead>
-          <tbody>{rows}</tbody>
-        </table>
+        <HistoryTableContainer localData={this.props.localData} onClick={this.handleClick}/>
       </div>
     );
   }
 }
 
 HistorySection.propTypes = {
-  history: PropTypes.array.isRequired,
   localData: PropTypes.object.isRequired,
 };
 

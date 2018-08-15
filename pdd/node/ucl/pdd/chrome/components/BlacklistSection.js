@@ -19,13 +19,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { noop } from 'lodash';
-import { Icon } from '@blueprintjs/core';
 
-import { formatQuery } from '../protocol/history';
+import BlacklistTable from './BlacklistTable';
 
 class BlacklistSection extends React.Component {
-  handleClick(e, idx) {
-    e.preventDefault();
+  handleClick(idx) {
     const blacklist = { queries: this.props.localData.blacklist.queries.slice() };
     blacklist.queries.splice(idx, 1);
     this.props.onChange({ blacklist });
@@ -33,14 +31,6 @@ class BlacklistSection extends React.Component {
 
   render() {
     const blacklist = this.props.localData.blacklist || { queries: [] };
-    const rows = blacklist.queries.map((item, idx) => {
-      return (
-        <tr key={idx}>
-          <td>{formatQuery(item)}</td>
-          <td style={{textAlign: 'center'}}><a onClick={e => this.handleClick(e, idx)}><Icon icon="confirm"/></a></td>
-        </tr>
-      );
-    });
     return (
       <div>
         <h1>Blacklist</h1>
@@ -53,15 +43,7 @@ class BlacklistSection extends React.Component {
           its usage.
         </p>
 
-        <table className="pt-html-table">
-          <thead>
-          <tr>
-            <th>Keywords</th>
-            <th style={{textAlign: 'center'}}>Revoke</th>
-          </tr>
-          </thead>
-          <tbody>{rows}</tbody>
-        </table>
+        <BlacklistTable blacklist={blacklist} onClick={this.handleClick}/>
       </div>
     );
   }

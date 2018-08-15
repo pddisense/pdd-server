@@ -17,7 +17,7 @@
  */
 
 import React from 'react';
-import HistorySection from './HistorySection';
-import withLocalData from './withLocalData';
+import HistoryTable from './HistoryTable';
+import withSearchHistory from './withSearchHistory';
 
-export default withLocalData(HistorySection);
+export default withSearchHistory(HistoryTable);

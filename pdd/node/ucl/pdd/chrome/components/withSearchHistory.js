@@ -18,6 +18,8 @@
 
 import React from 'react';
 import moment from 'moment';
+import { Spinner } from '@blueprintjs/core';
+
 import { searchHistory } from '../browser/history';
 import { aggregateHistory } from '../protocol/history';
 import { isBefore1am } from '../util/dates';
@@ -27,13 +29,21 @@ export default function withSearchHistory(WrappedComponent) {
     constructor(props) {
       super(props);
       this.state = {
-        history: [],
+        history: null,
       };
     }
 
     fetchData() {
-      const vocabulary = this.props.localData.vocabulary || { queries: [] };
-      if (vocabulary.queries.length > 0) {
+      if (!this.props.localData.vocabulary) {
+        // The vocabulary is not yet available, likely because the first ping has not been
+        // realised. We cannot display anything meaningful, so the spinner will remain.
+        return;
+      }
+      if (this.props.localData.vocabulary.queries.length === 0) {
+        // There is a vocabulary but it is empty. There is no need to retrieve the search history,
+        // we simply set it empty. The spinner will disappear as a consequence.
+        this.setState({ history: [] });
+      } else {
         // Retrieve the search history only if the vocabulary is non-empty.
         const now = moment();
         let startTime = now.clone().startOf('day');
@@ -53,7 +63,7 @@ export default function withSearchHistory(WrappedComponent) {
           // displaying all search queries without indicating which ones are actually tracked.
           // TODO: a possible fix would be to delay the activation of new keywords by one day.
           const blacklist = this.props.localData.blacklist || { queries: [] };
-          const history = aggregateHistory(data, vocabulary, blacklist);
+          const history = aggregateHistory(data, this.props.localData.vocabulary, blacklist);
           this.setState({ history })
         });
       }
@@ -65,11 +75,11 @@ export default function withSearchHistory(WrappedComponent) {
 
     componentDidUpdate(prevProps) {
       if (!prevProps.localData.vocabulary && this.props.localData.vocabulary) {
-        // A vocabulary has been retrieved.
+        // A vocabulary has been created.
         this.fetchData();
       }
       if (!prevProps.localData.blacklist && this.props.localData.blacklist) {
-        // A blacklist has been retrieved.
+        // A blacklist has been created.
         this.fetchData();
       }
       if (prevProps.localData.blacklist && prevProps.localData.blacklist.queries.length !== this.props.localData.blacklist.queries.length) {
@@ -79,6 +89,9 @@ export default function withSearchHistory(WrappedComponent) {
     }
 
     render() {
+      if (this.state.history === null) {
+        return <div style={{textAlign: 'center'}}><Spinner/></div>;
+      }
       return <WrappedComponent {...this.props} {...this.state}/>;
     }
   };
