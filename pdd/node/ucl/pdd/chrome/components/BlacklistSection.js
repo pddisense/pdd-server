@@ -26,6 +26,7 @@ class BlacklistSection extends React.Component {
   handleClick(idx) {
     const blacklist = { queries: this.props.localData.blacklist.queries.slice() };
     blacklist.queries.splice(idx, 1);
+    console.log({ blacklist });
     this.props.onChange({ blacklist });
   }
 
@@ -33,8 +34,6 @@ class BlacklistSection extends React.Component {
     const blacklist = this.props.localData.blacklist || { queries: [] };
     return (
       <div>
-        <h1>Blacklist</h1>
-
         <p>
           This page shows all keywords that you have previously blacklisted.
           It means that statistics about these keywords are not being monitored anymore by the
@@ -42,8 +41,7 @@ class BlacklistSection extends React.Component {
           You can choose at any time to revoke a blacklisted keyword, allowing us to monitor again
           its usage.
         </p>
-
-        <BlacklistTable blacklist={blacklist} onClick={this.handleClick}/>
+        <BlacklistTable blacklist={blacklist} onClick={idx => this.handleClick(idx)}/>
       </div>
     );
   }

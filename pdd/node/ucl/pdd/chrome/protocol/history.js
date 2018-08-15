@@ -16,7 +16,7 @@
  * along with PDD.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { sum, isEqual, findIndex } from 'lodash';
+import { findIndex, isEqual, sum } from 'lodash';
 
 /**
  * Aggregate the complete search history according to a given vocabulary.
@@ -32,7 +32,7 @@ export function aggregateHistory(history, vocabulary, blacklist = []) {
   // (even if no search was performed for that query).
   const counters = Array(vocabulary.queries.length + 1);
   counters.fill(0);
-  counters[0] = sum(history.map(search => search.count));
+  counters[ 0 ] = sum(history.map(search => search.count));
 
   // Compute the identifiers of blacklisted queries inside the vocabulary.
   const blacklisted = [];
@@ -44,9 +44,24 @@ export function aggregateHistory(history, vocabulary, blacklist = []) {
 
   // Each search inside the history may correspond to multiple monitored queries. For each search,
   // we find the identifiers of the associated query(ies) and update the appropriate counters.
-  history.forEach(search => {
-    const indices = findIndices(search.query, vocabulary, blacklisted);
-    indices.forEach(idx => counters[idx + 1] += search.count);
+  vocabulary.queries.forEach((query, idx) => {
+    history.forEach(search => {
+      if (blacklisted.indexOf(idx) > -1) {
+        // If query is blacklisted, never take it into account.
+        return;
+      }
+      if (query.exact) {
+        if (search.query === query.exact) {
+          counters[ idx + 1 ] += search.count;
+        }
+      } else if (query.terms) {
+        // TODO: tokenize to handle quotes.
+        const keywords = search.query.split(' ').map(s => s.trim());
+        if (query.terms.every(v => keywords.indexOf(v) > -1)) {
+          counters[ idx + 1 ] += search.count;
+        }
+      }
+    });
   });
   return counters;
 }
@@ -59,26 +74,4 @@ export function formatQuery(query) {
   } else {
     return '–';
   }
-}
-
-function findIndices(q, vocabulary, blacklisted = []) {
-  const indices = [];
-  vocabulary.queries.forEach((query, idx) => {
-    if (blacklisted.indexOf(idx) > -1) {
-      // If query is blacklisted, never take it into account.
-      return;
-    }
-    if (query.exact) {
-      if (q === query.exact) {
-        indices.push(idx);
-      }
-    } else if (query.terms) {
-      // TODO: tokenize to handle quotes.
-      const keywords = q.split(' ').map(s => s.trim());
-      if (query.terms.every(v => keywords.indexOf(v) > -1)) {
-        indices.push(idx);
-      }
-    }
-  });
-  return indices;
 }

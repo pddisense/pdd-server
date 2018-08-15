@@ -66,8 +66,6 @@ class SettingsSection extends React.Component {
   render() {
     return (
       <div>
-        <h1>Advanced</h1>
-
         <div className="pt-form-group">
           <label className="pt-label" htmlFor="external-name">
             Participant identifier

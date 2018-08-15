@@ -37,17 +37,16 @@ class HistorySection extends React.Component {
     const yesterday = isBefore1am(moment());
     return (
       <div>
-        <h1>History</h1>
         <p>
-          Here are the search queries that Private Data Donor has detected
+          This page shows the search queries that Private Data Donor has detected
           for {yesterday ? 'yesterday' : 'today'}.
-          Those that are of interest will be automatically sent {yesterday ? '' : 'tomorrow'} at
-          1am.
+          Those that are of interest will be automatically sent {yesterday ? '' : 'tomorrow'} at 1am.
           If you do not want some keywords to be monitored, you can choose to blacklist them by
           clicking on the button on the right-hand side of each keyword.
           They will be permanently blocked.
         </p>
-        <HistoryTableContainer localData={this.props.localData} onClick={this.handleClick}/>
+        <HistoryTableContainer localData={this.props.localData}
+                               onClick={idx => this.handleClick(idx)}/>
       </div>
     );
   }
