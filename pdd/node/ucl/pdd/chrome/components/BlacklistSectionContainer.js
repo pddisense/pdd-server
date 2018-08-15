@@ -18,27 +18,7 @@
 
 import React from 'react';
 
-import { getData } from '../browser/storage';
+import BlacklistSection from './BlacklistSection';
+import withLocalData from './withLocalData';
 
-export default function withVocabulary(WrappedComponent) {
-  return class WithVocabularyContainer extends React.Component {
-    constructor(props) {
-      super(props);
-      this.state = {
-        vocabulary: {queries: []},
-      };
-    }
-
-    componentDidMount() {
-      getData().then(data => {
-        if (data.vocabulary) {
-          this.setState({ vocabulary: data.vocabulary });
-        }
-      });
-    }
-
-    render() {
-      return <WrappedComponent {...this.props} {...this.state}/>;
-    }
-  };
-}
+export default withLocalData(BlacklistSection);

@@ -17,45 +17,8 @@
  */
 
 import React from 'react';
-import autobind from 'autobind-decorator';
-import { Intent } from '@blueprintjs/core';
 
-import { setData } from '../browser/storage';
 import SettingsSection from './SettingsSection';
 import withLocalData from './withLocalData';
-import xhr from '../util/xhr';
-import toaster from './toaster';
 
-@withLocalData
-export default class SettingsSectionContainer extends React.Component {
-  @autobind
-  handleChange(data) {
-    let p;
-    if (this.props.localData.name) {
-      p = xhr(
-        `/api/clients/${this.props.localData.name}`,
-        { method: 'PATCH', body: JSON.stringify(data) }
-      ).then(
-        () => {
-          toaster.show({ message: 'The settings have been updated.', intent: Intent.SUCCESS });
-          return Promise.resolve();
-        },
-        (reason) => {
-          toaster.show({ message: 'There was an error while updating the settings.', intent: Intent.DANGER });
-          return Promise.reject(reason);
-        }
-      );
-    } else {
-      // It means that the client is not (yet) registered with the server.
-      p = Promise.resolve();
-    }
-    p.then(
-      () => setData(data),
-      () => console.log('Cannot contact the server, changes are discarded.'),
-    );
-  }
-
-  render() {
-    return <SettingsSection client={this.props.localData} onChange={this.handleChange}/>;
-  }
-}
+export default withLocalData(SettingsSection);

@@ -19,6 +19,6 @@
 import React from 'react';
 import HistorySection from './HistorySection';
 import withSearchHistory from './withSearchHistory';
-import withVocabulary from './withVocabulary';
+import withLocalData from './withLocalData';
 
-export default withVocabulary(withSearchHistory(HistorySection));
+export default withLocalData(withSearchHistory(HistorySection));

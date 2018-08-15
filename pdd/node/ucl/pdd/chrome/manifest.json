@@ -4,7 +4,7 @@
   "name": "Private Data Donor",
   "short_name": "PDD",
   "description": "It connects researchers with volunteers. It monitors web searches in order to study the spread of infectious diseases such as flu.",
-  "version": "0.6.13",
+  "version": "0.6.14",
 
   "options_ui": {
     "page": "options.html",
@@ -31,7 +31,6 @@
   "permissions": [
     "history",
     "alarms",
-    "storage",
-    "tabs"
+    "storage"
   ]
 }

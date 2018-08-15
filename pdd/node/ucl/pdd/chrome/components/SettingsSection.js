@@ -24,9 +24,9 @@ import { noop } from 'lodash';
 
 import sendPing from '../protocol/ping.js';
 
-function attrsToState(client) {
+function attrsToState(localData) {
   return {
-    externalName: client.externalName || '',
+    externalName: localData.externalName || '',
   };
 }
 
@@ -39,11 +39,11 @@ function stateToAttrs(state) {
 class SettingsSection extends React.Component {
   constructor(props) {
     super(props);
-    this.state = attrsToState(props.client);
+    this.state = attrsToState(props.localData);
   }
 
   componentWillReceiveProps(nextProps) {
-    this.setState(attrsToState(nextProps.client));
+    this.setState(attrsToState(nextProps.localData));
   }
 
   @autobind
@@ -58,15 +58,15 @@ class SettingsSection extends React.Component {
 
   @autobind
   handleClick() {
-    if (this.props.client.name) {
-      sendPing(this.props.client);
+    if (this.props.localData.name) {
+      sendPing(this.props.localData);
     }
   }
 
   render() {
     return (
       <div>
-        <h1>Settings</h1>
+        <h1>Advanced</h1>
 
         <div className="pt-form-group">
           <label className="pt-label" htmlFor="external-name">
@@ -94,7 +94,7 @@ class SettingsSection extends React.Component {
             Client name
           </label>
           <div className="pt-form-content">
-            {this.props.client.name || '(not yet registered)'}
+            {this.props.localData.name || '(not yet registered)'}
             <div className="pt-form-helper-text">
               This is the internal name that is used to identify the data you contribute.
               Should you encounter any issues, our technical support may ask you this value.
@@ -106,7 +106,7 @@ class SettingsSection extends React.Component {
           <Button fill={true}
                   onClick={this.handleClick}
                   text="Force synchronization now"
-                  disabled={!this.props.client.name}
+                  disabled={!this.props.localData.name}
                   icon="refresh"/>
           <div className="pt-form-helper-text">
             By clicking on this button, you will force a data synchronization now.
@@ -120,7 +120,7 @@ class SettingsSection extends React.Component {
 }
 
 SettingsSection.propTypes = {
-  client: PropTypes.object.isRequired,
+  localData: PropTypes.object.isRequired,
   onChange: PropTypes.func,
 };
 

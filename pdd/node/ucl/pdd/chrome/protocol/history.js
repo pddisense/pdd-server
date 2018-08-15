@@ -16,38 +16,69 @@
  * along with PDD.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { sum } from 'lodash';
+import { sum, isEqual, findIndex } from 'lodash';
 
 /**
  * Aggregate the complete search history according to a given vocabulary.
  *
  * @param history Search history.
  * @param vocabulary Monitored vocabulary.
+ * @param blacklist Blacklisted vocabulary.
  * @returns int[]
  */
-export function aggregateHistory(history, vocabulary) {
+export function aggregateHistory(history, vocabulary, blacklist = []) {
   // The first counter is always the total number of searches performed across the period, whether
   // or not they are actually monitored. Then there is one counter per query in the vocabulary
   // (even if no search was performed for that query).
   const counters = Array(vocabulary.queries.length + 1);
   counters.fill(0);
   counters[0] = sum(history.map(search => search.count));
+
+  // Compute the identifiers of blacklisted queries inside the vocabulary.
+  const blacklisted = [];
+  vocabulary.queries.forEach((query, idx) => {
+    if (findIndex(blacklist.queries, q => isEqual(q, query)) > -1) {
+      blacklisted.push(idx);
+    }
+  });
+
+  // Each search inside the history may correspond to multiple monitored queries. For each search,
+  // we find the identifiers of the associated query(ies) and update the appropriate counters.
   history.forEach(search => {
-    const indices = findIndices(search.query, vocabulary);
+    const indices = findIndices(search.query, vocabulary, blacklisted);
     indices.forEach(idx => counters[idx + 1] += search.count);
   });
   return counters;
 }
 
-function findIndices(q, vocabulary) {
-  return vocabulary.queries.map((query, idx) => {
+export function formatQuery(query) {
+  if (query.exact) {
+    return query.exact;
+  } else if (query.terms) {
+    return query.terms.join(', ');
+  } else {
+    return '–';
+  }
+}
+
+function findIndices(q, vocabulary, blacklisted = []) {
+  const indices = [];
+  vocabulary.queries.forEach((query, idx) => {
+    if (blacklisted.indexOf(idx) > -1) {
+      // If query is blacklisted, never take it into account.
+      return;
+    }
     if (query.exact) {
-      return q === query.exact ? idx : -1;
+      if (q === query.exact) {
+        indices.push(idx);
+      }
     } else if (query.terms) {
       // TODO: tokenize to handle quotes.
       const keywords = q.split(' ').map(s => s.trim());
-      return query.terms.every(v => keywords.indexOf(v) > -1) ? idx : -1;
+      if (query.terms.every(v => keywords.indexOf(v) > -1)) {
+        indices.push(idx);
+      }
     }
-    return -1;
-  }).filter(idx => -1 !== idx);
+  });
+  return indices;
 }

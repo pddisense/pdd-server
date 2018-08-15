@@ -17,8 +17,40 @@
  */
 
 import React from 'react';
+import autobind from 'autobind-decorator';
+import { Intent } from '@blueprintjs/core';
+import { keys, pick } from 'lodash';
 
-import { getData } from '../browser/storage';
+import { getData, setData } from '../browser/storage';
+import xhr from '../util/xhr';
+import toaster from './toaster';
+
+function patchClient(clientName, data) {
+  if (!clientName) {
+    // The client is not (yet) registered with the server.
+    return Promise.resolve();
+  }
+  if (keys(data).length === 0) {
+    // There is nothing to patch.
+    return Promise.resolve();
+  }
+  return xhr(
+    `/api/clients/${clientName}`,
+    { method: 'PATCH', body: JSON.stringify(data) }
+  ).then(
+    () => {
+      toaster.show({ message: 'The settings have been updated.', intent: Intent.SUCCESS });
+      return Promise.resolve();
+    },
+    (reason) => {
+      toaster.show({
+        message: 'An error occurred while contacting the server.',
+        intent: Intent.DANGER
+      });
+      return Promise.reject(reason);
+    }
+  );
+}
 
 export default function withLocalData(WrappedComponent) {
   return class WithLocalDataContainer extends React.Component {
@@ -33,8 +65,20 @@ export default function withLocalData(WrappedComponent) {
       getData().then(data => this.setState({ data }));
     }
 
+    @autobind
+    handleChange(data) {
+      const patch = pick(data, [ 'externalName' ]);
+      patchClient(this.state.data.name, patch).then(
+        () => setData(data),
+        () => {
+          console.log('Cannot contact the server, changes are discarded.');
+          return {};
+        }
+      ).then(data => this.setState({ data }));
+    }
+
     render() {
-      return <WrappedComponent localData={this.state.data} />;
+      return <WrappedComponent localData={this.state.data} onChange={this.handleChange}/>;
     }
   };
 }

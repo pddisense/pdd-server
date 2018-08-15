@@ -19,31 +19,43 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
-import { sum } from 'lodash';
+import { Icon } from '@blueprintjs/core';
+import { noop } from 'lodash';
+
 import { isBefore1am } from '../util/dates';
+import { formatQuery } from '../protocol/history';
 
 class HistorySection extends React.Component {
-  handleHistoryClick(e) {
+  handleClick(e, idx) {
     e.preventDefault();
-    chrome.tabs.create({ 'url': 'chrome://history', 'active': true });
+    const blacklist = this.props.localData.blacklist
+      ? { queries: this.props.localData.blacklist.queries.slice() }
+      : { queries: [] };
+    blacklist.queries.push(this.props.localData.vocabulary.queries[idx]);
+    this.props.onChange({ blacklist });
   }
 
   render() {
     const yesterday = isBefore1am(moment());
-    const total = this.props.history.length > 0 ? this.props.history.shift() : 0;
+    const total = this.props.history.length > 0 ? this.props.history[0] : 0;
     const rows = [];
-    this.props.history.forEach((v, idx) => {
-      if (v > 0) {
-        const query = this.props.vocabulary.queries[idx];
-        let keywords;
-        if (query.exact) {
-          keywords = query.exact;
-        } else if (query.terms) {
-          keywords = query.terms.join(', ');
+    if (this.props.localData.vocabulary) {
+      // If the vocabulary is not available locally, we cannot extract the search history yet.
+      this.props.history.forEach((v, idx) => {
+        // Don't display first count, which is the total number of searches, and...
+        // don't display keywords with a null count.
+        if (idx > 0 && v > 0) {
+          const query = this.props.localData.vocabulary.queries[idx - 1];
+          rows.push(
+            <tr key={idx}>
+              <td>{formatQuery(query)}</td>
+              <td>{v}</td>
+              <td style={{textAlign: 'center'}}><a onClick={e => this.handleClick(e, idx - 1)}><Icon icon="remove"/></a></td>
+            </tr>
+          );
         }
-        rows.push(<tr key={idx}><td>{keywords}</td><td>{v}</td></tr>);
-      }
-    });
+      });
+    }
     return (
       <div>
         <h1>History</h1>
@@ -52,8 +64,9 @@ class HistorySection extends React.Component {
           for {yesterday ? 'yesterday' : 'today'}.
           Those that are of interest will be automatically sent {yesterday ? '' : 'tomorrow'} at
           1am.
-          If you wish to delete some of them, please remove the corresponding activity
-          from <a onClick={this.handleHistoryClick}>your browsing history</a>.
+          If you do not want some keywords to be monitored, you can choose to blacklist them by
+          clicking on the button on the right-hand side of each keyword.
+          They will be permanently blocked.
         </p>
         <p>
           <b>{total} search{total === 1 ? '' : 'es'}</b> {total === 1 ? 'has' : 'have'} been
@@ -64,6 +77,7 @@ class HistorySection extends React.Component {
           <tr>
             <th>Keywords</th>
             <th>Occurrences</th>
+            <th style={{textAlign: 'center'}}>Blacklist</th>
           </tr>
           </thead>
           <tbody>{rows}</tbody>
@@ -75,7 +89,11 @@ class HistorySection extends React.Component {
 
 HistorySection.propTypes = {
   history: PropTypes.array.isRequired,
-  vocabulary: PropTypes.array.isRequired,
+  localData: PropTypes.object.isRequired,
+};
+
+HistorySection.defaultProps = {
+  onChange: noop,
 };
 
 export default HistorySection;

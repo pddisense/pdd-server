@@ -32,7 +32,8 @@ export default function withSearchHistory(WrappedComponent) {
     }
 
     fetchData() {
-      if (this.props.vocabulary.queries.length > 0) {
+      const vocabulary = this.props.localData.vocabulary || { queries: [] };
+      if (vocabulary.queries.length > 0) {
         // Retrieve the search history only if the vocabulary is non-empty.
         const now = moment();
         let startTime = now.clone().startOf('day');
@@ -51,7 +52,8 @@ export default function withSearchHistory(WrappedComponent) {
           // However, for now there is no easy fix and we consider that this situation is best than
           // displaying all search queries without indicating which ones are actually tracked.
           // TODO: a possible fix would be to delay the activation of new keywords by one day.
-          const history = aggregateHistory(data, this.props.vocabulary);
+          const blacklist = this.props.localData.blacklist || { queries: [] };
+          const history = aggregateHistory(data, vocabulary, blacklist);
           this.setState({ history })
         });
       }
@@ -62,7 +64,10 @@ export default function withSearchHistory(WrappedComponent) {
     }
 
     componentDidUpdate(prevProps) {
-      if (this.props.vocabulary.queries.length > prevProps.vocabulary.queries.length) {
+      if (!this.props.localData.vocabulary) {
+        return;
+      }
+      if (!prevProps.localData.vocabulary) {
         this.fetchData();
       }
     }
