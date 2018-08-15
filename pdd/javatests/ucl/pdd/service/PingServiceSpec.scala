@@ -67,7 +67,7 @@ class PingServiceSpec extends UnitSpec with BeforeAndAfterEach {
       notes = None,
       vocabulary = Vocabulary(Seq(
         Vocabulary.Query(exact = Some("foo")),
-        Vocabulary.Query(exact = Some("bar")),
+        Vocabulary.Query(terms = Some(Seq("foot", "ball"))),
         Vocabulary.Query(exact = Some("weather")))),
       startTime = Some(at("2018-05-12T10:00:00")),
       endTime = None,
@@ -196,7 +196,7 @@ class PingServiceSpec extends UnitSpec with BeforeAndAfterEach {
     super.afterEach()
   }
 
-  it should "return commands to a client" in {
+  it should "return a response to a client" in {
     def runTests(now: String): Unit = {
       var resp = Await.result(service.apply(PingRequest("client1", InetAddress.getByName("0.0.0.0")), at(now))).get
       resp.submit should contain theSameElementsAs Seq(
@@ -211,6 +211,12 @@ class PingServiceSpec extends UnitSpec with BeforeAndAfterEach {
           collectRaw = true,
           collectEncrypted = true,
           round = 1))
+      // The latest version of the vocabulary is always returned.
+      resp.vocabulary.queries should contain theSameElementsAs Set(
+        Vocabulary.Query(exact = Some("foo")),
+        Vocabulary.Query(exact = Some("bar")),
+        Vocabulary.Query(terms = Some(Seq("foot", "ball"))),
+        Vocabulary.Query(exact = Some("weather")))
 
       resp = Await.result(service.apply(PingRequest("client2", InetAddress.getByName("0.0.0.0")), at(now))).get
       resp.submit should contain theSameElementsAs Seq(
@@ -241,16 +247,28 @@ class PingServiceSpec extends UnitSpec with BeforeAndAfterEach {
           endTime = at("2018-05-13T00:00:00"),
           vocabulary = Vocabulary(Seq(
             Vocabulary.Query(exact = Some("foo")),
-            Vocabulary.Query(exact = Some("bar")),
+            Vocabulary.Query(terms = Some(Seq("foot", "ball"))),
             Vocabulary.Query(exact = Some("weather")))),
           publicKeys = Seq("pubkey1", "pubkey2", "pubkey3"),
           collectRaw = true,
           collectEncrypted = false,
           round = 0))
+      // The latest version of the vocabulary is always returned.
+      resp.vocabulary.queries should contain theSameElementsAs Set(
+        Vocabulary.Query(exact = Some("foo")),
+        Vocabulary.Query(exact = Some("bar")),
+        Vocabulary.Query(terms = Some(Seq("foot", "ball"))),
+        Vocabulary.Query(exact = Some("weather")))
 
       resp = Await.result(service.apply(PingRequest("client3", InetAddress.getByName("0.0.0.0")), at(now))).get
       // It does return something (the client exists), but it has nothing to do.
       resp.submit should have size 0
+      // The latest version of the vocabulary is always returned.
+      resp.vocabulary.queries should contain theSameElementsAs Set(
+        Vocabulary.Query(exact = Some("foo")),
+        Vocabulary.Query(exact = Some("bar")),
+        Vocabulary.Query(terms = Some(Seq("foot", "ball"))),
+        Vocabulary.Query(exact = Some("weather")))
     }
 
     // Test at several times of the day (including edge cases).
