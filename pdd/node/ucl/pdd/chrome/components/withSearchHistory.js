@@ -21,7 +21,7 @@ import moment from 'moment';
 import { Spinner } from '@blueprintjs/core';
 
 import { searchHistory } from '../browser/history';
-import { aggregateHistory } from '../protocol/history';
+import { aggregateCounters } from '../protocol/history';
 import { isBefore1am } from '../util/dates';
 
 export default function withSearchHistory(WrappedComponent) {
@@ -63,7 +63,7 @@ export default function withSearchHistory(WrappedComponent) {
           // displaying all search queries without indicating which ones are actually tracked.
           // TODO: a possible fix would be to delay the activation of new keywords by one day.
           const blacklist = this.props.localData.blacklist || { queries: [] };
-          const history = aggregateHistory(data, this.props.localData.vocabulary, blacklist);
+          const history = aggregateCounters(data, this.props.localData.vocabulary, blacklist);
           this.setState({ history })
         });
       }

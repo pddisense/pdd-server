@@ -26,7 +26,7 @@ import { findIndex, isEqual, sum } from 'lodash';
  * @param blacklist Blacklisted vocabulary.
  * @returns int[]
  */
-export function aggregateHistory(history, vocabulary, blacklist = []) {
+export function aggregateCounters(history, vocabulary, blacklist = {}) {
   // The first counter is always the total number of searches performed across the period, whether
   // or not they are actually monitored. Then there is one counter per query in the vocabulary
   // (even if no search was performed for that query).

@@ -20,10 +20,10 @@ import moment from 'moment';
 import jstz from 'jstz';
 
 import { searchHistory } from '../browser/history';
-import { aggregateHistory } from './history';
-import { setData } from '../browser/storage';
-import xhr from '../util/xhr';
+import { getData, setData } from '../browser/storage';
+import { aggregateCounters } from './history';
 import { encryptCounters } from './crypto';
+import xhr from '../util/xhr';
 
 /**
  * Contact the API server to get instructions, and rect to them by sending data. We do not handle
@@ -73,7 +73,12 @@ function submitSketch(client, command) {
   const endTime = moment(command.endTime);
 
   return searchHistory(startTime, endTime)
-    .then(history => aggregateHistory(history, command.vocabulary))
+    .then(history => {
+      return getData().then(localData => {
+        const blacklist = localData.blacklist || { queries: [] };
+        return aggregateCounters(history, command.vocabulary, blacklist);
+      });
+    })
     .then(rawValues => {
       console.log(`Counters from ${startTime.format()} to ${endTime.format()}`);
       console.log(rawValues);
