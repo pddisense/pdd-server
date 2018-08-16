@@ -30,6 +30,9 @@ class BlacklistTable extends React.Component {
   }
 
   render() {
+    if (this.props.blacklist.queries.length === 0) {
+      return <p style={{textAlign: 'center'}}>No keywords has been blacklisted.</p>;
+    }
     const rows = this.props.blacklist.queries.map((item, idx) => {
       return (
         <tr key={idx}>
