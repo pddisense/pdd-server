@@ -40,7 +40,7 @@ class HistorySection extends React.Component {
         <p>
           This page shows the search queries that Private Data Donor has detected
           for {yesterday ? 'yesterday' : 'today'}.
-          Those that are of interest will be automatically sent {yesterday ? '' : 'tomorrow'} at 1am.
+          Those that are of interest will be automatically sent {yesterday ? '' : 'tomorrow'} after 1am, as soon as your browser has an Internet access.
           If you do not want some keywords to be monitored, you can choose to blacklist them by
           clicking on the button on the right-hand side of each keyword.
           They will be permanently blocked.
