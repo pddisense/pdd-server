@@ -103,6 +103,9 @@ object MysqlStorage {
       "UNIQUE KEY uix_name(name)" +
       ") ENGINE=InnoDB DEFAULT CHARSET=utf8",
 
+    "create index campaignName_day_group_idx on sketches(campaignName, day, `group`)",
+    "create index clientName_idx on sketches(clientName)",
+
     "create table if not exists activity(" +
       "unused_id int not null auto_increment," +
       "clientName varchar(255) not null," +
