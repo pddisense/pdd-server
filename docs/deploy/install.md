@@ -66,7 +66,7 @@ docker run \
   --env ROLE=server \
   --name pdd-server \
   pddisense/pdd-server \
-    -storage.type=mysql \
+    -storage=mysql \
     -storage.mysql.user=pdd \
     -storage.mysql.pass=<mysql password> \
     -metrics=datadog \

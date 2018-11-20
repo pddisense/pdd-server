@@ -1,5 +1,6 @@
 site_name: Private Data Donor
 theme: cinder
+site_url: "https://ppd.cs.ucl.ac.uk/docs/"
 repo_url: "https://github.com/pddisense/pdd"
 
 nav:
@@ -19,4 +20,3 @@ nav:
   - contribute/client.md
   - contribute/docs.md
   - contribute/protocol.md
-- About: about.md

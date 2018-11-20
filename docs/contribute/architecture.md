@@ -3,6 +3,8 @@ layout: docs
 title: Architecture
 ---
 
+# Platform architecture
+
 The Private Data Donor platform is made of three components:
 
   * The API server, offering a REST API;
