@@ -25,7 +25,7 @@ import com.twitter.inject.TwitterModule
 import com.twitter.util.JavaTimer
 
 object MetricsModule extends TwitterModule {
-  private[this] val typeFlag = flag("metrics.type", "finagle", "Metrics type ('finagle' or 'datadog')")
+  private[this] val typeFlag = flag("metrics", "finagle", "Metrics type ('finagle' or 'datadog')")
 
   // DataDog options.
   private[this] val datadogServerFlag = flag("metrics.datadog.server", "127.0.0.1:8125", "Address to DataDog agent")

@@ -1,0 +1,22 @@
+site_name: Private Data Donor
+theme: cinder
+repo_url: "https://github.com/pddisense/pdd"
+
+nav:
+- Home: index.md
+- Deploy:
+  - deploy/index.md
+  - deploy/install.md
+  - deploy/monitoring.md
+  - deploy/update.md
+- Contribute:
+  - contribute/index.md
+  - contribute/architecture.md
+  - contribute/compile.md
+  - contribute/codebase.md
+  - contribute/server.md
+  - contribute/dashboard.md
+  - contribute/client.md
+  - contribute/docs.md
+  - contribute/protocol.md
+- About: about.md
