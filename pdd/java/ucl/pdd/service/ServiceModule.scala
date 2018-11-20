@@ -19,8 +19,9 @@
 package ucl.pdd.service
 
 import com.google.inject.Provides
+import com.twitter.conversions.time._
 import com.twitter.inject.{Injector, TwitterModule}
-import com.twitter.util.{Await, JavaTimer, Timer}
+import com.twitter.util.{Await, Duration, JavaTimer, Timer}
 import org.joda.time.DateTimeZone
 
 /**
@@ -37,6 +38,7 @@ object ServiceModule extends TwitterModule {
   override def configure(): Unit = {
     bind[DateTimeZone].annotatedWith[Timezone].toInstance(DateTimeZone.forID(timezoneFlag()))
     bind[Boolean].annotatedWith[TestingMode].toInstance(testingModeFlag())
+    bind[Duration].annotatedWith[PruneThreshold].toInstance(15.days)
     if (testingModeFlag()) {
       logger.warn("Running in TESTING mode. Days will only last 5 minutes!")
     }

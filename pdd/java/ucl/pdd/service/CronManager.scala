@@ -56,6 +56,10 @@ final class CronManager @Inject()(
     timer.schedule(if (testingMode) nextDay.plusMinutes(1) else nextDay.plusMinutes(30), period) {
       injector.instance[AggregateSketchesJob].execute(Instant.now())
     }
+
+    timer.schedule(if (testingMode) nextDay.plusMinutes(1) else nextDay.plusHours(2), period) {
+      injector.instance[PruneClientsJob].execute(Instant.now())
+    }
   }
 
   override def shutDown(): Future[Unit] = Future {

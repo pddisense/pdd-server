@@ -19,7 +19,7 @@
 package ucl.pdd.service
 
 import com.github.nscala_time.time.Imports._
-import com.google.inject.Inject
+import com.google.inject.{Inject, Singleton}
 import com.twitter.inject.Logging
 import com.twitter.util.{Await, Future}
 import org.joda.time.Instant
@@ -36,6 +36,7 @@ import ucl.pdd.storage.{SketchStore, Storage}
  * @param timezone    Reference timezone.
  * @param testingMode Whether we are in testing mode, where days are shorter.
  */
+@Singleton
 final class AggregateSketchesJob @Inject()(
   storage: Storage,
   @Timezone timezone: DateTimeZone,

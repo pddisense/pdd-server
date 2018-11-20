@@ -21,7 +21,7 @@ package ucl.pdd.service
 import java.util.UUID
 
 import com.github.nscala_time.time.Imports._
-import com.google.inject.Inject
+import com.google.inject.{Inject, Singleton}
 import com.twitter.inject.Logging
 import com.twitter.util.{Await, Future}
 import org.joda.time.Instant
@@ -39,6 +39,7 @@ import scala.util.Random
  * @param timezone    Current timezone.
  * @param testingMode Is the testing mode enabled?
  */
+@Singleton
 final class CreateSketchesJob @Inject()(
   storage: Storage,
   strategy: Strategy,

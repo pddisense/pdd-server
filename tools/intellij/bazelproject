@@ -5,7 +5,7 @@ targets:
   //...
 
 test_sources:
-  javatests
+  pdd/javatests
 
 additional_languages:
   javascript
