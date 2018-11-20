@@ -2,8 +2,8 @@
 .bazelrc
 
 # Artifacts
-dist/
-bazel-*
+/dist/
+/bazel-*
 *.log
 *.tgz
 .installed.cfg
