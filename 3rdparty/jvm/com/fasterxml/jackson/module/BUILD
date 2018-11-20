@@ -13,10 +13,10 @@ java_library(
 
 
 java_library(
-    name = "jackson_module_scala_2_11",
+    name = "jackson_module_scala_2_12",
     exports = [
         "//3rdparty/jvm/org/scala_lang:scala_reflect",
-        "//external:jar/com/fasterxml/jackson/module/jackson_module_scala_2_11",
+        "//external:jar/com/fasterxml/jackson/module/jackson_module_scala_2_12",
         ":jackson_module_paranamer"
     ],
     visibility = [

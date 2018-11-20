@@ -7,7 +7,7 @@ scala_import(
         "//3rdparty/jvm/org/scala_lang:scala_library"
     ],
     jars = [
-        "//external:jar/com/github/nscala_time/nscala_time_2_11"
+        "//external:jar/com/github/nscala_time/nscala_time_2_12"
     ],
     visibility = [
         "//visibility:public"

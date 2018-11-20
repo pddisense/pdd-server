@@ -4,10 +4,10 @@ scala_import(
     exports = [
         "//3rdparty/jvm/org/bouncycastle:bcpkix_jdk15on",
         "//3rdparty/jvm/org/scala_lang:scala_library",
-        ":jwt_core_impl_2_11"
+        ":jwt_core_impl_2_12"
     ],
     jars = [
-        "//external:jar/com/pauldijou/jwt_core_2_11"
+        "//external:jar/com/pauldijou/jwt_core_2_12"
     ],
     visibility = [
         "//visibility:public"
@@ -17,9 +17,9 @@ scala_import(
 
 
 java_library(
-    name = "jwt_core_impl_2_11",
+    name = "jwt_core_impl_2_12",
     exports = [
-        "//external:jar/com/pauldijou/jwt_core_impl_2_11"
+        "//external:jar/com/pauldijou/jwt_core_impl_2_12"
     ],
     visibility = [
         "//3rdparty/jvm:__subpackages__"
