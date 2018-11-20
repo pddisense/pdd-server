@@ -27,6 +27,7 @@ cache:
 
 services:
 - mysql
+- docker
 
 env:
   global:
