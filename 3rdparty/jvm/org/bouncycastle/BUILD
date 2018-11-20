@@ -6,7 +6,7 @@ java_library(
         ":bcprov_jdk15on"
     ],
     visibility = [
-        "//visibility:public"
+        "//3rdparty/jvm:__subpackages__"
     ]
 )
 
@@ -18,7 +18,7 @@ java_library(
         "//external:jar/org/bouncycastle/bcprov_jdk15on"
     ],
     visibility = [
-        "//visibility:public"
+        "//3rdparty/jvm:__subpackages__"
     ]
 )
 

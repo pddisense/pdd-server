@@ -33,7 +33,7 @@ env:
   - MYSQL_HOST=127.0.0.1
   - MYSQL_USER=root
   matrix:
-  - BAZEL_VERSION=0.15.2
+  - BAZEL_VERSION=0.19.2
 
 before_install:
 - |

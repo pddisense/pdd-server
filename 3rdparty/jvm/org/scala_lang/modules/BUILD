@@ -5,7 +5,7 @@ java_library(
         "//external:jar/org/scala_lang/modules/scala_parser_combinators_2_11"
     ],
     visibility = [
-        "//visibility:public"
+        "//3rdparty/jvm:__subpackages__"
     ]
 )
 
@@ -17,7 +17,7 @@ java_library(
         "//external:jar/org/scala_lang/modules/scala_xml_2_11"
     ],
     visibility = [
-        "//visibility:public"
+        "//3rdparty/jvm:__subpackages__"
     ]
 )
 

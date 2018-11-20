@@ -22,7 +22,7 @@ java_library(
         "//external:jar/com/pauldijou/jwt_core_impl_2_11"
     ],
     visibility = [
-        "//visibility:public"
+        "//3rdparty/jvm:__subpackages__"
     ]
 )
 

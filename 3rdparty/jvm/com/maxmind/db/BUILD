@@ -5,7 +5,7 @@ java_library(
         "//external:jar/com/maxmind/db/maxmind_db"
     ],
     visibility = [
-        "//visibility:public"
+        "//3rdparty/jvm:__subpackages__"
     ]
 )
 

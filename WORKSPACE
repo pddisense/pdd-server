@@ -18,7 +18,7 @@ workspace(name = "ucl_pdd")
 
 ## Download and load the rules bringing Scala support.
 # https://github.com/bazelbuild/rules_scala
-rules_scala_version = "b537bddc58a77318b34165812a0311ef52806318"
+rules_scala_version = "4be50865a332aef46c46c94b345c320c3353e9e1"
 http_archive(
   name = "io_bazel_rules_scala",
   url = "https://github.com/bazelbuild/rules_scala/archive/%s.zip" % rules_scala_version,
@@ -34,13 +34,16 @@ scala_register_toolchains()
 
 ## Download and load the rules bringing Node support.
 # https://github.com/bazelbuild/rules_node
-rules_node_version = "8c11abc21a96a5305004307e3d98f1d05985ac75"
+rules_node_version = "0.16.1"
 http_archive(
   name = "build_bazel_rules_nodejs",
   url = "https://github.com/bazelbuild/rules_nodejs/archive/%s.zip" % rules_node_version,
   type = "zip",
   strip_prefix= "rules_nodejs-%s" % rules_node_version
 )
+
+load("@build_bazel_rules_nodejs//:package.bzl", "rules_nodejs_dependencies")
+rules_nodejs_dependencies()
 
 load("@build_bazel_rules_nodejs//:defs.bzl", "node_repositories")
 node_repositories(package_json = ["//3rdparty:package.json"])
@@ -52,7 +55,7 @@ maven_dependencies()
 
 ## Download and load the rules bringing Docker support.
 # https://github.com/bazelbuild/rules_docker
-rules_docker_version = "452878d665648ada0aaf816931611fdd9c683a97"
+rules_docker_version = "9527234ef0b5a57bce93be524cb56d7ab1a85ea3"
 http_archive(
   name = "io_bazel_rules_docker",
   url = "https://github.com/bazelbuild/rules_docker/archive/%s.zip" % rules_docker_version,
