@@ -5,7 +5,9 @@ title: Installing
 # Installing the platform
 
 Private Data Donor is made of three different components: an API server, a Web dashboard and a Chrome extension.
-The API server is a mandatory component with which the extension communicates, while the dashboard is an optional component providing an intuitive Web UI for administrators and analysts. 
+The API server is a mandatory component with which the extension communicates, while the dashboard is an optional component providing an intuitive Web UI for administrators and analysts.
+If you want to get a deeper understanding of the architecture, you can read [the dedicated page](../contribute/architecture.md) in the developer guide.
+ 
 This page explains how to deploy the API server and the Web dashboard using Docker.
 
 ## Installing Docker

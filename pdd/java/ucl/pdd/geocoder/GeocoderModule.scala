@@ -21,7 +21,7 @@ package ucl.pdd.geocoder
 import com.twitter.inject.{Injector, TwitterModule}
 
 /**
- * Guice module providing business services.
+ * Guice module configuring the geocoder service.
  */
 object GeocoderModule extends TwitterModule {
   private[this] val typeFlag = flag(

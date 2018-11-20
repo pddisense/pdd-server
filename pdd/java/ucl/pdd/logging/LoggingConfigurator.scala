@@ -29,6 +29,10 @@ import io.sentry.Sentry
 import io.sentry.logback.SentryAppender
 import org.slf4j.{Logger, LoggerFactory}
 
+/**
+ * Trait helping with configuring Logback support for Twitter applications. It also enables a
+ * bridge to Sentry (iff the `SENTRY_DSN` environment variable is defined).
+ */
 trait LoggingConfigurator {
   this: App =>
 
@@ -46,9 +50,8 @@ trait LoggingConfigurator {
       // https://docs.sentry.io/clients/java/config/#in-application-stack-frames
       sys.props("sentry.stacktrace.app.packages") = "ucl.pdd"
 
-      // Configure the environment and tags.
+      // Configure the environment.
       sys.props("sentry.environment") = sys.env.getOrElse("ENVIRONMENT", "devel")
-      sys.props("sentry.tags") = s"role:${sys.env.getOrElse("ROLE", "pdd")}"
 
       // This will initialize Sentry by looking for the `SENTRY_DSN` environment variable.
       Sentry.init()
@@ -56,7 +59,11 @@ trait LoggingConfigurator {
   }
 
   private def initLogback(): Unit = {
+    // This method programmatically configures Logback, instead of using a logback.xml file.
+    // It sends the logs to the console and to Sentry, if configured.
+
     // We assume SLF4J is bound to logback in the current environment.
+    // This is enforced by the dependency of this package on Logback.
     val ctx = LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext]
     val rootLogger = ctx.getLogger(Logger.ROOT_LOGGER_NAME)
 

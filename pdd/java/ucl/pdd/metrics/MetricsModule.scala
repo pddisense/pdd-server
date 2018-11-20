@@ -24,21 +24,30 @@ import com.twitter.finagle.stats.{MetricsStatsReceiver, StatsReceiver}
 import com.twitter.inject.TwitterModule
 import com.twitter.util.JavaTimer
 
+/**
+ * Guice module configuring the metrics provider.
+ */
 object MetricsModule extends TwitterModule {
-  private[this] val typeFlag = flag("metrics", "finagle", "Metrics type ('finagle' or 'datadog')")
+  private[this] val typeFlag = flag(
+    "metrics",
+    "finagle",
+    "Where to write metrics. Valid values are: 'finagle', 'datadog'.")
 
   // DataDog options.
-  private[this] val datadogServerFlag = flag("metrics.datadog.server", "127.0.0.1:8125", "Address to DataDog agent")
+  private[this] val datadogServerFlag = flag(
+    "metrics.datadog.server",
+    "127.0.0.1:8125",
+    "Address to the DataDog agent.")
 
   override def configure(): Unit = {
     typeFlag() match {
-      case "finagle" => bind[StatsReceiver].toProvider[MetricsStatsReceiverProvider].in[Singleton]
+      case "finagle" => bind[StatsReceiver].toProvider[FinagleStatsReceiverProvider].in[Singleton]
       case "datadog" => bind[StatsReceiver].toProvider[DataDogStatsReceiverProvider].in[Singleton]
       case invalid => throw new IllegalArgumentException(s"Invalid metrics type: $invalid")
     }
   }
 
-  private class MetricsStatsReceiverProvider extends Provider[StatsReceiver] {
+  private class FinagleStatsReceiverProvider extends Provider[StatsReceiver] {
     override def get(): StatsReceiver = new MetricsStatsReceiver()
   }
 
@@ -46,10 +55,11 @@ object MetricsModule extends TwitterModule {
     override def get(): StatsReceiver = {
       val (host, port) = datadogServerFlag().split(":") match {
         case Array(h, p) => (h, p.toInt)
-        case invalid => throw new IllegalArgumentException(s"Invalid server address: $invalid")
+        case invalid => throw new IllegalArgumentException(s"Invalid Datadog server address: $invalid")
       }
-      val constantTags = Seq(s"environment:${sys.env.getOrElse("ENVIRONMENT", "devel")}") ++
-        sys.env.get("SERVICE").map(service => s"service:$service").toSeq
+      // We use the ENVIRONMENT environment variable (instead of a flag), because the former is
+      // already used to parametrise Sentry.
+      val constantTags = Seq(s"environment:${sys.env.getOrElse("ENVIRONMENT", "devel")}")
       val client = new NonBlockingStatsDClient("app", host, port, constantTags: _*)
       new DataDogStatsReceiver(client, new JavaTimer)
     }

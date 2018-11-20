@@ -18,7 +18,7 @@
 
 package ucl.pdd.storage.mysql
 
-import com.twitter.finagle.mysql.{Client => MysqlClient}
+import com.twitter.finagle.mysql.{ServerError, Client => MysqlClient}
 import com.twitter.util.Future
 import ucl.pdd.storage._
 
@@ -30,8 +30,18 @@ private[storage] class MysqlStorage(mysql: MysqlClient) extends Storage {
   override val activity = new MysqlActivityStore(mysql)
 
   override def startUp(): Future[Unit] = {
-    val fs = MysqlStorage.Ddl.map(mysql.query(_).unit)
-    Future.join(fs)
+    mysql.query("select count(1) from campaigns").rescue { case ServerError(1146, _, _) =>
+      // 1146 is MySQL code for "tables does not exist", meaning that the schema has not
+      // been created yet. In that case we create it now. Please that this is a rudimentary
+      // tooling helping to bootstrap the server, but it does not support migrations.
+
+      // We proceed in two steps, as creating the indices require the tables to be
+      // created first. However, all tables and all indices can be created in parallel.
+
+      Future.join(MysqlStorage.TablesDdl.map(mysql.query)).flatMap { _ =>
+        Future.join(MysqlStorage.IndicesDdl.map(mysql.query))
+      }
+    }.unit
   }
 
   override def shutDown(): Future[Unit] = {
@@ -40,7 +50,7 @@ private[storage] class MysqlStorage(mysql: MysqlClient) extends Storage {
 }
 
 object MysqlStorage {
-  private val Ddl = Seq(
+  private val TablesDdl = Seq(
     "create table if not exists clients(" +
       "unused_id int not null auto_increment," +
       "name varchar(255) not null," +
@@ -103,9 +113,6 @@ object MysqlStorage {
       "UNIQUE KEY uix_name(name)" +
       ") ENGINE=InnoDB DEFAULT CHARSET=utf8",
 
-    "create index campaignName_day_group_idx on sketches(campaignName, day, `group`)",
-    "create index clientName_idx on sketches(clientName)",
-
     "create table if not exists activity(" +
       "unused_id int not null auto_increment," +
       "clientName varchar(255) not null," +
@@ -115,4 +122,8 @@ object MysqlStorage {
       "extensionVersion varchar(50) not null," +
       "primary key (unused_id)" +
       ") ENGINE=InnoDB DEFAULT CHARSET=utf8")
+
+  private val IndicesDdl = Seq(
+    "create index campaignName_day_group_idx on sketches(campaignName, day, `group`)",
+    "create index clientName_idx on sketches(clientName)")
 }

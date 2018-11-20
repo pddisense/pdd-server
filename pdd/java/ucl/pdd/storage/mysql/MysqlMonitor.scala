@@ -21,8 +21,18 @@ package ucl.pdd.storage.mysql
 import com.twitter.finagle.mysql.ServerError
 import com.twitter.util.Monitor
 
+/**
+ * Exception monitor for the MySQL client. This feels a bit like a hack, but it prevents
+ * legitimate exceptions (that we handle properly with rescue/handle) to be forwarded to
+ * the default monitor. Even in the latest case, it would not have much of an impact, but
+ * it makes the logs cleaner. The caveat is that the whitelisted error codes are
+ * permanently and silently ignored (we unfortunately cannot install a monitor on a
+ * per-query basis).
+ */
 private[mysql] object MysqlMonitor extends Monitor {
-  private[this] val whitelist = Set(1062 /* Duplicate key */)
+  private[this] val whitelist = Set(
+    1062 /* Duplicate key */,
+    1146 /* Table does not exist */)
 
   override def handle(exc: Throwable): Boolean = {
     exc match {
