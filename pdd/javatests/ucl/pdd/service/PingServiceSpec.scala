@@ -24,6 +24,7 @@ import com.twitter.util.{Await, Future}
 import org.joda.time.{DateTime, DateTimeZone}
 import org.scalatest.BeforeAndAfterEach
 import ucl.pdd.domain.{Campaign, Client, PingRequest, PingResponse, Sketch, Vocabulary}
+import ucl.pdd.geocoder.NullGeocoder
 import ucl.pdd.storage.Storage
 import ucl.pdd.storage.memory.MemoryStorage
 import ucl.testing.UnitSpec
