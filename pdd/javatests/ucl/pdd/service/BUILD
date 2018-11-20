@@ -22,6 +22,7 @@ scala_test(
     "//pdd/java/ucl/pdd/service",
     "//pdd/java/ucl/pdd/domain",
     "//pdd/java/ucl/pdd/strategy",
+    "//pdd/java/ucl/pdd/geocoder",
     "//pdd/java/ucl/pdd/storage",
     "//pdd/java/ucl/pdd/storage/memory",
     "//pdd/javatests/ucl/testing",
