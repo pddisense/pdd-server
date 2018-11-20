@@ -26,6 +26,7 @@ deps = [
   "//pdd/java/ucl/pdd/logging",
   "//pdd/java/ucl/pdd/metrics",
   "//pdd/java/ucl/pdd/service",
+  "//pdd/java/ucl/pdd/geocoder",
   "//pdd/java/ucl/pdd/storage",
   "//pdd/java/ucl/pdd/storage/install",
   "//3rdparty/jvm/com/twitter:finatra_http",

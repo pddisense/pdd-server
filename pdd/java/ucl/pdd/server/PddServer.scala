@@ -23,6 +23,7 @@ import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finatra.http.HttpServer
 import com.twitter.finatra.http.filters.{CommonFilters, LoggingMDCFilter, TraceIdMDCFilter}
 import com.twitter.finatra.http.routing.HttpRouter
+import ucl.pdd.geocoder.GeocoderModule
 import ucl.pdd.jackson.PddJacksonModule
 import ucl.pdd.logging.LoggingConfigurator
 import ucl.pdd.metrics.MetricsModule
@@ -33,7 +34,7 @@ import ucl.pdd.strategy.StrategyModule
 object PddServerMain extends PddServer
 
 class PddServer extends HttpServer with LoggingConfigurator {
-  override def modules = Seq(AuthModule, StorageModule, ServiceModule, StrategyModule)
+  override def modules = Seq(AuthModule, StorageModule, GeocoderModule, ServiceModule, StrategyModule)
 
   override def defaultHttpPort: String = ":8000"
 
