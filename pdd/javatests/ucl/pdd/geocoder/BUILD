@@ -14,29 +14,14 @@
 # You should have received a copy of the GNU General Public License
 # along with PDD.  If not, see <http://www.gnu.org/licenses/>.
 
-package(default_visibility = ["//visibility:public"])
-
-scala_library(
-  name = "service",
+scala_test(
+  name = "geocoder",
   srcs = glob(["*.scala"]),
+  size = "small",
   deps = [
-    ":annotations",
-    "//pdd/java/ucl/pdd/domain",
-    "//pdd/java/ucl/pdd/storage",
-    "//pdd/java/ucl/pdd/strategy",
     "//pdd/java/ucl/pdd/geocoder",
-    "//pdd/java/ucl/pdd/util",
+    "//pdd/javatests/ucl/testing",
     "//3rdparty/jvm/com/twitter:util_core",
     "//3rdparty/jvm/com/twitter:inject_core",
-    "//3rdparty/jvm/com/twitter:inject_slf4j",
-    "//3rdparty/jvm/com/github/nscala_time",
-  ],
-)
-
-java_library(
-  name = "annotations",
-  srcs = glob(["*.java"]),
-  deps = [
-    "//3rdparty/jvm/com/twitter:inject_core",
-  ],
+  ]
 )

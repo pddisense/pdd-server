@@ -17,26 +17,14 @@
 package(default_visibility = ["//visibility:public"])
 
 scala_library(
-  name = "service",
+  name = "geocoder",
   srcs = glob(["*.scala"]),
   deps = [
-    ":annotations",
-    "//pdd/java/ucl/pdd/domain",
-    "//pdd/java/ucl/pdd/storage",
-    "//pdd/java/ucl/pdd/strategy",
-    "//pdd/java/ucl/pdd/geocoder",
-    "//pdd/java/ucl/pdd/util",
     "//3rdparty/jvm/com/twitter:util_core",
     "//3rdparty/jvm/com/twitter:inject_core",
-    "//3rdparty/jvm/com/twitter:inject_slf4j",
-    "//3rdparty/jvm/com/github/nscala_time",
+    "//3rdparty/jvm/com/maxmind/geoip2",
   ],
-)
-
-java_library(
-  name = "annotations",
-  srcs = glob(["*.java"]),
-  deps = [
-    "//3rdparty/jvm/com/twitter:inject_core",
+  resources = [
+    "GeoLite2-Country.mmdb",
   ],
 )

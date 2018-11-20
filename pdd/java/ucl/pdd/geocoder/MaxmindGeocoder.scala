@@ -16,7 +16,7 @@
  * along with PDD.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ucl.pdd.service
+package ucl.pdd.geocoder
 
 import java.net.InetAddress
 

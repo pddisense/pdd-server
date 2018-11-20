@@ -16,24 +16,17 @@
  * along with PDD.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ucl.pdd.service
+package ucl.pdd.geocoder
 
 import java.net.InetAddress
 
-import com.twitter.util.Await
-import ucl.testing.UnitSpec
+import com.twitter.util.{Future, Time}
 
 /**
- * Unit tests for [[MaxmindGeocoder]].
+ * No-op geocoder.
  */
-class MaxmindGeocoderSpec extends UnitSpec {
-  behavior of "MaxmindGeocoder"
+object NullGeocoder extends Geocoder {
+  override def geocode(ipAddress: InetAddress): Future[Option[String]] = Future.value(None)
 
-  it should "geocode IP addresses" in {
-    val geocoder = new MaxmindGeocoder
-    Await.result(geocoder.geocode(InetAddress.getByName("64.253.63.128"))) shouldBe Some("GB")
-    Await.result(geocoder.geocode(InetAddress.getByName("92.222.0.128"))) shouldBe Some("FR")
-    Await.result(geocoder.geocode(InetAddress.getByName("192.168.0.1"))) shouldBe None
-    Await.result(geocoder.close())
-  }
+  override def close(deadline: Time): Future[Unit] = Future.Done
 }

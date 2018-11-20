@@ -16,17 +16,21 @@
  * along with PDD.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ucl.pdd.service
+package ucl.pdd.geocoder
 
 import java.net.InetAddress
 
-import com.twitter.util.{Future, Time}
+import com.twitter.util.{Closable, Future}
 
 /**
- * No-op geocoder.
+ * A geocoder is used to translate IP address into location information.
  */
-object NullGeocoder extends Geocoder {
-  override def geocode(ipAddress: InetAddress): Future[Option[String]] = Future.value(None)
-
-  override def close(deadline: Time): Future[Unit] = Future.Done
+trait Geocoder extends Closable {
+  /**
+   * Return the country code associated with a given IP address.
+   *
+   * @param ipAddress IP address to locate.
+   * @return An ISO 3166-1 alpha-2 country code.
+   */
+  def geocode(ipAddress: InetAddress): Future[Option[String]]
 }

@@ -16,21 +16,28 @@
  * along with PDD.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ucl.pdd.service
+package ucl.pdd.geocoder
 
-import java.net.InetAddress
-
-import com.twitter.util.{Closable, Future}
+import com.twitter.inject.{Injector, TwitterModule}
 
 /**
- * A geocoder is used to translate IP address into location information.
+ * Guice module providing business services.
  */
-trait Geocoder extends Closable {
-  /**
-   * Return the country code associated with a given IP address.
-   *
-   * @param ipAddress IP address to locate.
-   * @return An ISO 3166-1 alpha-2 country code.
-   */
-  def geocode(ipAddress: InetAddress): Future[Option[String]]
+object GeocoderModule extends TwitterModule {
+  private[this] val typeFlag = flag(
+    "geocoder",
+    "null",
+    "Which geocoder to use to map IP addresses to a country code. Valid values are: 'null', 'maxmind'.")
+
+  override def configure(): Unit = {
+    typeFlag() match {
+      case "maxmind" => bind[Geocoder].to[MaxmindGeocoder]
+      case "null" => bind[Geocoder].toInstance(NullGeocoder)
+      case invalid => throw new IllegalArgumentException(s"Invalid geocoder type: $invalid")
+    }
+  }
+
+  override def singletonShutdown(injector: Injector): Unit = {
+    injector.instance[Geocoder].close()
+  }
 }

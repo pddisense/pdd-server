@@ -23,6 +23,7 @@ import com.google.inject.{Inject, Singleton}
 import com.twitter.util.Future
 import org.joda.time.Instant
 import ucl.pdd.domain._
+import ucl.pdd.geocoder.Geocoder
 import ucl.pdd.storage.{CampaignStore, SketchStore, Storage}
 
 import scala.util.Random
