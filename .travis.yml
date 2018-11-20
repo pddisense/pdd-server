@@ -41,6 +41,7 @@ before_install:
   chmod +x install.sh
   ./install.sh --user
   rm -f install.sh
+
 script:
 - |
   bazel \
@@ -49,9 +50,6 @@ script:
     --host_jvm_args=-Xms500m \
     run \
     --config=ci \
-    --nokeep_state_after_build \
-    --experimental_repository_cache="$HOME/.bazel_repository_cache" \
-    --local_resources=400,1,1.0 \
     @yarn//:yarn
 - |
   bazel \
@@ -60,9 +58,28 @@ script:
     --host_jvm_args=-Xms500m \
     test \
     --config=ci \
-    --nokeep_state_after_build \
     --action_env MYSQL_HOST \
     --action_env MYSQL_USER \
-    --experimental_repository_cache="$HOME/.bazel_repository_cache" \
-    --local_resources=400,1,1.0 \
     //pdd/...
+
+deploy:
+  provider: script
+  skip_cleanup: true
+  script: |
+    echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+    bazel \
+      --output_base=$HOME/.cache/bazel \
+      --host_jvm_args=-Xmx500m \
+      --host_jvm_args=-Xms500m \
+      run \
+      --config=ci
+      //pdd/java/ucl/pdd/server:publish
+    bazel \
+      --output_base=$HOME/.cache/bazel \
+      --host_jvm_args=-Xmx500m \
+      --host_jvm_args=-Xms500m \
+      run \
+      --config=ci \
+      //pdd/java/ucl/pdd/dashboard:publish
+  on:
+    branch: master

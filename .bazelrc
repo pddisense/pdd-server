@@ -23,9 +23,12 @@ build --workspace_status_command=tools/print-workspace-status.sh
 # up with Bazel).
 build --deleted_packages .git,3rdparty/node_modules/rxjs/src
 
-# Here follow the configuration relevant for continuous integration services.
-# Run with: bazel test --config=ci
+###############################################
+## Travis continuous integration configuration.
+## Run with: bazel test --config=ci
 common:ci --color=no
+common:ci --nokeep_state_after_build
+build:ci --repository_cache="$HOME/.bazel_repository_cache"
 build:ci --verbose_failures
 build:ci --sandbox_debug
 build:ci --spawn_strategy=standalone
@@ -38,3 +41,6 @@ test:ci --test_output=errors
 # Build for production environment.
 build:ci --define env=production
 test:ci --define env=production
+
+# Limit resources usage.
+build:ci --local_resources=400,1,1.0
