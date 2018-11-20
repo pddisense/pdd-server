@@ -35,7 +35,7 @@ object PddServerMain extends PddServer
 class PddServer extends HttpServer with LoggingConfigurator {
   override def modules = Seq(AuthModule, StorageModule, ServiceModule, StrategyModule)
 
-  override def defaultFinatraHttpPort: String = ":8000"
+  override def defaultHttpPort: String = ":8000"
 
   override def jacksonModule = PddJacksonModule
 

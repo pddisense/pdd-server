@@ -35,7 +35,7 @@ class PddDashboard extends HttpServer with LoggingConfigurator {
 
   override def statsReceiverModule = MetricsModule
 
-  override def defaultFinatraHttpPort: String = ":8001"
+  override def defaultHttpPort: String = ":8001"
 
   override def configureHttp(router: HttpRouter): Unit = {
     router

@@ -9,6 +9,7 @@ java_library(
         "//3rdparty/jvm/io/netty:netty_transport_native_epoll_jar_linux_x86_64",
         "//3rdparty/jvm/io/netty:netty_transport_native_unix_common",
         "//external:jar/com/twitter/finagle_base_http_2_11",
+        ":finagle_http_cookie_2_11",
         ":finagle_netty3_2_11"
     ],
     visibility = [
@@ -26,7 +27,7 @@ scala_import(
         "//3rdparty/jvm/org/hdrhistogram:HdrHistogram",
         ":finagle_init_2_11",
         ":finagle_toggle_2_11",
-        ":util_app_2_11",
+        ":util_app",
         ":util_cache_2_11",
         ":util_codec_2_11",
         ":util_core",
@@ -49,14 +50,11 @@ scala_import(
 
 
 
-scala_import(
-    name = "finagle_exp",
+java_library(
+    name = "finagle_exp_2_11",
     exports = [
-        ":finagle_core",
+        "//external:jar/com/twitter/finagle_exp_2_11",
         ":finagle_thrift_2_11"
-    ],
-    jars = [
-        "//external:jar/com/twitter/finagle_exp_2_11"
     ],
     visibility = [
         "//3rdparty/jvm:__subpackages__"
@@ -99,9 +97,9 @@ java_library(
 
 
 java_library(
-    name = "finagle_init_2_11",
+    name = "finagle_http_cookie_2_11",
     exports = [
-        "//external:jar/com/twitter/finagle_init_2_11"
+        "//external:jar/com/twitter/finagle_http_cookie_2_11"
     ],
     visibility = [
         "//3rdparty/jvm:__subpackages__"
@@ -110,14 +108,10 @@ java_library(
 
 
 
-scala_import(
-    name = "finagle_mux",
+java_library(
+    name = "finagle_init_2_11",
     exports = [
-        ":finagle_exp",
-        ":finagle_netty4_2_11"
-    ],
-    jars = [
-        "//external:jar/com/twitter/finagle_mux_2_11"
+        "//external:jar/com/twitter/finagle_init_2_11"
     ],
     visibility = [
         "//3rdparty/jvm:__subpackages__"
@@ -203,7 +197,7 @@ scala_import(
         ":finagle_http_2_11",
         ":finagle_toggle_2_11",
         ":finagle_tunable_2_11",
-        ":util_app_2_11",
+        ":util_app",
         ":util_core",
         ":util_lint_2_11",
         ":util_logging_2_11",
@@ -271,7 +265,7 @@ scala_import(
         "//3rdparty/jvm/commons_fileupload:commons_fileupload",
         "//3rdparty/jvm/javax/servlet:servlet_api",
         "//3rdparty/jvm/org/scala_lang:scala_library",
-        ":finagle_exp",
+        ":finagle_exp_2_11",
         ":finagle_http_2_11",
         ":finatra_jackson",
         ":finatra_utils",
@@ -353,6 +347,10 @@ scala_import(
     name = "inject_app",
     exports = [
         "//3rdparty/jvm/org/scala_lang:scala_library",
+        "//3rdparty/jvm/org/slf4j:jcl_over_slf4j",
+        "//3rdparty/jvm/org/slf4j:jul_to_slf4j",
+        "//3rdparty/jvm/org/slf4j:log4j_over_slf4j",
+        "//3rdparty/jvm/org/slf4j:slf4j_api",
         ":inject_core",
         ":util_core"
     ],
@@ -381,7 +379,7 @@ scala_import(
         "//3rdparty/jvm/org/scala_lang:scala_library",
         "//3rdparty/jvm/org/scala_lang:scalap",
         ":inject_slf4j",
-        ":util_app_2_11"
+        ":util_app"
     ],
     jars = [
         "//external:jar/com/twitter/inject_core_2_11"
@@ -393,14 +391,11 @@ scala_import(
 
 
 
-scala_import(
-    name = "inject_modules",
+java_library(
+    name = "inject_modules_2_11",
     exports = [
-        ":util_slf4j_jul_bridge_2_11",
-        ":util_stats"
-    ],
-    jars = [
-        "//external:jar/com/twitter/inject_modules_2_11"
+        "//external:jar/com/twitter/inject_modules_2_11",
+        ":util_slf4j_jul_bridge_2_11"
     ],
     visibility = [
         "//3rdparty/jvm:__subpackages__"
@@ -412,9 +407,12 @@ scala_import(
 scala_import(
     name = "inject_server",
     exports = [
+        "//3rdparty/jvm/org/slf4j:jcl_over_slf4j",
+        "//3rdparty/jvm/org/slf4j:jul_to_slf4j",
+        "//3rdparty/jvm/org/slf4j:log4j_over_slf4j",
         ":finagle_stats",
         ":inject_app",
-        ":inject_modules",
+        ":inject_modules_2_11",
         ":twitter_server"
     ],
     jars = [
@@ -432,11 +430,8 @@ scala_import(
     exports = [
         "//3rdparty/jvm/com/fasterxml/jackson/core:jackson_annotations",
         "//3rdparty/jvm/org/scala_lang:scala_library",
-        "//3rdparty/jvm/org/slf4j:jcl_over_slf4j",
-        "//3rdparty/jvm/org/slf4j:jul_to_slf4j",
-        "//3rdparty/jvm/org/slf4j:log4j_over_slf4j",
         "//3rdparty/jvm/org/slf4j:slf4j_api",
-        ":util_core",
+        ":finagle_core",
         ":util_slf4j_api_2_11"
     ],
     jars = [
@@ -454,7 +449,6 @@ scala_import(
     exports = [
         "//3rdparty/jvm/commons_lang:commons_lang",
         ":finagle_core",
-        ":finagle_mux",
         ":inject_core"
     ],
     jars = [
@@ -489,7 +483,7 @@ scala_import(
         ":finagle_http_2_11",
         ":finagle_toggle_2_11",
         ":finagle_tunable_2_11",
-        ":util_app_2_11",
+        ":util_app",
         ":util_core",
         ":util_jvm_2_11",
         ":util_lint_2_11",
@@ -528,11 +522,14 @@ scala_import(
 
 
 
-java_library(
-    name = "util_app_2_11",
+scala_import(
+    name = "util_app",
     exports = [
-        "//external:jar/com/twitter/util_app_2_11",
+        ":util_core",
         ":util_registry_2_11"
+    ],
+    jars = [
+        "//external:jar/com/twitter/util_app_2_11"
     ],
     visibility = [
         "//3rdparty/jvm:__subpackages__"

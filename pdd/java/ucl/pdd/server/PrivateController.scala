@@ -24,8 +24,8 @@ import com.github.nscala_time.time.Imports._
 import com.google.inject.{Inject, Singleton}
 import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
-import com.twitter.finatra.http.request.RequestUtils
-import com.twitter.finatra.request.{ContentType, QueryParam, RouteParam}
+import com.twitter.finatra.http.request.{ContentType, RequestUtils}
+import com.twitter.finatra.request.{QueryParam, RouteParam}
 import com.twitter.util.Future
 import org.joda.time.Instant
 import ucl.pdd.domain.{instantOrdering, _}
