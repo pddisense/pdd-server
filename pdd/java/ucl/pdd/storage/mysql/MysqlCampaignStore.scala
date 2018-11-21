@@ -22,6 +22,7 @@ import com.twitter.finagle.mysql.{OK, Row, ServerError, Client => MysqlClient}
 import com.twitter.util.Future
 import ucl.pdd.domain.{Campaign, Vocabulary}
 import ucl.pdd.storage.CampaignStore
+import ucl.pdd.storage.mysql.query.QueryBuilder
 
 private[mysql] final class MysqlCampaignStore(mysql: MysqlClient)
   extends CampaignStore with MysqlStore {
@@ -39,14 +40,14 @@ private[mysql] final class MysqlCampaignStore(mysql: MysqlClient)
   override def count(q: CampaignStore.Query): Future[Int] = {
     val qb = query.select
     addWhere(qb, q)
-    // TODO: do not force deserialization just to count... However the QueryBuilder API forces
-    // use to extract campaigns.
-    qb.execute().map(_.size)
+    qb.count()
   }
 
   override def get(name: String): Future[Option[Campaign]] = {
-    val qb = query.select.where("name = ?", name).limit(1)
-    qb.execute().map(_.headOption)
+    query.select
+      .where("name = ?", name).limit(1)
+      .execute()
+      .map(_.headOption)
   }
 
   override def delete(name: String): Future[Unit] = {
@@ -57,17 +58,15 @@ private[mysql] final class MysqlCampaignStore(mysql: MysqlClient)
     if (names.isEmpty) {
       Future.value(Seq.empty)
     } else {
-      query
-        .select
-        .where(s"name in (${Seq.fill(names.size)("?").mkString(",")})", names.map(wrapString): _*)
+      query.select
+        .whereIn("name", names.map(wrapString): _*)
         .execute()
         .map(campaigns => names.map(name => campaigns.find(_.name == name)))
     }
   }
 
   override def create(campaign: Campaign): Future[Boolean] = {
-    query
-      .insert
+    query.insert
       .set("name", campaign.name)
       .set("createTime", campaign.createTime)
       .set("displayName", campaign.displayName)
@@ -91,10 +90,8 @@ private[mysql] final class MysqlCampaignStore(mysql: MysqlClient)
   }
 
   override def replace(campaign: Campaign): Future[Boolean] = {
-    query
-      .update
+    query.update
       .where("name = ?", campaign.name)
-      .set("createTime", campaign.createTime)
       .set("displayName", campaign.displayName)
       .set("email", campaign.email)
       .set("notes", campaign.notes)

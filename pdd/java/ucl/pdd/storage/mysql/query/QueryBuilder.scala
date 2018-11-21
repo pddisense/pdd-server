@@ -16,7 +16,7 @@
  * along with PDD.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ucl.pdd.storage.mysql
+package ucl.pdd.storage.mysql.query
 
 import com.twitter.finagle.mysql.{Client, Parameter, Result, Row}
 import com.twitter.util.Future
@@ -54,6 +54,14 @@ private[mysql] class QueryBuilder[T](mysql: Client, table: String, hydrator: Row
     final def where(clause: String, params: Parameter*): this.type = {
       _where += (clause -> params)
       this
+    }
+
+    final def whereIn(field: String, values: Parameter*): this.type = {
+      if (values.isEmpty) {
+        where("false")
+      } else {
+        where(s"name in (${Seq.fill(values.size)("?").mkString(",")})", values: _*)
+      }
     }
 
     final def not(): this.type = {
@@ -146,6 +154,12 @@ private[mysql] class QueryBuilder[T](mysql: Client, table: String, hydrator: Row
     def limit(n: Int): this.type = {
       _limit = Some(n)
       this
+    }
+
+    def count(): Future[Int] = {
+      _select.prepend("count(1) as _count")
+      val (sql, params) = build
+      mysql.prepare(sql).select(params: _*)(row => row.intOrZero("_count")).map(_.head)
     }
 
     def execute(): Future[Seq[T]] = {

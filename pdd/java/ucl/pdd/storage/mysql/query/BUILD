@@ -17,19 +17,11 @@
 package(default_visibility = ["//visibility:public"])
 
 scala_library(
-  name = "mysql",
+  name = "query",
   srcs = glob(["*.scala"]),
   deps = [
-    "//pdd/java/ucl/pdd/domain",
-    "//pdd/java/ucl/pdd/storage",
-    "//pdd/java/ucl/pdd/storage/mysql/query",
-    "//pdd/java/ucl/pdd/util",
     "//3rdparty/jvm/com/twitter:util_core",
-    "//3rdparty/jvm/com/twitter:inject_slf4j",
     "//3rdparty/jvm/com/twitter:finagle_mysql",
     "//3rdparty/jvm/com/github/nscala_time",
   ],
-  exports = [
-    "//3rdparty/jvm/com/twitter:finagle_mysql",
-  ]
 )
