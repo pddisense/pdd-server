@@ -72,3 +72,13 @@ case class Campaign(
 
   def isActive: Boolean = isStarted && !isCompleted
 }
+
+object Campaign {
+  def relativeDay(startTime: Instant, now: Instant): Int = {
+    (startTime.toDateTime.withTimeAtStartOfDay to now.toDateTime).duration.days.toInt
+  }
+
+  def absoluteInstant(startTime: Instant, day: Int): Instant = {
+    (startTime.toDateTime.withTimeAtStartOfDay + day.days).toInstant
+  }
+}

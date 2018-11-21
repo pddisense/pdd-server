@@ -112,6 +112,9 @@ abstract class CampaignStoreSpec extends StoreSpec {
   it should "retrieve campaigns in batch" in {
     campaigns.foreach(campaign => Await.result(storage.campaigns.create(campaign)) shouldBe true)
 
-    Await.result(storage.campaigns.batchGet(Seq("campaign42", "campaign1", "campaign2"))) should contain theSameElementsInOrderAs Seq(None, Some(campaigns(0)), Some(campaigns(1)))
+    Await.result(storage.campaigns.multiGet(Seq("campaign42", "campaign2", "campaign1"))) should contain theSameElementsInOrderAs Seq(
+      None,
+      Some(campaigns(1)),
+      Some(campaigns(0)))
   }
 }

@@ -28,13 +28,13 @@ import com.twitter.util.JavaTimer
  * Guice module configuring the metrics provider.
  */
 object MetricsModule extends TwitterModule {
-  private[this] val typeFlag = flag(
+  private val typeFlag = flag(
     "metrics",
     "finagle",
     "Where to write metrics. Valid values are: 'finagle', 'datadog'.")
 
   // DataDog options.
-  private[this] val datadogServerFlag = flag(
+  private val datadogServerFlag = flag(
     "metrics.datadog.server",
     "127.0.0.1:8125",
     "Address to the DataDog agent.")

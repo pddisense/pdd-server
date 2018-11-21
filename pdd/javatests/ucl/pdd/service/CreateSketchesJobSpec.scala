@@ -24,7 +24,7 @@ import org.scalatest.BeforeAndAfterEach
 import ucl.pdd.domain.{Campaign, Client, Vocabulary}
 import ucl.pdd.storage.Storage
 import ucl.pdd.storage.memory.MemoryStorage
-import ucl.pdd.strategy.RoundRobinStrategy
+import ucl.pdd.strategy.NaiveGroupStrategy
 import ucl.testing.UnitSpec
 
 /**
@@ -33,11 +33,11 @@ import ucl.testing.UnitSpec
 class CreateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach {
   behavior of "CreateSketchesJob"
 
-  private[this] var job: CreateSketchesJob = _
-  private[this] var storage: Storage = _
-  private[this] val timezone = DateTimeZone.forID("Europe/London")
-  private[this] val now = DateTime.now(timezone).minusDays(1).withHourOfDay(12).toInstant
-  private[this] val campaign1 = Campaign(
+  private var job: CreateSketchesJob = _
+  private var storage: Storage = _
+  private val timezone = DateTimeZone.forID("Europe/London")
+  private val now = DateTime.now(timezone).minusDays(1).withHourOfDay(12).toInstant
+  private val campaign1 = Campaign(
     name = "campaign1",
     createTime = now,
     displayName = "a campaign",
@@ -55,7 +55,7 @@ class CreateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach {
 
   override def beforeEach(): Unit = {
     storage = MemoryStorage.empty
-    job = new CreateSketchesJob(storage, new RoundRobinStrategy, timezone, testingMode = false)
+    job = new CreateSketchesJob(storage, NaiveGroupStrategy)
     super.beforeEach()
   }
 

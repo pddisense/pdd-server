@@ -22,24 +22,26 @@ import com.google.inject.Provides
 import com.twitter.conversions.time._
 import com.twitter.inject.{Injector, TwitterModule}
 import com.twitter.util.{Await, Duration, JavaTimer, Timer}
-import org.joda.time.DateTimeZone
+import org.joda.time.{DateTimeUtils, DateTimeZone}
 
 /**
  * Guice module providing business services.
  */
 object ServiceModule extends TwitterModule {
-  private[this] val timezoneFlag = flag("api.timezone", "Europe/London", "Reference timezone")
-  private[this] val testingModeFlag = flag(
-    "api.testing_mode",
+  private val timezoneFlag = flag("timezone", "Europe/London", "Reference timezone")
+  private val testingModeFlag = flag(
+    "testing_mode",
     false,
-    "Whether to switch the server to testing mode (where days only last 5 minutes). It should be only activated for testing purposes.")
+    "Whether to switch the server to testing mode (where days last 5 minutes)." +
+      "It should be only activated for testing purposes.")
 
   override def configure(): Unit = {
-    bind[DateTimeZone].annotatedWith[Timezone].toInstance(DateTimeZone.forID(timezoneFlag()))
-    bind[Boolean].annotatedWith[TestingMode].toInstance(testingModeFlag())
+    DateTimeZone.setDefault(DateTimeZone.forID(timezoneFlag()))
     bind[Duration].annotatedWith[PruneThreshold].toInstance(15.days)
+
     if (testingModeFlag()) {
       logger.warn("Running in TESTING mode. Days will only last 5 minutes!")
+      DateTimeUtils.setCurrentMillisProvider(new TestingModeMillisProvider(System.currentTimeMillis()))
     }
   }
 
@@ -53,4 +55,16 @@ object ServiceModule extends TwitterModule {
   override def singletonShutdown(injector: Injector): Unit = {
     Await.ready(injector.instance[CronManager].shutDown())
   }
+
+  private class TestingModeMillisProvider(startMillis: Long) extends DateTimeUtils.MillisProvider {
+    override def getMillis: Long = {
+      // In testing mode we accelerate time, with days lasting only 5 minutes,
+      // which is equivalent to every second being being worth 288 seconds of
+      // "actual" time.
+      // 288 = 24 * 3600 (1 day in seconds) / 300 (5 minutes in seconds)
+      val currentMillis = System.currentTimeMillis()
+      startMillis + ((currentMillis - startMillis) * 288000)
+    }
+  }
+
 }

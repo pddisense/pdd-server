@@ -47,6 +47,13 @@ trait ClientStore {
   def get(name: String): Future[Option[Client]]
 
   /**
+   * Retrieve several clients by their names, if they exist.
+   *
+   * @param names A list of client names.
+   */
+  def multiGet(names: Seq[String]): Future[Seq[Option[Client]]]
+
+  /**
    * Delete a single client by its name, if it exists.
    *
    * @param name A client name.

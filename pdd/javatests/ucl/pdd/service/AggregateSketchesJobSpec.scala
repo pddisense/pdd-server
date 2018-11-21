@@ -78,7 +78,7 @@ class AggregateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach {
 
     Await.ready(Future.join(storage.campaigns.create(campaign1), storage.campaigns.create(campaign2)))
 
-    job = new AggregateSketchesJob(storage, timezone, testingMode = false)
+    job = new AggregateSketchesJob(storage)
     super.beforeEach()
   }
 

@@ -186,7 +186,7 @@ class PingServiceSpec extends UnitSpec with BeforeAndAfterEach {
         clients.map(storage.clients.create) ++
         sketches.map(storage.sketches.create)))
 
-    service = new PingService(storage, NullGeocoder, timezone, testingMode = false)
+    service = new PingService(storage, NullGeocoder)
     super.beforeEach()
   }
 

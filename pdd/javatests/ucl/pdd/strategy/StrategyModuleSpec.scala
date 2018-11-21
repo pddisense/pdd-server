@@ -32,6 +32,6 @@ class StrategyModuleSpec extends UnitSpec with CreateTwitterInjector {
 
   it should "provide a strategy" in {
     val injector = createInjector()
-    injector.instance[Strategy] shouldBe a[Strategy]
+    injector.instance[GroupStrategy] shouldBe a[GroupStrategy]
   }
 }

@@ -18,10 +18,18 @@
 
 package ucl.pdd.strategy
 
-import ucl.pdd.domain.Client
+import com.twitter.util.Future
 
-final class NoStrategy extends Strategy {
-  override def apply(clients: Seq[Client], attrs: StrategyAttrs): Seq[Seq[Client]] = {
-    Seq(clients)
+import scala.util.Random
+
+/**
+ * Strategy randomly assigning all clients to fixed-size groups.
+ */
+object NaiveGroupStrategy extends GroupStrategy {
+  override def apply(clientNames: Iterable[String], day: Int, attrs: GroupStrategy.Attrs): Future[Iterable[GroupStrategy.Group]] = {
+    // Clients are first shuffled to introduce some randomness in the process, and avoiding
+    // clients to be assigned to the same group everyday.
+    val shuffled = Random.shuffle(clientNames)
+    Future.value(GroupStrategy.assign(shuffled, attrs))
   }
 }

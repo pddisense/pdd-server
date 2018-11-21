@@ -49,5 +49,9 @@ private[memory] final class MemoryClientStore extends ClientStore {
 
   override def get(name: String): Future[Option[Client]] = Future(index.get(name))
 
+  override def multiGet(names: Seq[String]): Future[Seq[Option[Client]]] = {
+    Future.value(names.map(index.get))
+  }
+
   override def delete(name: String): Future[Boolean] = Future(index.remove(name).isDefined)
 }

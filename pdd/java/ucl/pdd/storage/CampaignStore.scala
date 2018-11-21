@@ -58,7 +58,7 @@ trait CampaignStore {
    *
    * @param names A list of campaign names.
    */
-  def batchGet(names: Seq[String]): Future[Seq[Option[Campaign]]]
+  def multiGet(names: Seq[String]): Future[Seq[Option[Campaign]]]
 
   /**
    * Retrieve several campaigns according to a query, ordered by decreasing `createTime` (the most

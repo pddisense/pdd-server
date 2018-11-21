@@ -40,18 +40,11 @@ import scala.util.Random
  * instead of recreating them every time this service is called. However, because we expect the
  * load to be low (except if somebody tries a DDoS...), it is simpler like this for now.
  *
- * @param storage     Persistent storage.
- * @param geocoder    Geocoder used to infer the country from an IP address.
- * @param timezone    Reference timezone.
- * @param testingMode Whether we are in testing mode, where days are shorter.
+ * @param storage  Storage.
+ * @param geocoder Geocoder used to infer the country from an IP address.
  */
 @Singleton
-final class PingService @Inject()(
-  storage: Storage,
-  geocoder: Geocoder,
-  @Timezone timezone: DateTimeZone,
-  @TestingMode testingMode: Boolean) {
-
+final class PingService @Inject()(storage: Storage, geocoder: Geocoder) {
   def apply(request: PingRequest, now: Instant): Future[Option[PingResponse]] = {
     storage.clients.get(request.clientName).flatMap {
       case None => Future.value(None)
@@ -107,38 +100,25 @@ final class PingService @Inject()(
   }
 
   private def getNextPingTime(now: Instant): Instant = {
-    if (testingMode) {
-      now.plus(Duration.standardMinutes(5).millis).toInstant
-    } else {
-      // The sketches are generated at 1:00, so we ask the clients to contact the server
-      // between 2:00 and 3:00 to get their instructions.
-      //
-      // We add some randomness to avoid all clients contacting the server at the same time.
-      // Although people are expected to be sleeping at 2:00, their computer might still be
-      // on and we prefer to avoid all clients sending their ping at the exact same moment.
-      now.toDateTime(timezone)
-        .plusDays(1)
-        .withTimeAtStartOfDay
-        .plusHours(2)
-        .plusMinutes(Random.nextInt(60)) // <- Randomness.
-        .toInstant
-    }
+    // The sketches are generated at 1:00, so we ask the clients to contact the server
+    // between 2:00 and 3:00 to get their instructions.
+    //
+    // We add some randomness to avoid all clients contacting the server at the same time.
+    // Although people are expected to be sleeping at 2:00, their computer might still be
+    // on and we prefer to avoid all clients sending their ping at the exact same moment.
+    now.toDateTime
+      .plusDays(1)
+      .withTimeAtStartOfDay
+      .plusHours(2)
+      .plusMinutes(Random.nextInt(60)) // <- Randomness.
+      .toInstant
   }
 
   private def createCommand(campaign: Campaign, client: Client, sketch: Sketch): Future[PingResponse.Command] = {
     collectGroupKeys(client.name, sketch.campaignName, sketch.day, sketch.group)
       .map { publicKeys =>
-        // Note: If a campaign has some sketches, its `startTime` is defined (otherwise there is
-        // an invariant not checked somewhere else).
-        val (startTime, endTime) = if (testingMode) {
-          val startTime = campaign.startTime.get.toDateTime(timezone) + (sketch.day * 5).minutes
-          val endTime = startTime + 5.minutes
-          (startTime, endTime)
-        } else {
-          val startTime = campaign.startTime.get.toDateTime(timezone).withTimeAtStartOfDay + sketch.day.days
-          val endTime = startTime + 1.day
-          (startTime, endTime)
-        }
+        val startTime = campaign.startTime.get.toDateTime.withTimeAtStartOfDay + sketch.day.days
+        val endTime = startTime + 1.day
         PingResponse.Command(
           sketchName = sketch.name,
           startTime = startTime.toInstant,
@@ -153,7 +133,7 @@ final class PingService @Inject()(
 
   private def batchGetCampaigns(ids: Seq[String]): Future[Map[String, Campaign]] = {
     storage.campaigns
-      .batchGet(ids)
+      .multiGet(ids)
       .map(_.flatMap(_.toSeq).map(campaign => campaign.name -> campaign).toMap)
   }
 

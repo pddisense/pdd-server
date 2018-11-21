@@ -77,4 +77,13 @@ abstract class ClientStoreSpec extends StoreSpec {
     Await.result(storage.clients.get("client1")) shouldBe None
     Await.result(storage.clients.get("client2")) shouldBe Some(clients(1))
   }
+
+  it should "retrieve clients in batch" in {
+    clients.foreach(client => Await.result(storage.clients.create(client)) shouldBe true)
+
+    Await.result(storage.clients.multiGet(Seq("client42", "client2", "client1"))) should contain theSameElementsInOrderAs Seq(
+      None,
+      Some(clients(1)),
+      Some(clients(0)))
+  }
 }

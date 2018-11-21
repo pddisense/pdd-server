@@ -57,7 +57,7 @@ private[memory] final class MemoryCampaignStore extends CampaignStore {
     index.get(name)
   }
 
-  override def batchGet(names: Seq[String]): Future[Seq[Option[Campaign]]] = {
+  override def multiGet(names: Seq[String]): Future[Seq[Option[Campaign]]] = {
     Future.value(names.map(index.get))
   }
 

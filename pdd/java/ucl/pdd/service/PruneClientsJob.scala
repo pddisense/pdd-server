@@ -26,8 +26,9 @@ import ucl.pdd.storage.{ActivityStore, Storage}
 
 @Singleton
 final class PruneClientsJob @Inject()(storage: Storage, @PruneThreshold pruneThreshold: Duration)
-  extends Logging {
-  def execute(fireTime: Instant): Unit = {
+  extends Job with Logging {
+
+  override def execute(fireTime: Instant): Future[Unit] = {
     val f1 = storage.clients.list()
     val f2 = storage.activity.list(ActivityStore.Query(startTime = Some(fireTime.minus(pruneThreshold.inMillis))))
     Future.join(f1, f2).flatMap { case (allClients, activeClients) =>

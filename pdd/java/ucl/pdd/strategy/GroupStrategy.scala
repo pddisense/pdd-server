@@ -16,17 +16,28 @@
  * along with PDD.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ucl.pdd.service;
+package ucl.pdd.strategy
 
-import com.google.inject.BindingAnnotation;
+import com.twitter.util.Future
+import org.joda.time.Instant
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+/**
+ * A strategy responsible for assigning clients into groups.
+ */
+trait GroupStrategy {
+  def apply(clientNames: Iterable[String], day: Int, attrs: GroupStrategy.Attrs): Future[Iterable[GroupStrategy.Group]]
+}
 
-@BindingAnnotation
-@Target({ElementType.FIELD, ElementType.PARAMETER})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Timezone {
+object GroupStrategy {
+
+  case class Attrs(groupSize: Int, startTime: Instant, delay: Int, graceDelay: Int)
+
+  case class Group(id: Int, clientNames: Iterable[String])
+
+  def assign(clientNames: Iterable[String], attrs: GroupStrategy.Attrs): Seq[Group] = {
+    clientNames.grouped(attrs.groupSize).zipWithIndex.map { case (groupClientNames, idx) =>
+      GroupStrategy.Group(idx, groupClientNames)
+    }.toSeq
+  }
+
 }

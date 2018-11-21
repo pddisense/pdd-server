@@ -18,10 +18,9 @@
 
 package ucl.pdd.service
 
-import com.github.nscala_time.time.Imports._
 import com.google.inject.{Inject, Singleton}
 import com.twitter.inject.Logging
-import com.twitter.util.{Await, Future}
+import com.twitter.util.Future
 import org.joda.time.Instant
 import ucl.pdd.domain.{Aggregation, Campaign, Sketch}
 import ucl.pdd.storage.{SketchStore, Storage}
@@ -32,32 +31,19 @@ import ucl.pdd.storage.{SketchStore, Storage}
  * analysts. Sketches are expected to be garbage-collected once the relevant aggregations have been
  * formed and the campaign's grace delay is expired.
  *
- * @param storage     Persistent storage.
- * @param timezone    Reference timezone.
- * @param testingMode Whether we are in testing mode, where days are shorter.
+ * @param storage Storage.
  */
 @Singleton
-final class AggregateSketchesJob @Inject()(
-  storage: Storage,
-  @Timezone timezone: DateTimeZone,
-  @TestingMode testingMode: Boolean)
-  extends Logging {
+final class AggregateSketchesJob @Inject()(storage: Storage)
+  extends Job with Logging {
 
-  private[this] val prefix = s"[${getClass.getSimpleName}]"
-
-  def execute(fireTime: Instant): Unit = synchronized {
-    logger.info(s"$prefix Starting job")
-
-    val now = fireTime.toDateTime(timezone)
-    val f = storage.campaigns
-      .list()
-      .flatMap(results => Future.join(results.map(aggregate(_, now))))
-    Await.result(f)
-
-    logger.info(s"$prefix Completed job")
+  override def execute(fireTime: Instant): Future[Unit] = {
+    storage.campaigns.list().flatMap { results =>
+      Future.join(results.map(aggregate(_, fireTime)))
+    }
   }
 
-  private def aggregate(campaign: Campaign, now: DateTime): Future[Unit] = {
+  private def aggregate(campaign: Campaign, now: Instant): Future[Unit] = {
     campaign.startTime match {
       case None =>
         // This campaign was never started, nothing to do.
@@ -74,14 +60,10 @@ final class AggregateSketchesJob @Inject()(
         // (because the aggregations won't be available anyway). The grace delay means that the
         // aggregations are made available but might still evolve. We hence need to recompute those
         // every during during the grace delay window.
-        val actualDay = if (testingMode) {
-          (startTime.toDateTime(timezone) to now).duration.minutes.toInt / 5
-        } else {
-          (startTime.toDateTime(timezone).withTimeAtStartOfDay to now).duration.days.toInt
-        }
+        val actualDay = Campaign.relativeDay(startTime, now)
         val endDay = actualDay - 2 - campaign.delay
         if (endDay < 0) {
-          logger.info(s"$prefix Nothing to do for campaign ${campaign.name} (just started)")
+          logger.info(s"Nothing to do for campaign ${campaign.name} (just started)")
           Future.Done
         } else {
           val startDay = math.max(0, actualDay - 2 - campaign.delay - campaign.graceDelay)
@@ -95,8 +77,7 @@ final class AggregateSketchesJob @Inject()(
   }
 
   private def aggregate(campaign: Campaign, day: Int): Future[Unit] = {
-    storage
-      .sketches
+    storage.sketches
       .list(SketchStore.Query(campaignName = Some(campaign.name), day = Some(day)))
       .flatMap(sketches => aggregate(campaign, day, sketches))
   }
@@ -143,7 +124,7 @@ final class AggregateSketchesJob @Inject()(
         case None => storage.aggregations.create(aggregation)
       }
       .onSuccess { _ =>
-        logger.info(s"$prefix Aggregated ${sketches.size} sketches for campaign ${campaign.name} (day: $day)")
+        logger.info(s"Aggregated ${sketches.size} sketches for campaign ${campaign.name} (day: $day)")
       }
       .unit
   }

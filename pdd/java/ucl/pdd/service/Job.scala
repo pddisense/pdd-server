@@ -16,17 +16,11 @@
  * along with PDD.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ucl.pdd.service;
+package ucl.pdd.service
 
-import com.google.inject.BindingAnnotation;
+import com.twitter.util.Future
+import org.joda.time.Instant
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-@BindingAnnotation
-@Target({ElementType.FIELD, ElementType.PARAMETER})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface TestingMode {
+trait Job {
+  def execute(fireTime: Instant): Future[Unit]
 }

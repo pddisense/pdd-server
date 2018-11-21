@@ -20,8 +20,20 @@ package ucl.pdd.strategy
 
 import com.twitter.inject.TwitterModule
 
+/**
+ * Guice module configuring a group strategy.
+ */
 object StrategyModule extends TwitterModule {
+  private val typeFlag = flag(
+    "groups",
+    "naive",
+    "Which strategy to use to assign clients into groups. Valid values are: 'naive', 'frequency'.")
+
   override def configure(): Unit = {
-    bind[Strategy].to[RoundRobinStrategy]
+    typeFlag() match {
+      case "naive" => bind[GroupStrategy].toInstance(NaiveGroupStrategy)
+      case "frequency" => bind[GroupStrategy].to[FrequencyGroupStrategy]
+      case invalid => throw new IllegalArgumentException(s"Invalid groups type: $invalid")
+    }
   }
 }

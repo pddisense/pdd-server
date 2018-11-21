@@ -93,6 +93,19 @@ private[mysql] final class MysqlClientStore(mysql: MysqlClient) extends ClientSt
       .map(_.headOption)
   }
 
+  override def multiGet(names: Seq[String]): Future[Seq[Option[Client]]] = {
+    if (names.isEmpty) {
+      Future.value(Seq.empty)
+    } else {
+      mysql
+        .prepare(s"select * " +
+          s"from clients " +
+          s"where name = in (${Seq.fill(names.size)("?").mkString(",")})")
+        .select(names.map(wrapString): _*)(hydrate)
+        .map(campaigns => names.map(name => campaigns.find(_.name == name)))
+    }
+  }
+
   private def hydrate(row: Row): Client = {
     Client(
       name = toString(row, "name"),
