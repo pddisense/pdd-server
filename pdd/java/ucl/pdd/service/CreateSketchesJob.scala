@@ -62,7 +62,7 @@ final class CreateSketchesJob @Inject()(storage: Storage, strategy: GroupStrateg
     val currentDay = Campaign.relativeDay(campaign.startTime.get, now)
     val day = currentDay - 1
     if (day < 0) {
-      logger.info(s"Nothing to do for campaign ${campaign.name} (just started)")
+      info(s"Nothing to do for campaign ${campaign.name} (just started)")
       Future.Done
     } else {
       handleCampaign(now, day, campaign, clientNames)
@@ -102,7 +102,7 @@ final class CreateSketchesJob @Inject()(storage: Storage, strategy: GroupStrateg
           Future.collect(fs)
         }
         .onSuccess { res =>
-          logger.info(s"Created ${res.size} sketches for campaign ${campaign.name} (day $day)")
+          info(s"Created ${res.size} sketches for campaign ${campaign.name} (day $day)")
         }
         .unit
     }

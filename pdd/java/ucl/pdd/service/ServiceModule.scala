@@ -40,7 +40,7 @@ object ServiceModule extends TwitterModule {
     bind[Duration].annotatedWith[PruneThreshold].toInstance(15.days)
 
     if (testingModeFlag()) {
-      logger.warn("Running in TESTING mode. Days will only last 5 minutes!")
+      warn("Running in TESTING mode. Days will only last 5 minutes!")
       DateTimeUtils.setCurrentMillisProvider(new TestingModeMillisProvider(System.currentTimeMillis()))
     }
   }

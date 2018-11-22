@@ -70,7 +70,7 @@ def list_dependencies():
     return [
     {"artifact": "aopalliance:aopalliance:1.0", "lang": "java", "sha1": "0235ba8b489512805ac13a8f9ea77a1ca5ebe3e8", "sha256": "0addec670fedcd3f113c5c8091d783280d23f75e3acb841b61a9cdb079376a08", "repository": "http://central.maven.org/maven2/", "url": "http://central.maven.org/maven2/aopalliance/aopalliance/1.0/aopalliance-1.0.jar", "name": "aopalliance_aopalliance", "actual": "@aopalliance_aopalliance//jar", "bind": "jar/aopalliance/aopalliance"},
     {"artifact": "ch.qos.logback:logback-classic:1.2.3", "lang": "java", "sha1": "7c4f3c474fb2c041d8028740440937705ebb473a", "sha256": "fb53f8539e7fcb8f093a56e138112056ec1dc809ebb020b59d8a36a5ebac37e0", "repository": "http://central.maven.org/maven2/", "url": "http://central.maven.org/maven2/ch/qos/logback/logback-classic/1.2.3/logback-classic-1.2.3.jar", "name": "ch_qos_logback_logback_classic", "actual": "@ch_qos_logback_logback_classic//jar", "bind": "jar/ch/qos/logback/logback_classic"},
-# duplicates in ch.qos.logback:logback-core fixed to 1.2.3
+# duplicates in ch.qos.logback:logback-core promoted to 1.2.3
 # - ch.qos.logback:logback-classic:1.2.3 wanted version 1.2.3
 # - io.sentry:sentry-logback:1.6.4 wanted version 1.2.1
     {"artifact": "ch.qos.logback:logback-core:1.2.3", "lang": "java", "sha1": "864344400c3d4d92dfeb0a305dc87d953677c03c", "sha256": "5946d837fe6f960c02a53eda7a6926ecc3c758bbdd69aa453ee429f858217f22", "repository": "http://central.maven.org/maven2/", "url": "http://central.maven.org/maven2/ch/qos/logback/logback-core/1.2.3/logback-core-1.2.3.jar", "name": "ch_qos_logback_logback_core", "actual": "@ch_qos_logback_logback_core//jar", "bind": "jar/ch/qos/logback/logback_core"},

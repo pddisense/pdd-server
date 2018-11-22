@@ -32,9 +32,9 @@ object AuthModule extends TwitterModule {
   private def randomToken(length: Int): String = {
     val characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
     val token = Seq.fill(length)(characters(Random.nextInt(characters.length))).mkString
-    logger.info("---------------------------------------------------------")
-    logger.info(s"Randomly generated API access token: $token")
-    logger.info("---------------------------------------------------------")
+    info("---------------------------------------------------------")
+    info(s"Randomly generated API access token: $token")
+    info("---------------------------------------------------------")
     token
   }
 }

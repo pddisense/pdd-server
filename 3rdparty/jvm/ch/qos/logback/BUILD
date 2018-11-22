@@ -20,7 +20,7 @@ java_library(
         "//external:jar/ch/qos/logback/logback_core"
     ],
     visibility = [
-        "//visibility:public"
+        "//3rdparty/jvm:__subpackages__"
     ]
 )
 

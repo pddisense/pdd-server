@@ -63,7 +63,7 @@ final class AggregateSketchesJob @Inject()(storage: Storage)
         val actualDay = Campaign.relativeDay(startTime, now)
         val endDay = actualDay - 2 - campaign.delay
         if (endDay < 0) {
-          logger.info(s"Nothing to do for campaign ${campaign.name} (just started)")
+          info(s"Nothing to do for campaign ${campaign.name} (just started)")
           Future.Done
         } else {
           val startDay = math.max(0, actualDay - 2 - campaign.delay - campaign.graceDelay)
@@ -124,7 +124,7 @@ final class AggregateSketchesJob @Inject()(storage: Storage)
         case None => storage.aggregations.create(aggregation)
       }
       .onSuccess { _ =>
-        logger.info(s"Aggregated ${sketches.size} sketches for campaign ${campaign.name} (day: $day)")
+        info(s"Aggregated ${sketches.size} sketches for campaign ${campaign.name} (day: $day)")
       }
       .unit
   }

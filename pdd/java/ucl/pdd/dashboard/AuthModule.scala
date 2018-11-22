@@ -31,9 +31,9 @@ object AuthModule extends TwitterModule {
   override def configure(): Unit = {
     bind[Option[String]].annotatedWith[MasterPassword].toInstance(masterPassword.get)
     if (masterPassword.isDefined) {
-      logger.info("Authentication is enabled on the API")
+      info("Authentication is enabled on the API")
     } else {
-      logger.warn("No authentication is configured on the API!")
+      warn("No authentication is configured on the API!")
     }
   }
 

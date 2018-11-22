@@ -16,7 +16,7 @@
  * along with PDD.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ucl.pdd.metrics
+package ucl.pdd.monitoring
 
 import java.util.concurrent.ConcurrentHashMap
 
@@ -27,12 +27,20 @@ import com.twitter.util.{Time, Timer}
 
 import scala.collection.JavaConverters._
 
-final class DataDogStatsReceiver(client: StatsDClient, timer: Timer) extends StatsReceiver {
+/**
+ * Stats receiver implementation that forwards the metrics to a DataDog agent.
+ *
+ * @param client Datadog client.
+ * @param timer  Timer to use for sampling gauges.
+ */
+private[monitoring] final class DataDogStatsReceiver(client: StatsDClient, timer: Timer)
+  extends StatsReceiver {
+
   private[this] val verbosity = new ConcurrentHashMap[Seq[String], Verbosity].asScala
   private[this] val gauges = new ConcurrentHashMap[Seq[String], DataDogGauge].asScala
 
-  // Every 10 seconds, gauges are sampled. We chose a 10 seconds interval because, by default, the
-  // DataDog agent sends metrics every 10 seconds.
+  // Every 10 seconds, gauges are sampled. We chose a 10 seconds interval because,
+  // by default, the DataDog agent sends metrics every 10 seconds.
   timer.schedule(Time.now + 10.seconds, 10.seconds) {
     gauges.values.foreach(gauge => client.recordGaugeValue(gauge.name, gauge(), gauge.tags: _*))
   }
@@ -50,19 +58,19 @@ final class DataDogStatsReceiver(client: StatsDClient, timer: Timer) extends Sta
   }
 
   private class DataDogCounter(names: Seq[String]) extends Counter {
-    private[this] val (name, tags) = toMetricName(names)
+    private[this] val (name, tags) = translateMetricName(names)
 
     override def incr(delta: Long): Unit = client.incrementCounter(name, tags: _*)
   }
 
   private class DataDogStat(names: Seq[String]) extends Stat {
-    private[this] val (name, tags) = toMetricName(names)
+    private[this] val (name, tags) = translateMetricName(names)
 
     override def add(value: Float): Unit = client.recordHistogramValue(name, value, tags: _*)
   }
 
   private class DataDogGauge(names: Seq[String], f: () => Float) extends Gauge {
-    val (name, tags) = toMetricName(names)
+    val (name, tags) = translateMetricName(names)
     gauges += names -> this
 
     override def remove(): Unit = gauges -= names
@@ -96,8 +104,11 @@ final class DataDogStatsReceiver(client: StatsDClient, timer: Timer) extends Sta
     }
   }
 
-  private def toMetricName(names: Seq[String]): (String, Seq[String]) =
-    names match {
+  private def translateMetricName(segments: Seq[String]): (String, Seq[String]) = {
+    // We attempt to roughly translate Finagle's standard metric names into something
+    // suitable for DataDog. Indeed, Finagle metric names are flat, and some of the
+    // information it contains are better translated as tags.
+    segments match {
       case "clnt" :: clientName +: rest =>
         (sanitizeName("clnt" +: rest), Seq(s"client:${clientName.replace(':', '/')}"))
       case Seq("status", status) => ("http.requests", Seq(s"status:$status"))
@@ -107,10 +118,12 @@ final class DataDogStatsReceiver(client: StatsDClient, timer: Timer) extends Sta
         (sanitizeName(Seq("http", metricName)), Seq(s"route:$routeName", s"method:$method", s"status:$status"))
       case Seq("route", routeName, Method(method), metricName) =>
         (sanitizeName(Seq("http", metricName)), Seq(s"route:$routeName", s"method:$method"))
-      case _ => (sanitizeName(names), Seq.empty)
+      case _ => (sanitizeName(segments), Seq.empty)
     }
+  }
 
-  private def sanitizeName(name: Seq[String]) = name.map(_.replaceAll("[^\\w]", "_")).mkString(".")
+  private def sanitizeName(name: Seq[String]) =
+    name.map(_.replaceAll("[^\\w]", "_")).mkString(".")
 
   private object Method {
     def unapply(s: String): Option[String] = if (s.toUpperCase == s) Some(s) else None

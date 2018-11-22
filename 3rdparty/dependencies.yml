@@ -52,7 +52,7 @@ dependencies:
     logback:
       version: "1.2.3"
       lang: java
-      modules: [classic, core]
+      modules: [classic]
   io.sentry:
     sentry:
       version: "1.6.4"
