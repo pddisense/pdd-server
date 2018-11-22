@@ -30,8 +30,6 @@ import ucl.pdd.util.Service
  *
  * @param timer       Timer (owned by the cron manager).
  * @param injector    Guice injector.
- * @param timezone    Current timezone.
- * @param testingMode Is the testing mode enabled?
  */
 @Singleton
 final class CronManager @Inject()(timer: Timer, injector: Injector)

@@ -25,20 +25,22 @@ import ucl.pdd.storage.Storage
 import ucl.pdd.storage.memory.MemoryStorage
 import ucl.pdd.storage.mysql.{MysqlClientFactory, MysqlStorage}
 
+/**
+ * Guice module configuring a storage.
+ */
 object StorageModule extends TwitterModule {
-  private[this] val typeFlag = flag[String](s"storage", "memory", "Storage type ('memory', or 'mysql')")
-
   // MySQL options.
-  private[this] val mysqlServerFlag = flag("storage.mysql.server", "127.0.0.1:3306", "Address to MySQL server")
-  private[this] val mysqlUserFlag = flag("storage.mysql.user", "root", "MySQL username")
-  private[this] val mysqlPassFlag = flag[String]("storage.mysql.pass", "MySQL password")
-  private[this] val mysqlBaseFlag = flag("storage.mysql.database", "pdd", "MySQL database")
+  private[this] val mysqlServerFlag = flag[String]("mysql_server", "Address to MySQL server")
+  private[this] val mysqlUserFlag = flag("mysql_user", "root", "MySQL username")
+  private[this] val mysqlPassFlag = flag[String]("mysql_password", "MySQL password")
+  private[this] val mysqlBaseFlag = flag("mysql_database", "pdd", "MySQL database")
 
   override def configure(): Unit = {
-    typeFlag() match {
-      case "memory" => bind[Storage].toProvider[MemoryStorageProvider].in[Singleton]
-      case "mysql" => bind[Storage].toProvider[MysqlStorageProvider].in[Singleton]
-      case invalid => throw new IllegalArgumentException(s"Invalid storage type: $invalid")
+    if (mysqlServerFlag.isDefined) {
+      bind[Storage].toProvider[MysqlStorageProvider].in[Singleton]
+    } else {
+      warn("Running with ephemeral in-memory storage.")
+      bind[Storage].toProvider[MemoryStorageProvider].in[Singleton]
     }
   }
 
@@ -62,6 +64,6 @@ object StorageModule extends TwitterModule {
   }
 
   override def singletonShutdown(injector: Injector): Unit = {
-    Await.ready(injector.instance[Storage].shutDown())
+    injector.instance[Storage].shutDown()
   }
 }

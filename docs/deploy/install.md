@@ -45,10 +45,10 @@ The administrative interface should *not* be publicly accessible and remain behi
 ### Storage
 By default, the server uses an in-memory storage, which is by definition not persistent.
 While this may be useful for local testing, a production setup requires to use a proper persistent storage.
-For now, the only implementation is a MySQL storage, which is enabled with the `-storage=mysql` flag. 
-Then, the `-storage.mysql.user`, `-storage.mysql.pass`, `-storage.mysql.database` and `-storage.mysql.server` flags can be used to override, respectively, 
-the MySQL username, password, database name and the MySQL server address.
-By default, it connects to a database named `pdd` on a local server listening on port 3306, as the `root` user and no password.
+For now, the only implementation is a MySQL storage, which is enabled by specifying the server address with tge `-mysql_server` flag, e.g., `-mysql_server=localhost:3306`. 
+Then, the `-mysql_user`, `-mysql_password` and `-mysql_database` flags can be used to override, respectively, 
+the MySQL username, password and database name.
+By default, it connects to a database named `pdd` as the `root` user and no password.
 
 ### Security
 The private endpoints are secured by the means of an access token, specified with the `-api.access_token` flag.
@@ -65,12 +65,11 @@ docker run \
   --restart=always \
   --env 'SENTRY_DSN=https://<public>:<private>@sentry.io/302347' \
   --env ENVIRONMENT=production \
-  --env ROLE=server \
   --name pdd-server \
   pddisense/pdd-server \
-    -storage=mysql \
-    -storage.mysql.user=pdd \
-    -storage.mysql.pass=<mysql password> \
+    -mysql_server=localhost:3306 \
+    -mysql_user=pdd \
+    -mysql_password=<mysql password> \
     -datadog_server=127.0.0.1:8125 \
     -geocoder=maxmind \
     -api.access_token=<access token> \
@@ -124,7 +123,6 @@ docker run \
   --restart=always \
   --name pdd-dashboard \
   --env ENVIRONMENT=production \
-  --env ROLE=dashboard \
   pddisense/pdd-dashboard \
     -api.access_token=<access token> \
     -master_password=<master password> \
