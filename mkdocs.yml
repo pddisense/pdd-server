@@ -6,10 +6,8 @@ repo_url: "https://github.com/pddisense/pdd"
 nav:
 - Home: index.md
 - Deploy:
-  - deploy/index.md
   - deploy/install.md
   - deploy/monitoring.md
-  - deploy/update.md
 - Contribute:
   - contribute/index.md
   - contribute/architecture.md

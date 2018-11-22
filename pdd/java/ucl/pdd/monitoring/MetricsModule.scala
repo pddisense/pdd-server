@@ -31,9 +31,7 @@ import scala.collection.mutable
  */
 object MetricsModule extends TwitterModule {
   // DataDog options.
-  private val datadogServerFlag = flag[String](
-    "metrics.datadog_server",
-    "Address to the DataDog agent.")
+  private val datadogServerFlag = flag[String]("datadog_server", "Address to the DataDog agent.")
 
   @Provides
   @Singleton

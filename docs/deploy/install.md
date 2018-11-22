@@ -2,7 +2,7 @@
 title: Installing
 ---
 
-# Installing the platform
+# Installing PDD
 
 Private Data Donor is made of three different components: an API server, a Web dashboard and a Chrome extension.
 The API server is a mandatory component with which the extension communicates, while the dashboard is an optional component providing an intuitive Web UI for administrators and analysts.
@@ -71,7 +71,7 @@ docker run \
     -storage=mysql \
     -storage.mysql.user=pdd \
     -storage.mysql.pass=<mysql password> \
-    -metrics=datadog \
+    -datadog_server=127.0.0.1:8125 \
     -geocoder=maxmind \
     -api.access_token=<access token> \
     -http.port=:8000 \

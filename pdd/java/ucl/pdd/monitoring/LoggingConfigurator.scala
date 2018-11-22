@@ -33,7 +33,10 @@ import org.slf4j.{Logger, LoggerFactory}
 trait LoggingConfigurator {
   this: App =>
 
-  val logLevelFlag = flag("log_level", "INFO", "Default root logging level.")
+  val logLevelFlag = flag(
+    "log_level",
+    "INFO",
+    "Default root logging level. Values values are: 'ALL', 'TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR', 'OFF'.")
 
   init {
     // We do not configure sentry if the DSN is not defined, to avoid showing a warning in that
