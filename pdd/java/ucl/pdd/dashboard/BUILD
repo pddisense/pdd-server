@@ -28,11 +28,11 @@ deps = [
   "//3rdparty/jvm/com/pauldijou:jwt_core",
 ]
 resources = [
-  "//pdd/node/ucl/pdd/dashboard:index.bundle.js",
-  "//pdd/node/ucl/pdd/dashboard:index.html",
-  "//pdd/node/ucl/pdd/dashboard:robots.txt",
+  "//pdd/node/dashboard:index.bundle.js",
+  "//pdd/node/dashboard:index.html",
+  "//pdd/node/dashboard:robots.txt",
 ]
-resource_strip_prefix = "pdd/node/ucl/pdd/dashboard"
+resource_strip_prefix = "pdd/node/dashboard"
 main_class = "ucl.pdd.dashboard.PddDashboardMain"
 
 scala_binary(

@@ -47,8 +47,8 @@ do
   esac
 done
 
-bazel build pdd/node/ucl/pdd/chrome:package --define env=production
-cp bazel-bin/pdd/node/ucl/pdd/chrome/package.zip ${dist_dir}/chrome.zip
+bazel build pdd/node/chrome:package --define env=production
+cp bazel-bin/pdd/node/chrome/package.zip ${dist_dir}/chrome.zip
 
 bazel build pdd/java/ucl/pdd/dashboard:dashboard_deploy.jar --define env=production
 cp bazel-bin/pdd/java/ucl/pdd/dashboard/dashboard_deploy.jar ${dist_dir}/pdd-dashboard.jar
