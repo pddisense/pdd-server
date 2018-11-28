@@ -35,6 +35,12 @@ object ServiceModule extends TwitterModule {
     "Whether to switch the server to testing mode (where days last 5 minutes)." +
       "It should be only activated for testing purposes.")
 
+  // There is a feature allowing to collect the raw data from the clients. It used
+  // to be enabled during early testing of the platform, but is now disabled by default
+  // for privacy reasons. It is also disabled in the client by default, so even switching
+  // this flag here wouldn't do much if the client does not send the raw data.
+  private[service] val FlagCollectRaw = false
+
   override def configure(): Unit = {
     DateTimeZone.setDefault(DateTimeZone.forID(timezoneFlag()))
     bind[Duration].annotatedWith[PruneThreshold].toInstance(15.days)

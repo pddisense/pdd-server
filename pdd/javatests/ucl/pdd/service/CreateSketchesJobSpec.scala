@@ -149,8 +149,6 @@ class CreateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach with Before
       vocabulary = Vocabulary(Seq(Vocabulary.Query(exact = Some("foo")))),
       startTime = Some(at),
       endTime = None,
-      collectRaw = true,
-      collectEncrypted = true,
       delay = 0,
       graceDelay = 0,
       groupSize = groupSize))
@@ -162,8 +160,6 @@ class CreateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach with Before
       createTime = Instant.now(),
       displayName = s"campaign ${index + 1}",
       vocabulary = Vocabulary(Seq(Vocabulary.Query(exact = Some("foo")))),
-      collectRaw = true,
-      collectEncrypted = true,
       delay = 0,
       graceDelay = 0,
       groupSize = 2))

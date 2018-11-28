@@ -51,37 +51,27 @@ class PingServiceSpec extends UnitSpec with BeforeAndAfterEach with BeforeAndAft
       name = "campaign1",
       createTime = at("2018-05-10T15:53:00"), // Value does not matter.
       displayName = "a campaign",
-      email = None,
-      notes = None,
       vocabulary = Vocabulary(Seq(
         Vocabulary.Query(exact = Some("foo")),
         Vocabulary.Query(exact = Some("bar")))),
       startTime = Some(at("2018-05-11T15:00:00")),
       endTime = None,
-      collectRaw = true,
-      collectEncrypted = true,
       delay = 0,
       graceDelay = 0,
-      groupSize = 3,
-      samplingRate = None)
+      groupSize = 3)
     val campaign2 = Campaign(
       name = "campaign2",
       createTime = at("2018-05-10T15:53:00"), // Value does not matter.
       displayName = "another campaign",
-      email = None,
-      notes = None,
       vocabulary = Vocabulary(Seq(
         Vocabulary.Query(exact = Some("foo")),
         Vocabulary.Query(terms = Some(Seq("foot", "ball"))),
         Vocabulary.Query(exact = Some("weather")))),
       startTime = Some(at("2018-05-12T10:00:00")),
       endTime = None,
-      collectRaw = true,
-      collectEncrypted = false,
       delay = 0,
       graceDelay = 0,
-      groupSize = 3,
-      samplingRate = None)
+      groupSize = 3)
 
     val clients = Seq(
       Client(
@@ -213,8 +203,6 @@ class PingServiceSpec extends UnitSpec with BeforeAndAfterEach with BeforeAndAft
             Vocabulary.Query(exact = Some("foo")),
             Vocabulary.Query(exact = Some("bar")))),
           publicKeys = Seq("pubkey1", "pubkey2"),
-          collectRaw = true,
-          collectEncrypted = true,
           round = 1))
       // The latest version of the vocabulary is always returned.
       resp.vocabulary.queries should contain theSameElementsAs Set(
@@ -232,8 +220,6 @@ class PingServiceSpec extends UnitSpec with BeforeAndAfterEach with BeforeAndAft
           // Vocabulary is truncated to 1 on day 1.
           vocabulary = Vocabulary(Seq(Vocabulary.Query(exact = Some("foo")))),
           publicKeys = Seq("pubkey1", "pubkey2"),
-          collectRaw = true,
-          collectEncrypted = true,
           round = 0),
         PingResponse.Command(
           sketchName = "sketch7",
@@ -243,8 +229,6 @@ class PingServiceSpec extends UnitSpec with BeforeAndAfterEach with BeforeAndAft
             Vocabulary.Query(exact = Some("foo")),
             Vocabulary.Query(exact = Some("bar")))),
           publicKeys = Seq("pubkey1", "pubkey2"),
-          collectRaw = true,
-          collectEncrypted = true,
           round = 1),
         PingResponse.Command(
           sketchName = "sketch8",
@@ -255,8 +239,6 @@ class PingServiceSpec extends UnitSpec with BeforeAndAfterEach with BeforeAndAft
             Vocabulary.Query(terms = Some(Seq("foot", "ball"))),
             Vocabulary.Query(exact = Some("weather")))),
           publicKeys = Seq("pubkey1", "pubkey2", "pubkey3"),
-          collectRaw = true,
-          collectEncrypted = false,
           round = 0))
       // The latest version of the vocabulary is always returned.
       resp.vocabulary.queries should contain theSameElementsAs Set(

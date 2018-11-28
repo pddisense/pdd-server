@@ -28,8 +28,6 @@ function attrsToState(campaign) {
   return {
     delay: campaign.delay,
     graceDelay: campaign.graceDelay,
-    collectRaw: campaign.collectRaw,
-    collectEncrypted: campaign.collectEncrypted,
     groupSize: campaign.groupSize,
     hasSamplingRate: !!campaign.samplingRate,
     samplingRate: campaign.samplingRate ? campaign.samplingRate * 100 : 100,
@@ -40,8 +38,6 @@ function stateToAttrs(state) {
   return {
     delay: state.delay,
     graceDelay: state.graceDelay,
-    collectRaw: state.collectRaw,
-    collectEncrypted: state.collectEncrypted,
     groupSize: state.groupSize,
     samplingRate: state.hasSamplingRate ? state.samplingRate / 100 : null,
   };
@@ -71,16 +67,6 @@ class StrategyForm extends React.Component {
   @autobind
   handleSamplingRateChange(samplingRate) {
     this.setState({ samplingRate });
-  }
-
-  @autobind
-  handleCollectRawClick() {
-    this.setState({ collectRaw: !this.state.collectRaw });
-  }
-
-  @autobind
-  handleCollectEncryptedClick() {
-    this.setState({ collectEncrypted: !this.state.collectEncrypted });
   }
 
   @autobind
@@ -130,30 +116,15 @@ class StrategyForm extends React.Component {
             min={0}/>
         </FormGroup>
 
-        <div className="pt-form-group">
-          <Switch
-            checked={this.state.collectRaw}
-            label="Enable raw data collection"
-            onChange={this.handleCollectRawClick}/>
-        </div>
-
-        <div className="pt-form-group">
-          <Switch
-            checked={this.state.collectEncrypted}
-            label="Enable privacy-preserving data collection"
-            onChange={this.handleCollectEncryptedClick}/>
-        </div>
-
-        {this.state.collectEncrypted ?
-          <FormGroup
-            title="Group size"
-            help="Expected number of users within groups. This value is only a hint.
-                  Larger groups increase privacy of users, but may decrease the accuracy of results.">
-            <NumericInput
-              value={this.state.groupSize}
-              onValueChange={this.handleGroupSizeChange}
-              min={2}/>
-          </FormGroup> : null}
+        <FormGroup
+          title="Group size"
+          help="Expected number of users within groups. This value is only a hint.
+                Larger groups increase privacy of users, but may decrease the accuracy of results.">
+          <NumericInput
+            value={this.state.groupSize}
+            onValueChange={this.handleGroupSizeChange}
+            min={2}/>
+        </FormGroup>
 
         <div className="pt-form-group">
           <Switch

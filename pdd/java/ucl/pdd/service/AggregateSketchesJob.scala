@@ -83,28 +83,24 @@ final class AggregateSketchesJob @Inject()(storage: Storage)
   }
 
   private def aggregate(campaign: Campaign, day: Int, sketches: Seq[Sketch]): Future[Unit] = {
-    // We only aggregate raw values if the campaign was expecting so.
-    val rawValues = if (campaign.collectRaw) {
+    val rawValues = if (ServiceModule.FlagCollectRaw) {
+      // Raw values are by default not collected, for privacy reasons.
       sumRawValues(sketches.map(_.rawValues.toSeq.flatten))
     } else {
       Seq.empty
     }
-    // We only aggregate and decrypt encrypted values if the campaign was expecting so.
-    val (decryptedValues, decryptedCount) = if (campaign.collectEncrypted) {
-      // TODO: raise a warning if submitted but no encrypted values?
-      // Encrypted values of a group can only be decrypted if in possession of all values of this
-      // group. First step is then to filter the groups for which we have all submissions.
-      val decryptedByGroup = sketches
-        .groupBy(_.group)
-        .values
-        .filter(_.forall(s => s.submitted && s.encryptedValues.isDefined))
-      val valuesByGroup = decryptedByGroup.map { groupSketches =>
-        sumEncryptedValues(groupSketches.map(_.encryptedValues.toSeq.flatten))
-      }
-      (sumRawValues(valuesByGroup), decryptedByGroup.map(_.size).sum.toLong)
-    } else {
-      (Seq.empty, 0L)
+    // TODO: raise a warning if submitted but no encrypted values?
+    // Encrypted values of a group can only be decrypted if in possession of all values of this
+    // group. First step is then to filter the groups for which we have all submissions.
+    val decryptedByGroup = sketches
+      .groupBy(_.group)
+      .values
+      .filter(_.forall(s => s.submitted && s.encryptedValues.isDefined))
+    val valuesByGroup = decryptedByGroup.map { groupSketches =>
+      sumEncryptedValues(groupSketches.map(_.encryptedValues.toSeq.flatten))
     }
+    val decryptedValues = sumRawValues(valuesByGroup)
+    val decryptedCount = decryptedByGroup.map(_.size).sum.toLong
 
     val aggregation = Aggregation(
       name = s"${campaign.name}-$day",

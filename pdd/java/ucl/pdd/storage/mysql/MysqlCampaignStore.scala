@@ -75,8 +75,6 @@ private[mysql] final class MysqlCampaignStore(mysql: MysqlClient)
       .set("vocabulary", encodeVocabulary(campaign.vocabulary))
       .set("startTime", campaign.startTime)
       .set("endTime", campaign.endTime)
-      .set("collectRaw", campaign.collectRaw)
-      .set("collectEncrypted", campaign.collectEncrypted)
       .set("delay", campaign.delay)
       .set("graceDelay", campaign.graceDelay)
       .set("groupSize", campaign.groupSize)
@@ -99,8 +97,6 @@ private[mysql] final class MysqlCampaignStore(mysql: MysqlClient)
       .set("vocabulary", encodeVocabulary(campaign.vocabulary))
       .set("startTime", campaign.startTime)
       .set("endTime", campaign.endTime)
-      .set("collectRaw", campaign.collectRaw)
-      .set("collectEncrypted", campaign.collectEncrypted)
       .set("delay", campaign.delay)
       .set("graceDelay", campaign.graceDelay)
       .set("groupSize", campaign.groupSize)
@@ -126,8 +122,6 @@ private[mysql] final class MysqlCampaignStore(mysql: MysqlClient)
       vocabulary = vocabulary,
       startTime = getInstant(row, "startTime"),
       endTime = getInstant(row, "endTime"),
-      collectRaw = toBoolean(row, "collectRaw"),
-      collectEncrypted = toBoolean(row, "collectEncrypted"),
       delay = toInt(row, "delay"),
       graceDelay = toInt(row, "graceDelay"),
       groupSize = toInt(row, "groupSize"),

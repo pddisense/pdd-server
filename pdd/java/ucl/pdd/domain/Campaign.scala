@@ -37,8 +37,6 @@ import org.joda.time.Instant
  *                         aggregations will be generated for this campaign, but currently active
  *                         aggregations will remain active for at most `delay` + `graceDelay`. It
  *                         can be left empty for an open-ended campaign.
- * @param collectRaw       Whether the raw counts are collected.
- * @param collectEncrypted Whether the encrypted counts are collected.
  * @param delay            Delay after which the aggregation is made available.
  * @param graceDelay       Additional delay during which the sketches are still accepted, thus
  *                         allowing the aggregation to be refined. This delay starts after the
@@ -57,8 +55,6 @@ case class Campaign(
   vocabulary: Vocabulary,
   startTime: Option[Instant] = None,
   endTime: Option[Instant] = None,
-  collectRaw: Boolean,
-  collectEncrypted: Boolean,
   delay: Int,
   graceDelay: Int,
   groupSize: Int,

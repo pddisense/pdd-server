@@ -29,6 +29,7 @@ import com.twitter.finatra.request.{QueryParam, RouteParam}
 import com.twitter.util.Future
 import org.joda.time.Instant
 import ucl.pdd.domain.{instantOrdering, _}
+import ucl.pdd.service.Exporter
 import ucl.pdd.storage._
 
 @Singleton
@@ -52,8 +53,6 @@ final class PrivateController @Inject()(storage: Storage) extends Controller {
       vocabulary = req.vocabulary,
       startTime = req.startTime,
       endTime = req.endTime,
-      collectRaw = req.collectRaw,
-      collectEncrypted = req.collectEncrypted,
       delay = req.delay,
       graceDelay = req.graceDelay,
       groupSize = req.groupSize,
@@ -145,8 +144,6 @@ final class PrivateController @Inject()(storage: Storage) extends Controller {
           vocabulary = req.vocabulary,
           startTime = req.startTime,
           endTime = req.endTime,
-          collectRaw = req.collectRaw,
-          collectEncrypted = req.collectEncrypted,
           delay = req.delay,
           graceDelay = req.graceDelay,
           groupSize = req.groupSize,
@@ -249,8 +246,6 @@ case class CreateCampaignRequest(
   vocabulary: Vocabulary = Vocabulary(),
   startTime: Option[Instant],
   endTime: Option[Instant],
-  collectRaw: Boolean = true,
-  collectEncrypted: Boolean = true,
   delay: Int = 0,
   graceDelay: Int = 0,
   groupSize: Int = 10,
@@ -264,8 +259,6 @@ case class UpdateCampaignRequest(
   vocabulary: Vocabulary,
   startTime: Option[Instant],
   endTime: Option[Instant],
-  collectRaw: Boolean,
-  collectEncrypted: Boolean,
   delay: Int,
   graceDelay: Int,
   groupSize: Int,

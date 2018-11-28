@@ -49,8 +49,6 @@ object PingResponse {
    * @param publicKeys       List of public keys of the other members of the group. The order matters
    *                         (it should be the same for all commands of a given group) and it has to
    *                         include the key of the client receiving this command.
-   * @param collectRaw       Whether to send raw counts.
-   * @param collectEncrypted Whether to send encrypted counts.
    * @param round            Round. Practically, it is the same thing than the day number.
    */
   case class Command(
@@ -59,8 +57,6 @@ object PingResponse {
     endTime: Instant,
     vocabulary: Vocabulary,
     publicKeys: Seq[String],
-    collectRaw: Boolean,
-    collectEncrypted: Boolean,
     round: Int)
 
 }

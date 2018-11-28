@@ -16,7 +16,9 @@
  * along with PDD.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ucl.pdd.domain
+package ucl.pdd.service
+
+import ucl.pdd.domain.{Aggregation, Campaign}
 
 object Exporter {
 
@@ -27,14 +29,10 @@ object Exporter {
     decryptedCount: Option[Long] = None)
 
   def collect(campaign: Campaign, results: Seq[Aggregation]): Seq[Count] = {
-    if (campaign.collectEncrypted && campaign.collectRaw) {
+    if (ServiceModule.FlagCollectRaw) {
       collectBoth(results)
-    } else if (campaign.collectEncrypted) {
+    } else  {
       collectEncrypted(results)
-    } else if (campaign.collectRaw) {
-      collectRaw(results)
-    } else {
-      Seq.empty
     }
   }
 
@@ -88,22 +86,6 @@ object Exporter {
           .zipWithIndex
           .filter { case (v, _) => v > 0 }
           .map { case (v, idx) => Count(result.day, idx.toString, decryptedCount = Some(v)) }
-        total +: rows
-      }
-    }
-  }
-
-  private def collectRaw(results: Seq[Aggregation]): Seq[Count] = {
-    results.flatMap { result =>
-      if (result.rawValues.isEmpty) {
-        // If for any reason we do not have data for that day, still return the total count.
-        Seq(Count(result.day, "total", rawCount = Some(0)))
-      } else {
-        val total = Count(result.day, "total", rawCount = Some(result.rawValues.head))
-        val rows = result.rawValues.tail
-          .zipWithIndex
-          .filter { case (v, _) => v > 0 }
-          .map { case (v, idx) => Count(result.day, idx.toString, rawCount = Some(v)) }
         total +: rows
       }
     }

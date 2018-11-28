@@ -73,20 +73,9 @@ class ViewCampaign extends React.Component {
         </div>
 
         <div className="attr-row">
-          <div className="attr-name">Collect raw data</div>
-          <div className="attr-value">{campaign.collectRaw ? 'yes' : 'no'}</div>
+          <div className="attr-name">Group size</div>
+          <div className="attr-value">{campaign.groupSize}</div>
         </div>
-
-        <div className="attr-row">
-          <div className="attr-name">Collect encrypted data</div>
-          <div className="attr-value">{campaign.collectEncrypted ? 'yes' : 'no'}</div>
-        </div>
-
-        {campaign.collectEncrypted ?
-          <div className="attr-row">
-            <div className="attr-name">Group size</div>
-            <div className="attr-value">{campaign.groupSize}</div>
-          </div>: null}
       </div>
     );
   }

@@ -79,12 +79,6 @@ object CampaignValidator {
     if (previous.isStarted && obj.graceDelay != previous.graceDelay) {
       errors += ErrorCause("cannot be changed once a campaign started", "graceDelay")
     }
-    if (previous.isStarted && obj.collectRaw != previous.collectRaw) {
-      errors += ErrorCause("cannot be changed once a campaign started", "collectRaw")
-    }
-    if (previous.isStarted && obj.collectEncrypted != previous.collectEncrypted) {
-      errors += ErrorCause("cannot be changed once a campaign started", "collectEncrypted")
-    }
     if (previous.isStarted && obj.samplingRate != previous.samplingRate) {
       errors += ErrorCause("cannot be changed in the past once a campaign started", "samplingRate")
     }

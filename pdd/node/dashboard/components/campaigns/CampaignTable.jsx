@@ -39,7 +39,6 @@ class CampaignTable extends React.Component {
           <td>{wrap(item.email ? item.email : '-')}</td>
           <td>{wrap(item.startTime ? moment(item.startTime).fromNow() : '–')}</td>
           <td>{wrap(item.endTime ? moment(item.endTime).fromNow() : item.startTime ? 'never' : '-')}</td>
-          <td>{wrap(item.collectEncrypted ? 'enabled' : 'disabled')}</td>
         </tr>
       );
     });
@@ -52,7 +51,6 @@ class CampaignTable extends React.Component {
           <th>Owner</th>
           <th>Start time</th>
           <th>End time</th>
-          <th>Encryption</th>
         </tr>
         </thead>
         <tbody>{rows}</tbody>

@@ -125,8 +125,6 @@ final class PingService @Inject()(storage: Storage, geocoder: Geocoder) {
           endTime = endTime.toInstant,
           vocabulary = campaign.vocabulary.take(sketch.queriesCount),
           publicKeys = publicKeys,
-          collectRaw = campaign.collectRaw,
-          collectEncrypted = campaign.collectEncrypted,
           round = sketch.day)
       }
   }

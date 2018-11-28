@@ -72,8 +72,6 @@ object MysqlStorage {
       "vocabulary longtext not null," +
       "startTime timestamp null," +
       "endTime timestamp null," +
-      "collectRaw tinyint," +
-      "collectEncrypted tinyint," +
       "delay int," +
       "graceDelay int," +
       "groupSize int," +
