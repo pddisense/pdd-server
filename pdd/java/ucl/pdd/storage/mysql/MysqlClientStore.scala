@@ -51,6 +51,7 @@ private[mysql] final class MysqlClientStore(mysql: MysqlClient)
       .where("name = ?", client.name)
       .set("publicKey", client.publicKey)
       .set("browser", client.browser)
+      .set("createTime", client.createTime)
       .set("externalName", client.externalName)
       .execute()
       .map {

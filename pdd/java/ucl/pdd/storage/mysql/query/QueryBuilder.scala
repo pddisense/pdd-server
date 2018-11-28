@@ -159,7 +159,7 @@ private[mysql] class QueryBuilder[T](mysql: Client, table: String, hydrator: Row
     def count(): Future[Int] = {
       _select.prepend("count(1) as _count")
       val (sql, params) = build
-      mysql.prepare(sql).select(params: _*)(row => row.intOrZero("_count")).map(_.head)
+      mysql.prepare(sql).select(params: _*)(row => row.longOrZero("_count")).map(_.head.toInt)
     }
 
     def execute(): Future[Seq[T]] = {

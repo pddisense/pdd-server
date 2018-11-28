@@ -92,6 +92,7 @@ private[mysql] final class MysqlCampaignStore(mysql: MysqlClient)
   override def replace(campaign: Campaign): Future[Boolean] = {
     query.update
       .where("name = ?", campaign.name)
+      .set("createTime", campaign.createTime)
       .set("displayName", campaign.displayName)
       .set("email", campaign.email)
       .set("notes", campaign.notes)

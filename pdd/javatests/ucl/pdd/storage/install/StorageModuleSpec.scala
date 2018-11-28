@@ -35,12 +35,12 @@ class StorageModuleSpec extends UnitSpec with CreateTwitterInjector {
   override protected def modules: Seq[Module] = Seq(StorageModule, StatsModule)
 
   it should "provide a memory storage" in {
-    val injector = createInjector("-storage", "memory")
+    val injector = createInjector()
     injector.instance[Storage] shouldBe a[MemoryStorage]
   }
 
   it should "provide a zookeeper storage" in {
-    val injector = createInjector("-storage", "mysql")
+    val injector = createInjector("-mysql_server", "127.0.0.1")
     injector.instance[Storage] shouldBe a[MysqlStorage]
   }
 

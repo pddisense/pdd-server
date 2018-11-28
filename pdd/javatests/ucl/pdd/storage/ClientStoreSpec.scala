@@ -63,6 +63,8 @@ abstract class ClientStoreSpec extends StoreSpec {
     clients.foreach(client => Await.result(storage.clients.create(client)) shouldBe true)
 
     val newClient1 = clients(0).copy(browser = "fakebrowser")
+    println(clients(0))
+    println(newClient1)
     Await.result(storage.clients.replace(newClient1)) shouldBe true
     Await.result(storage.clients.get("client1")) shouldBe Some(newClient1)
     Await.result(storage.clients.get("client2")) shouldBe Some(clients(1))
