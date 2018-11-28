@@ -22,7 +22,7 @@ import java.net.InetAddress
 
 import com.twitter.util.{Await, Future}
 import org.joda.time.{DateTime, DateTimeZone}
-import org.scalatest.BeforeAndAfterEach
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import ucl.pdd.domain.{Campaign, Client, PingRequest, PingResponse, Sketch, Vocabulary}
 import ucl.pdd.geocoder.NullGeocoder
 import ucl.pdd.storage.Storage
@@ -32,12 +32,16 @@ import ucl.testing.UnitSpec
 /**
  * Unit tests for [[PingService]].
  */
-class PingServiceSpec extends UnitSpec with BeforeAndAfterEach {
+class PingServiceSpec extends UnitSpec with BeforeAndAfterEach with BeforeAndAfterAll {
   behavior of "PingService"
 
   private var service: PingService = _
   private var storage: Storage = _
-  private val timezone = DateTimeZone.forID("Europe/London")
+
+  override def beforeAll(): Unit = {
+    // Normally done in ServiceModule, need to be done for tests as well.
+    DateTimeZone.setDefault(DateTimeZone.forID("Europe/London"))
+  }
 
   override def beforeEach(): Unit = {
     storage = MemoryStorage.empty
@@ -284,5 +288,5 @@ class PingServiceSpec extends UnitSpec with BeforeAndAfterEach {
   }
 
   // All our operations should use the canonical timezone used by the service.
-  private def at(str: String) = new DateTime(str, timezone).toInstant
+  private def at(str: String) = new DateTime(str).toInstant
 }

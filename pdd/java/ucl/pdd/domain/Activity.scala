@@ -34,6 +34,6 @@ import org.joda.time.Instant
 case class Activity(
   clientName: String,
   time: Instant,
-  countryCode: Option[String],
-  extensionVersion: Option[String],
-  timezone: Option[String])
+  countryCode: Option[String] = None,
+  extensionVersion: Option[String] = None,
+  timezone: Option[String] = None)

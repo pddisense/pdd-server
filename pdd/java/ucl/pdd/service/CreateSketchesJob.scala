@@ -41,11 +41,11 @@ final class CreateSketchesJob @Inject()(storage: Storage, strategy: GroupStrateg
   extends Job with Logging {
 
   override def execute(fireTime: Instant): Future[Unit] = {
-    // All clients are subscribed to all campaigns. We therefore retrieve once
-    // and for all the list of all clients here, as well as the list of active
-    // campaigns.
     val f1 = storage.campaigns.list(CampaignStore.Query(isActive = Some(true)))
-    val endTime = fireTime.toDateTime.withTimeAtStartOfDay().minusDays(1)
+
+    // All clients are subscribed to all campaigns. We therefore retrieve once
+    // and for all the list of all clients active during the past day.
+    val endTime = fireTime.toDateTime.withTimeAtStartOfDay()
     val startTime = endTime.minusDays(1)
     val f2 = storage.activity.list(ActivityStore.Query(
       startTime = Some(startTime.toInstant),

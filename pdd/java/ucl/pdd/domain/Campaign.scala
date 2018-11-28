@@ -52,17 +52,17 @@ case class Campaign(
   name: String,
   createTime: Instant,
   displayName: String,
-  email: Option[String],
-  notes: Option[String],
+  email: Option[String] = None,
+  notes: Option[String] = None,
   vocabulary: Vocabulary,
-  startTime: Option[Instant],
-  endTime: Option[Instant],
+  startTime: Option[Instant] = None,
+  endTime: Option[Instant] = None,
   collectRaw: Boolean,
   collectEncrypted: Boolean,
   delay: Int,
   graceDelay: Int,
   groupSize: Int,
-  samplingRate: Option[Double]) {
+  samplingRate: Option[Double] = None) {
 
   def withoutVocabulary: Campaign = copy(vocabulary = Vocabulary())
 
