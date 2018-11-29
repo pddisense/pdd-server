@@ -14,58 +14,28 @@
 # You should have received a copy of the GNU General Public License
 # along with PDD.  If not, see <http://www.gnu.org/licenses/>.
 
-# Cf. https://github.com/bazelbuild/rules_go#how-do-i-run-bazel-on-travis-ci
-
-dist: trusty
-sudo: false
-language: java
-
-cache:
-  yarn: true
-  directories:
-  - "$HOME/.bazel_repository_cache"
+language: scala
+scala:
+- 2.12.6
 
 services:
-- mysql
 - docker
+- mysql
 
-env:
-  global:
-  - MYSQL_HOST=127.0.0.1
-  - MYSQL_USER=root
-  matrix:
-  - BAZEL_VERSION=0.19.2
+cache:
+  directories:
+  - $HOME/.ivy2/cache
+  - $HOME/.sbt
 
-before_install:
-- |
-  wget -O install.sh "https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION}/bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh"
-  chmod +x install.sh
-  ./install.sh --user
-  rm -f install.sh
+before_cache:
+# Cleanup the cached directories to avoid unnecessary cache updates
+- find $HOME/.ivy2/cache -name "ivydata-*.properties" -print -delete
+- find $HOME/.sbt        -name "*.lock"               -print -delete
 
-script:
-- |
-  bazel \
-    --output_base=$HOME/.cache/bazel \
-    --host_jvm_args=-Xmx500m \
-    --host_jvm_args=-Xms500m \
-    run \
-    --config=ci \
-    @yarn//:yarn
-- |
-  bazel \
-    --output_base=$HOME/.cache/bazel \
-    --host_jvm_args=-Xmx500m \
-    --host_jvm_args=-Xms500m \
-    test \
-    --config=ci \
-    --action_env MYSQL_HOST \
-    --action_env MYSQL_USER \
-    //pdd/...
-
-deploy:
-  provider: script
-  skip_cleanup: true
-  script: ./bin/travis-deploy.sh
-  on:
-    branch: master
+# Push Docker image.
+#deploy:
+#  provider: script
+#  skip_cleanup: true
+#  script: ./bin/travis-deploy.sh
+#  on:
+#    branch: master

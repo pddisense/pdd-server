@@ -1,29 +1,6 @@
-# Artifacts
-/dist/
-/bazel-*
-*.log
-*.tgz
-.installed.cfg
-env/
-_site/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.npm
-.node_repl_history
-.yarn-integrity
-.eslintcache
-**/node_modules/
-*.crx
-
-# Sensitive files
-.env
-*.pem
-
-# Temporary files
+/.idea
+/.project
+target
 .DS_Store
-.ropeproject
-
-# IDE configuration
-.project/
-.ijwb/
+*.iml
+node_modules
