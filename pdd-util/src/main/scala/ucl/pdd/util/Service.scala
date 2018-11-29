@@ -20,8 +20,21 @@ package ucl.pdd.util
 
 import com.twitter.util.Future
 
+/**
+ * Trait for services that can be started/stopped asynchronously. This is to be used
+ * instead of [[com.google.common.util.concurrent.Service]], as its interfce is
+ * lighter and integrates better with our usage of Twitter's futures.
+ */
 trait Service {
+  /**
+   * Operation to perform when starting the service. By contract, no other method
+   * will be called on this object until the returned future completes.
+   */
   def startUp(): Future[Unit]
 
+  /**
+   * Operation to perform when stopping the service. By contract, no other method
+   * will be called on this object once the shutdown has been initiated.
+   */
   def shutDown(): Future[Unit]
 }

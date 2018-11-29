@@ -21,6 +21,9 @@ package ucl.pdd.jackson
 import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import com.twitter.finatra.json.modules.FinatraJacksonModule
 
+/**
+ * Custom Jackson module for PDD servers.
+ */
 object PddJacksonModule extends FinatraJacksonModule {
-  override val propertyNamingStrategy = PropertyNamingStrategy.LOWER_CAMEL_CASE
+  override val propertyNamingStrategy: PropertyNamingStrategy = PropertyNamingStrategy.LOWER_CAMEL_CASE
 }

@@ -24,8 +24,8 @@ import com.twitter.finatra.http.Controller
 import com.twitter.finatra.httpclient.HttpClient
 
 /**
- * The API controller exposes endpoints locally to the application. It mainly forwards calls to the
- * API server.
+ * This controller exposes endpoints locally to the application. Its role is to forward calls
+ * to the API server. It allows us to avoid CORS restriction.
  *
  * @param httpClient HTTP client to the API server.
  */

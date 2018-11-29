@@ -18,40 +18,26 @@
 
 package ucl.pdd.dashboard
 
-import java.security.KeyPair
-
 import com.google.inject.{Inject, Singleton}
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.finagle.{Service, SimpleFilter}
 import com.twitter.util.Future
-import pdi.jwt.{Jwt, JwtAlgorithm}
 
-import scala.util.{Failure, Success}
-
+/**
+ * Authentication filter checking that the master password has been provided as a header.
+ *
+ * @param authenticator Authentication service.
+ */
 @Singleton
-final class AuthFilter @Inject()(keyPair: KeyPair, @MasterPassword masterPassword: Option[String])
+final class AuthFilter @Inject()(authenticator: Authenticator)
   extends SimpleFilter[Request, Response] {
 
   override def apply(request: Request, service: Service[Request, Response]): Future[Response] = {
-    if (masterPassword.isEmpty || authenticate(request)) {
+    val authenticated = authenticator.authenticate(request).authenticated
+    if (authenticated) {
       service(request)
     } else {
       Future.value(Response(Status.Unauthorized))
-    }
-  }
-
-  private def authenticate(request: Request): Boolean = {
-    request.authorization match {
-      case Some(header) if header.startsWith("Bearer ") =>
-        Jwt.decode(header.drop(7), keyPair.getPublic, Seq(JwtAlgorithm.ES512)) match {
-          case Success(_) => true
-          case Failure(e) =>
-            e.printStackTrace()
-            false
-        }
-      case None =>
-        println("no token")
-        false
     }
   }
 }

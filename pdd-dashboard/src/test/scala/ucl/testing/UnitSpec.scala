@@ -16,17 +16,11 @@
  * along with PDD.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ucl.pdd.dashboard;
+package ucl.testing
 
-import com.google.inject.BindingAnnotation;
+import org.scalatest._
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-@BindingAnnotation
-@Target({ElementType.FIELD, ElementType.PARAMETER})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface MasterPassword {
-}
+/**
+ * Base class for all tests.
+ */
+abstract class UnitSpec extends FlatSpec with Matchers

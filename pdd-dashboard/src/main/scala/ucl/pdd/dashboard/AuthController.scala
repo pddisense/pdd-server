@@ -18,49 +18,31 @@
 
 package ucl.pdd.dashboard
 
-import java.security.KeyPair
-
 import com.google.inject.{Inject, Singleton}
 import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
-import pdi.jwt.{Jwt, JwtAlgorithm}
 
-import scala.util.{Failure, Success}
-
+/**
+ * This controller exposes two methods
+ *
+ * @param authenticator Authentication service.
+ */
 @Singleton
-final class AuthController @Inject()(keyPair: KeyPair, @MasterPassword masterPassword: Option[String])
-  extends Controller {
+final class AuthController @Inject()(authenticator: Authenticator) extends Controller {
+
+  import AuthController._
 
   get("/auth") { req: Request =>
-    if (masterPassword.isEmpty) {
-      AuthResponse(authenticated = true, None)
-    } else {
-      req.authorization match {
-        case Some(header) if header.startsWith("Bearer ") =>
-          val accessToken = header.drop(7)
-          Jwt.decode(accessToken, keyPair.getPublic, Seq(JwtAlgorithm.ES512)) match {
-            case Success(_) => AuthResponse(authenticated = true, Some(accessToken))
-            case Failure(_) => AuthResponse(authenticated = false, None)
-          }
-        case None => AuthResponse(authenticated = false, None)
-      }
-    }
+    authenticator.authenticate(req)
   }
 
   post("/auth") { req: AuthRequest =>
-    masterPassword match {
-      case None => AuthResponse(authenticated = true, None)
-      case Some(password) =>
-        if (req.password == password) {
-          val accessToken = Jwt.encode("""{}""", keyPair.getPrivate, JwtAlgorithm.ES512)
-          AuthResponse(authenticated = true, Some(accessToken))
-        } else {
-          AuthResponse(authenticated = false, None)
-        }
-    }
+    authenticator.authenticate(req.password)
   }
 }
 
-case class AuthRequest(password: String)
+object AuthController {
 
-case class AuthResponse(authenticated: Boolean, accessToken: Option[String])
+  case class AuthRequest(password: String)
+
+}

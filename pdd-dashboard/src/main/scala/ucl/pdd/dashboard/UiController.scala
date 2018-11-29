@@ -22,6 +22,9 @@ import com.google.inject.Singleton
 import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
 
+/**
+ * This controller exposes the static files embedding the user interface.
+ */
 @Singleton
 final class UiController extends Controller {
   get("/") { _: Request =>

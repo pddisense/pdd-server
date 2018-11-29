@@ -18,34 +18,22 @@
 
 package ucl.pdd.dashboard
 
-import java.security.spec.ECGenParameterSpec
-import java.security.{KeyPair, KeyPairGenerator, SecureRandom, Security}
-
 import com.google.inject.{Provides, Singleton}
 import com.twitter.inject.TwitterModule
-import org.bouncycastle.jce.provider.BouncyCastleProvider
 
+/**
+ * Guice module providing authentication services.
+ */
 object AuthModule extends TwitterModule {
-  private[this] val masterPassword = flag[String]("master_password", "Master password securing the access to the app")
-
-  override def configure(): Unit = {
-    bind[Option[String]].annotatedWith[MasterPassword].toInstance(masterPassword.get)
-    if (masterPassword.isDefined) {
-      info("Authentication is enabled on the API")
-    } else {
-      warn("No authentication is configured on the API!")
-    }
-  }
+  private val masterPasswordFlag = flag[String]("master_password", "Master password securing the access to the app")
 
   @Provides
   @Singleton
-  def providesKeyPair: KeyPair = {
-    if (Security.getProvider("BC") == null) {
-      Security.addProvider(new BouncyCastleProvider)
-    }
-    val generator = KeyPairGenerator.getInstance("ECDSA", "BC")
-    val params = new ECGenParameterSpec("P-521")
-    generator.initialize(params, new SecureRandom)
-    generator.generateKeyPair()
+  def providesAuthenticator(): Authenticator = {
+    // The cryptographic key pair is generated on-the-fly and not persisted. It means
+    // that JWT will not be valid across server restarts. This will oblige users to
+    // enter again their passwords, but this may also be used as an emergency measure
+    // to force logout all users.
+    Authenticator.newAuthenticator(masterPasswordFlag.get)
   }
 }
