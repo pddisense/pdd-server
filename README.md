@@ -2,25 +2,33 @@
 
 [![Build Status](https://travis-ci.com/pddisense/pdd-server.svg?branch=master)](https://travis-ci.com/pddisense/pdd-server)
 
-This repository contains the source code for the Private Data Donor platform, whose goal is to collect web search queries, in order to identify outbreaks of infectious diseases much earlier than ever before.
-It is a research project conducted in the frame of the broader [i-sense project](https://www.i-sense.org.uk/), the EPSRC IRC in Early Warning Sensing Systems for Infectious Diseases.
-Private Data Donor is developed conjointly by research teams from [UCL's CS department](http://www.cs.ucl.ac.uk/home/).
+This repository contains the source code for the PDD server.
+More specifically, it provides an API server, with which the clients interact, and a dashboard, providing a user interface to analysts.
+The server components are written in Scala and rely on [Finatra](https://twitter.github.io/finatra/) to provide HTTP services.
 
-Private Data Donor is made of three components:
-  * the API server;
-  * the dashboard;
-  * the Chrome extension.
+## Build
+To build the server, you will need [Scala 2.12.x](https://www.scala-lang.org) and [SBT ≥ 0.13.17](https://www.scala-sbt.org).
+Alternatively, you can use the `sbt` wrapper script included at the root of the repository.
 
-## Getting started
+First clone the repository:
+```bash
+git clone git@github.com:pddisense/pdd-server.git
+cd pdd-server
+```
 
-This repository follows the mono-repository pattern, and all the code is compiled using Bazel.
-It allows to compile multiple languages (Java/Scala and Javascript in our case) using the same build tool.
+Then test and build the extension:
+```bash
+yarn install
+yarn build
+sbt test
+sbt compile
+```
 
-1. [Install Bazel](https://docs.bazel.build/versions/master/install.html) on your machine.
-2. Clone this repository: `git clone git@github.com:pddisense/pdd.git`
-3. Install the NodeJS dependencies: `bazel run @yarn//:yarn`
-4. Compile everything: `bazel build ...`
+## About
+Private Data Donor is a research project whose goal is to gather statistics about Web search queries in a privacy-preserving way.
+Collected data is then used to help monitoring and predicting outbreaks of infectious diseases such as flu.
+It is developed by [UCL's CS department](http://www.cs.ucl.ac.uk/home/), in the frame of the [i-sense project](https://www.i-sense.org.uk/), the EPSRC IRC in Early Warning Sensing Systems for Infectious Diseases.
 
 ## License
 
-Private Data Donor is made available under the terms of the GNU GPL v3: https://www.gnu.org/licenses/gpl-3.0.en.html
+Private Data Donor is made available under the terms of the GNU GPL v3.
