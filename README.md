@@ -9,6 +9,7 @@ The server components are written in Scala and rely on [Finatra](https://twitter
 ## Build
 To build the server, you will need [Scala 2.12.x](https://www.scala-lang.org) and [SBT ≥ 0.13.17](https://www.scala-sbt.org).
 Alternatively, you can use the `sbt` wrapper script included at the root of the repository.
+You will also need [Node ≥10.9.0](https://nodejs.org) and [Yarn](https://yarnpkg.com) if you want to work on the dashboard.
 
 First clone the repository:
 ```bash
@@ -16,12 +17,16 @@ git clone git@github.com:pddisense/pdd-server.git
 cd pdd-server
 ```
 
-Then test and build the extension:
+Then test and build the server:
+```bash
+sbt "project server" test compile
+```
+
+You can also build the dashboard, which requires an extra step to build the user interface:
 ```bash
 yarn install
 yarn build
-sbt test
-sbt compile
+sbt "project dashboard" compile
 ```
 
 ## About
