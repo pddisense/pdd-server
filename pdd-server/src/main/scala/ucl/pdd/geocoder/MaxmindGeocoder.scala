@@ -20,6 +20,7 @@ package ucl.pdd.geocoder
 
 import java.net.InetAddress
 
+import com.google.common.io.Resources
 import com.google.inject.Singleton
 import com.maxmind.db.CHMCache
 import com.maxmind.geoip2.DatabaseReader
@@ -36,10 +37,10 @@ import scala.util.Try
 @Singleton
 final class MaxmindGeocoder extends Geocoder {
   private[this] val reader = {
-    val is = classOf[MaxmindGeocoder].getResourceAsStream("GeoLite2-Country.mmdb")
+    val is = Resources.getResource("GeoLite2-Country.mmdb").openStream()
     new DatabaseReader.Builder(is)
       .withCache(new CHMCache())
-      .build
+      .build()
   }
 
   override def geocode(ipAddress: InetAddress): Future[Option[String]] = {
@@ -52,7 +53,6 @@ final class MaxmindGeocoder extends Geocoder {
   }
 
   override def close(deadline: Time): Future[Unit] = {
-    reader.close()
-    Future.Done
+    FuturePool.unboundedPool(reader.close())
   }
 }

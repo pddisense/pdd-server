@@ -21,19 +21,29 @@ package ucl.pdd.geocoder
 import java.net.InetAddress
 
 import com.twitter.util.Await
+import org.scalatest.BeforeAndAfterEach
 import ucl.testing.UnitSpec
 
 /**
  * Unit tests for [[MaxmindGeocoder]].
  */
-class MaxmindGeocoderSpec extends UnitSpec {
+class MaxmindGeocoderSpec extends UnitSpec with BeforeAndAfterEach {
   behavior of "MaxmindGeocoder"
 
+  private var geocoder: Geocoder = _
+
+  override def beforeEach(): Unit = {
+    geocoder = new MaxmindGeocoder
+  }
+
+  override def afterEach(): Unit = {
+    Await.result(geocoder.close())
+    geocoder = null
+  }
+
   it should "geocode IP addresses" in {
-    val geocoder = new MaxmindGeocoder
     Await.result(geocoder.geocode(InetAddress.getByName("64.253.63.128"))) shouldBe Some("GB")
     Await.result(geocoder.geocode(InetAddress.getByName("92.222.0.128"))) shouldBe Some("FR")
     Await.result(geocoder.geocode(InetAddress.getByName("192.168.0.1"))) shouldBe None
-    Await.result(geocoder.close())
   }
 }
