@@ -32,7 +32,7 @@ private[mysql] trait MysqlStoreSpec extends StoreSpec with BeforeAndAfterEach {
 
   override def beforeEach(): Unit = {
     database = "test_" + UUID.randomUUID().getLeastSignificantBits.toHexString
-    initClient = Mysql.client.withCredentials(user, password).newRichClient(s"$host:3306")
+    initClient = Mysql.client.withCredentials(user, password).newRichClient(address)
     Await.result(initClient.query(s"create database $database"))
 
     super.beforeEach()
@@ -47,11 +47,11 @@ private[mysql] trait MysqlStoreSpec extends StoreSpec with BeforeAndAfterEach {
   }
 
   override def createStorage: Storage = {
-    val client = MysqlClientFactory(s"$host:3306", user, password, database)
+    val client = MysqlClientFactory(s"$address:3306", user, password, database)
     new MysqlStorage(client)
   }
 
-  private final def host = sys.env.getOrElse("MYSQL_HOST", "0.0.0.0")
+  private final def address = sys.env.getOrElse("MYSQL_ADDRESS", "0.0.0.0:3306")
 
   private final def user = sys.env.getOrElse("MYSQL_USER", "root")
 

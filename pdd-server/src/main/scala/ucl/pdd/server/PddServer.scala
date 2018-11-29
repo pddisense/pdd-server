@@ -27,7 +27,7 @@ import ucl.pdd.geocoder.GeocoderModule
 import ucl.pdd.jackson.PddJacksonModule
 import ucl.pdd.monitoring.{LoggingConfigurator, MetricsModule}
 import ucl.pdd.service.ServiceModule
-import ucl.pdd.storage.install.StorageModule
+import ucl.pdd.storage.StorageModule
 import ucl.pdd.strategy.StrategyModule
 
 object PddServerMain extends PddServer

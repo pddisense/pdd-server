@@ -16,12 +16,12 @@
  * along with PDD.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ucl.pdd.storage.install
+package ucl.pdd.storage
 
 import com.google.inject.Module
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.inject.{CreateTwitterInjector, TwitterModule}
-import ucl.pdd.storage.Storage
+import StorageModule
 import ucl.pdd.storage.memory.MemoryStorage
 import ucl.pdd.storage.mysql.MysqlStorage
 import ucl.testing.UnitSpec
@@ -40,7 +40,7 @@ class StorageModuleSpec extends UnitSpec with CreateTwitterInjector {
   }
 
   it should "provide a zookeeper storage" in {
-    val injector = createInjector("-mysql_server", "127.0.0.1")
+    val injector = createInjector("-mysql_server", "127.0.0.1:3306")
     injector.instance[Storage] shouldBe a[MysqlStorage]
   }
 
