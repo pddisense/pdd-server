@@ -21,7 +21,6 @@ package ucl.pdd.storage
 import com.google.inject.Module
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.inject.{CreateTwitterInjector, TwitterModule}
-import StorageModule
 import ucl.pdd.storage.memory.MemoryStorage
 import ucl.pdd.storage.mysql.MysqlStorage
 import ucl.testing.UnitSpec
