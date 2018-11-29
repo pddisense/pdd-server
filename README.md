@@ -9,7 +9,6 @@ The server components are written in Scala and rely on [Finatra](https://twitter
 ## Build
 To build the server, you will need [Scala 2.12.x](https://www.scala-lang.org) and [SBT ≥ 0.13.17](https://www.scala-sbt.org).
 Alternatively, you can use the `sbt` wrapper script included at the root of the repository.
-You will also need [Node ≥10.9.0](https://nodejs.org) and [Yarn](https://yarnpkg.com) if you want to work on the dashboard.
 
 First clone the repository:
 ```bash
@@ -22,7 +21,8 @@ Then test and build the server:
 sbt "project server" test compile
 ```
 
-You can also build the dashboard, which requires an extra step to build the user interface:
+You will also need [Node ≥10.9.0](https://nodejs.org) and [Yarn](https://yarnpkg.com) if you want to work on the dashboard.
+To build the latter, an extra step is required in order to build the user interface:
 ```bash
 yarn install
 yarn build
