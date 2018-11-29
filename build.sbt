@@ -57,6 +57,7 @@ lazy val server = (project in file("pdd-server"))
       "org.scalatest" %% "scalatest" % "3.0.5" % "test"
     ),
     mainClass in(Compile, run) := Some("ucl.pdd.server.PddServerMain"),
+    packageName in Docker := "pdd-server",
     dockerExposedPorts in Docker := Seq(8000, 9990)
   )
 
@@ -73,5 +74,6 @@ lazy val dashboard = (project in file("pdd-dashboard"))
       "com.pauldijou" %% "jwt-core" % "0.16.0"
     ),
     mainClass in(Compile, run) := Some("ucl.pdd.dashboard.PddDashboardMain"),
+    packageName in Docker := "pdd-dashboard",
     dockerExposedPorts in Docker := Seq(8001, 9990)
   )
