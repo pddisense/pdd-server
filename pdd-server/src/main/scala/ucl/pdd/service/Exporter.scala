@@ -28,20 +28,20 @@ final class Exporter {
 
   import Exporter._
 
-  def collect(campaign: Campaign, results: Seq[Aggregation]): Seq[Count] = {
+  def collect(campaign: Campaign, results: Seq[Aggregation]): Seq[Row] = {
     val startTime = campaign.startTime.getOrElse(Instant.now())
     results.flatMap { result =>
       if (result.decryptedValues.isEmpty) {
         // If we do not have data for that day, still return the total count.
-        Seq(Count(Campaign.absoluteDate(startTime, result.day), "total", 0))
+        Seq(Row(Campaign.absoluteDate(startTime, result.day), "_total", 0))
       } else {
-        val total = Count(Campaign.absoluteDate(startTime, result.day), "total", result.decryptedValues.head)
+        val total = Row(Campaign.absoluteDate(startTime, result.day), "_total", result.decryptedValues.head)
         val rows = result.decryptedValues
           .tail
           .zipWithIndex
           .filter { case (v, _) => v > 0 }
           .map { case (v, idx) =>
-            Count(Campaign.absoluteDate(startTime, result.day), campaign.vocabulary.queries(idx).toString, v)
+            Row(Campaign.absoluteDate(startTime, result.day), campaign.vocabulary.queries(idx).toString, v)
           }
         total +: rows
       }
@@ -50,15 +50,15 @@ final class Exporter {
 
   def collectAsCsv(campaign: Campaign, results: Seq[Aggregation]): String = {
     val header = "day,query,count"
-    val lines = collect(campaign, results).map { count =>
-      s"${count.date},${count.query},${count.decryptedCount}"
+    val rows = collect(campaign, results).map { row =>
+      s"${row.date},${row.query},${row.count}"
     }
-    (header +: lines).mkString("\n")
+    (header +: rows).mkString("\n")
   }
 }
 
 object Exporter {
 
-  case class Count(date: LocalDate, query: String, decryptedCount: Long)
+  case class Row(date: LocalDate, query: String, count: Long)
 
 }
