@@ -20,7 +20,6 @@ package ucl.pdd.monitoring
 
 import ch.qos.logback.classic.{Level, LoggerContext}
 import com.twitter.app.App
-import io.sentry.Sentry
 import org.slf4j.{Logger, LoggerFactory}
 
 /**
@@ -38,25 +37,20 @@ trait LoggingConfigurator {
     "INFO",
     "Default root logging level. Values values are: 'ALL', 'TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR', 'OFF'.")
 
-  init {
-    // We do not configure sentry if the DSN is not defined, to avoid showing a warning in that
-    // case (we may want no to report to Sentry, e.g., during development). It also mean that we
-    // enforce using an environment-based configuration of Sentry (no Java properties).
-    if (sys.env.contains("SENTRY_DSN")) {
-      // Used to differentiate between libraries and our own code.
-      // https://docs.sentry.io/clients/java/config/#in-application-stack-frames
-      sys.props("sentry.stacktrace.app.packages") = "ucl.pdd"
+  // Sentry configuration. This is done in the constructor and not an `init` block because
+  // Sentry is integrated with Logback and the latter is initialised very soon.
+  {
+    // Used to differentiate between libraries and our own code.
+    // https://docs.sentry.io/clients/java/config/#in-application-stack-frames
+    sys.props("sentry.stacktrace.app.packages") = "ucl.pdd"
 
-      // Configure the environment.
-      sys.props("sentry.environment") = sys.env.getOrElse("ENVIRONMENT", "devel")
-
-      // This will initialize Sentry by looking for the `SENTRY_DSN` environment variable.
-      Sentry.init()
-    }
+    // Set the environment. The same environment variable is used to configure DataDog's
+    // environment as well.
+    sys.props("sentry.environment") = sys.env.getOrElse("ENVIRONMENT", "devel")
   }
 
   premain {
-    // Programmatically set the root logging level. We cannot do it in the `init` block
+    // Programmatically set the root logging level. We cannot do it in an `init` block
     // because the flags are not parsed yet.
     val ctx = LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext]
     val rootLogger = ctx.getLogger(Logger.ROOT_LOGGER_NAME)

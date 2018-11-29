@@ -1,3 +1,4 @@
+import sbt.dsl.enablePlugins
 // PDD is a platform for privacy-preserving Web searches collection.
 // Copyright (C) 2016-2018 Vincent Primault <v.primault@ucl.ac.uk>
 //
@@ -17,10 +18,14 @@
 lazy val commonSettings = Seq(
   version := "0.0.1",
   organization := "ucl",
-
   scalaVersion := "2.12.6",
 
   resolvers += Resolver.mavenLocal
+)
+
+lazy val dockerSettings = Seq(
+  dockerUsername in Docker := Some("pddisense"),
+  dockerAliases ++= Seq(dockerAlias.value.withTag(Option("latest")))
 )
 
 lazy val util = (project in file("pdd-util"))
@@ -38,8 +43,12 @@ lazy val util = (project in file("pdd-util"))
   )
 
 lazy val server = (project in file("pdd-server"))
+  .enablePlugins(JavaAppPackaging)
+  .enablePlugins(DockerPlugin)
+  .dependsOn(util)
   .settings(
     commonSettings,
+    dockerSettings,
     libraryDependencies ++= Seq(
       "com.twitter" %% "finatra-http" % "18.11.0",
       "com.twitter" %% "finagle-mysql" % "18.11.0",
@@ -47,25 +56,22 @@ lazy val server = (project in file("pdd-server"))
       "com.maxmind.geoip2" % "geoip2" % "2.12.0",
       "org.scalatest" %% "scalatest" % "3.0.5" % "test"
     ),
-    mainClass in(Compile, run) := Some("ucl.pdd.dashboard.PddServerMain")
+    mainClass in(Compile, run) := Some("ucl.pdd.server.PddServerMain"),
+    dockerExposedPorts in Docker := Seq(8000, 9990)
   )
-  .dependsOn(util)
 
 lazy val dashboard = (project in file("pdd-dashboard"))
+  .enablePlugins(JavaAppPackaging)
+  .enablePlugins(DockerPlugin)
+  .dependsOn(util)
   .settings(
     commonSettings,
+    dockerSettings,
     libraryDependencies ++= Seq(
       "com.twitter" %% "finatra-http" % "18.11.0",
       "com.twitter" %% "finatra-httpclient" % "18.11.0",
       "com.pauldijou" %% "jwt-core" % "0.16.0"
     ),
-    mainClass in(Compile, run) := Some("ucl.pdd.dashboard.PddDashboardMain")
+    mainClass in(Compile, run) := Some("ucl.pdd.dashboard.PddDashboardMain"),
+    dockerExposedPorts in Docker := Seq(8001, 9990)
   )
-  .dependsOn(util)
-
-// Docker configuration.
-//enablePlugins(JavaAppPackaging)
-//enablePlugins(DockerPlugin)
-//dockerUsername in Docker := Some("pddisense")
-//dockerExposedPorts in Docker := Seq(8888, 8880, 9990)
-//dockerAliases ++= Seq(dockerAlias.value.withTag(Option("latest")))
