@@ -27,6 +27,7 @@ package ucl.pdd.domain
  * @param campaignName    The name of the campaign this sketch is about.
  * @param day             The day this aggregation is about. It is relative to the associated
  *                        campaign's start time.
+ * @param stats           Statistics.
  * @param decryptedValues The list of query counts decrypted from the encrypted counts. The first
  *                        count represents the total number of searches over the associated day
  *                        (all of them, not only the ones actively monitored), and then there is
@@ -35,15 +36,14 @@ package ucl.pdd.domain
  *                        the total number of searches over the associated day (all of them, not
  *                        only the ones actively monitored), and then there is one count per
  *                        monitored query on the associated day.
- * @param stats           Statistics.
  */
 case class Aggregation(
   name: String,
   campaignName: String,
   day: Int,
+  stats: Aggregation.Stats,
   decryptedValues: Seq[Long],
-  rawValues: Seq[Long],
-  stats: Aggregation.Stats) {
+  rawValues: Seq[Long] = Seq.empty) {
 
   def withoutValues: Aggregation = copy(decryptedValues = Seq.empty, rawValues = Seq.empty)
 }

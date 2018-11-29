@@ -39,7 +39,7 @@ object ServiceModule extends TwitterModule {
   // to be enabled during early testing of the platform, but is now disabled by default
   // for privacy reasons. It is also disabled in the client by default, so even switching
   // this flag here wouldn't do much if the client does not send the raw data.
-  private[service] val FlagCollectRaw = false
+  private[service] var FlagCollectRaw = false
 
   override def configure(): Unit = {
     DateTimeZone.setDefault(DateTimeZone.forID(timezoneFlag()))

@@ -20,7 +20,7 @@ package ucl.pdd.service
 
 import com.twitter.util.{Await, Future}
 import org.joda.time.{DateTime, DateTimeZone}
-import org.scalatest.BeforeAndAfterEach
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import ucl.pdd.domain.{Aggregation, Campaign, Sketch, Vocabulary}
 import ucl.pdd.storage.memory.MemoryStorage
 import ucl.pdd.storage.{AggregationStore, Storage}
@@ -29,12 +29,17 @@ import ucl.testing.UnitSpec
 /**
  * Unit tests for [[AggregateSketchesJob]].
  */
-class AggregateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach {
+class AggregateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach with BeforeAndAfterAll {
   behavior of "AggregateSketchesJob"
 
-  private[this] var job: AggregateSketchesJob = _
-  private[this] var storage: Storage = _
-  private[this] val timezone = DateTimeZone.forID("Europe/London")
+  private var job: AggregateSketchesJob = _
+  private var storage: Storage = _
+  private val timezone = DateTimeZone.forID("Europe/London")
+
+  override def beforeAll(): Unit = {
+    // We test here the collection of raw values, even though it is disabled by default.
+    ServiceModule.FlagCollectRaw = true
+  }
 
   override def beforeEach(): Unit = {
     storage = MemoryStorage.empty
