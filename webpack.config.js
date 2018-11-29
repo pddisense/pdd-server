@@ -19,7 +19,7 @@
 const webpack = require('webpack');
 const path = require('path');
 
-const outputPath = path.resolve(__dirname, 'pdd-dashboard/src/resources');
+const outputPath = path.resolve(__dirname, 'pdd-dashboard/src/main/resources');
 const config = {
   entry: './pdd-dashboard/src/main/node/index.js',
   output: {
