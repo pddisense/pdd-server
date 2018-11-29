@@ -43,7 +43,7 @@ lazy val server = (project in file("pdd-server"))
     libraryDependencies ++= Seq(
       "com.twitter" %% "finatra-http" % "18.11.0",
       "com.twitter" %% "finagle-mysql" % "18.11.0",
-      "com.github.nscala-time" %% "nscala-time" % "2.18.0",
+      "com.github.nscala-time" %% "nscala-time" % "2.14.0",
       "com.maxmind.geoip2" % "geoip2" % "2.12.0",
       "org.scalatest" %% "scalatest" % "3.0.5" % "test"
     ),
