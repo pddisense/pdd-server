@@ -77,4 +77,8 @@ object Campaign {
   def absoluteInstant(startTime: Instant, day: Int): Instant = {
     (startTime.toDateTime.withTimeAtStartOfDay + day.days).toInstant
   }
+
+  def absoluteDate(startTime: Instant, day: Int): LocalDate = {
+    (startTime.toDateTime.withTimeAtStartOfDay + day.days).toLocalDate
+  }
 }

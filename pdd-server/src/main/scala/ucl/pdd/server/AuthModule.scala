@@ -22,6 +22,9 @@ import com.twitter.inject.TwitterModule
 
 import scala.util.Random
 
+/**
+ * Guice module providing authentication services.
+ */
 object AuthModule extends TwitterModule {
   private[this] val tokenFlag = flag[String]("api.access_token", "Token used to secure the access to relevant endpoints")
 

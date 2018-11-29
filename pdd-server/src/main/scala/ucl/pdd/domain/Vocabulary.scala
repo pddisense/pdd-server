@@ -37,6 +37,16 @@ object Vocabulary {
    * @param terms Terms represent a list of tokens that must be simultaneously present in a search
    *              query. The order does not matter (as opposed to n-grams).
    */
-  case class Query(exact: Option[String] = None, terms: Option[Seq[String]] = None)
+  case class Query(exact: Option[String] = None, terms: Option[Seq[String]] = None) {
+    override def toString: String = {
+      if (exact.isDefined) {
+        exact.get
+      } else if (terms.isDefined) {
+        terms.get.mkString(", ")
+      } else {
+        "<none>"
+      }
+    }
+  }
 
 }

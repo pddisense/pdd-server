@@ -33,7 +33,10 @@ import ucl.pdd.service.Exporter
 import ucl.pdd.storage._
 
 @Singleton
-final class PrivateController @Inject()(storage: Storage) extends Controller {
+final class PrivateController @Inject()(storage: Storage, exporter: Exporter) extends Controller {
+
+  import PrivateController._
+
   get("/api/campaigns") { req: ListCampaignsRequest =>
     storage.campaigns
       .list(CampaignStore.Query(isActive = req.active))
@@ -57,6 +60,7 @@ final class PrivateController @Inject()(storage: Storage) extends Controller {
       graceDelay = req.graceDelay,
       groupSize = req.groupSize,
       samplingRate = req.samplingRate)
+
     CampaignValidator.validate(campaign) match {
       case ValidationResult.Valid =>
         storage.campaigns.create(campaign).map {
@@ -121,9 +125,9 @@ final class PrivateController @Inject()(storage: Storage) extends Controller {
   private def export(request: Request, campaign: Campaign, results: Seq[Aggregation]) = {
     RequestUtils.respondTo(request) {
       case ContentType.CSV =>
-        val content = Exporter.csv(campaign, results)
+        val content = exporter.collectAsCsv(campaign, results)
         response.ok(content).contentType(ContentType.CSV.contentTypeName)
-      case ContentType.JSON => response.ok(Exporter.collect(campaign, results))
+      case ContentType.JSON => response.ok(exporter.collect(campaign, results))
       case _ => response.notAcceptable
     }
   }
@@ -216,71 +220,75 @@ final class PrivateController @Inject()(storage: Storage) extends Controller {
   }
 }
 
-case class GetStatisticsResponse(activeCampaigns: Int, activeClients: Int)
+object PrivateController {
 
-case class GetCampaignRequest(@RouteParam name: String)
+  case class GetStatisticsResponse(activeCampaigns: Int, activeClients: Int)
 
-case class DeleteCampaignRequest(@RouteParam name: String, @QueryParam force: Boolean = false)
+  case class GetCampaignRequest(@RouteParam name: String)
 
-case class GetResultsRequest(
-  @RouteParam name: String,
-  @QueryParam export: Boolean = false,
-  request: Request)
+  case class DeleteCampaignRequest(@RouteParam name: String, @QueryParam force: Boolean = false)
 
-case class GetResultRequest(
-  @RouteParam name: String,
-  @RouteParam day: Int,
-  @QueryParam export: Boolean = false,
-  request: Request)
+  case class GetResultsRequest(
+    @RouteParam name: String,
+    @QueryParam export: Boolean = false,
+    request: Request)
 
-case class GetResultsResponse(results: Seq[Aggregation])
+  case class GetResultRequest(
+    @RouteParam name: String,
+    @RouteParam day: Int,
+    @QueryParam export: Boolean = false,
+    request: Request)
 
-case class ListCampaignsRequest(@QueryParam active: Option[Boolean])
+  case class GetResultsResponse(results: Seq[Aggregation])
 
-case class ListCampaignsResponse(campaigns: Seq[Campaign])
+  case class ListCampaignsRequest(@QueryParam active: Option[Boolean])
 
-case class CreateCampaignRequest(
-  displayName: String,
-  email: Option[String],
-  notes: Option[String],
-  vocabulary: Vocabulary = Vocabulary(),
-  startTime: Option[Instant],
-  endTime: Option[Instant],
-  delay: Int = 0,
-  graceDelay: Int = 0,
-  groupSize: Int = 10,
-  samplingRate: Option[Double])
+  case class ListCampaignsResponse(campaigns: Seq[Campaign])
 
-case class UpdateCampaignRequest(
-  @RouteParam name: String,
-  displayName: String,
-  email: Option[String],
-  notes: Option[String],
-  vocabulary: Vocabulary,
-  startTime: Option[Instant],
-  endTime: Option[Instant],
-  delay: Int,
-  graceDelay: Int,
-  groupSize: Int,
-  samplingRate: Option[Double])
+  case class CreateCampaignRequest(
+    displayName: String,
+    email: Option[String],
+    notes: Option[String],
+    vocabulary: Vocabulary = Vocabulary(),
+    startTime: Option[Instant],
+    endTime: Option[Instant],
+    delay: Int = 0,
+    graceDelay: Int = 0,
+    groupSize: Int = 10,
+    samplingRate: Option[Double])
 
-case class GetClientRequest(@RouteParam name: String)
+  case class UpdateCampaignRequest(
+    @RouteParam name: String,
+    displayName: String,
+    email: Option[String],
+    notes: Option[String],
+    vocabulary: Vocabulary,
+    startTime: Option[Instant],
+    endTime: Option[Instant],
+    delay: Int,
+    graceDelay: Int,
+    groupSize: Int,
+    samplingRate: Option[Double])
 
-case class GetClientResponse(
-  name: String,
-  createTime: Instant,
-  browser: String,
-  externalName: Option[String],
-  timezone: Option[String] = None,
-  countryCode: Option[String] = None,
-  extensionVersion: Option[String] = None)
+  case class GetClientRequest(@RouteParam name: String)
 
-case class GetClientActivityRequest(@RouteParam name: String, @QueryParam tail: Option[Int])
+  case class GetClientResponse(
+    name: String,
+    createTime: Instant,
+    browser: String,
+    externalName: Option[String],
+    timezone: Option[String] = None,
+    countryCode: Option[String] = None,
+    extensionVersion: Option[String] = None)
 
-case class GetActivityRequest(@QueryParam tail: Option[Int])
+  case class GetClientActivityRequest(@RouteParam name: String, @QueryParam tail: Option[Int])
 
-case class GetActivityResponse(days: Seq[Activity])
+  case class GetActivityRequest(@QueryParam tail: Option[Int])
 
-case class ListClientsResponse(clients: Seq[Client])
+  case class GetActivityResponse(days: Seq[Activity])
 
-case class GetAggregationRequest(@RouteParam name: String)
+  case class ListClientsResponse(clients: Seq[Client])
+
+  case class GetAggregationRequest(@RouteParam name: String)
+
+}

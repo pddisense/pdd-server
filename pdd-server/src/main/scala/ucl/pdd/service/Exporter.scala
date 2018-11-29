@@ -18,76 +18,47 @@
 
 package ucl.pdd.service
 
+import org.joda.time.{Instant, LocalDate}
 import ucl.pdd.domain.{Aggregation, Campaign}
 
-object Exporter {
+/**
+ * Service helping to export aggregations into more human- or machine-readable formats.
+ */
+final class Exporter {
 
-  case class Count(
-    day: Int,
-    query: String,
-    rawCount: Option[Long] = None,
-    decryptedCount: Option[Long] = None)
+  import Exporter._
 
   def collect(campaign: Campaign, results: Seq[Aggregation]): Seq[Count] = {
-    if (ServiceModule.FlagCollectRaw) {
-      collectBoth(results)
-    } else  {
-      collectEncrypted(results)
-    }
-  }
-
-  def csv(campaign: Campaign, results: Seq[Aggregation]): String = {
-    val header = "day,query,raw count,decrypted count"
-    val lines = collect(campaign, results).map { count =>
-      s"${count.day},${count.query},${count.rawCount.getOrElse("")},${count.decryptedCount.getOrElse("")}"
-    }
-    (header +: lines).mkString("\n")
-  }
-
-  private def collectBoth(results: Seq[Aggregation]): Seq[Count] = {
+    val startTime = campaign.startTime.getOrElse(Instant.now())
     results.flatMap { result =>
-      if (result.decryptedValues.isEmpty && result.rawValues.isEmpty) {
-        // If for any reason we do not have data for that day, still return the total count.
-        Seq(Count(result.day, "total", rawCount = Some(0), decryptedCount = Some(0)))
-      } else if (result.decryptedValues.isEmpty) {
-        // There is an edge case, where the raw values are filled and the decrypted values are
-        // not filled. This happens when no value could be decrypted, the list might end up empty
-        // (instead of full of zeros).
-        val total = Count(result.day, "total", rawCount = Some(result.rawValues.head), decryptedCount = Some(0))
-        val rows = result.rawValues.tail
+      if (result.decryptedValues.isEmpty) {
+        // If we do not have data for that day, still return the total count.
+        Seq(Count(Campaign.absoluteDate(startTime, result.day), "total", 0))
+      } else {
+        val total = Count(Campaign.absoluteDate(startTime, result.day), "total", result.decryptedValues.head)
+        val rows = result.decryptedValues
+          .tail
           .zipWithIndex
           .filter { case (v, _) => v > 0 }
           .map { case (v, idx) =>
-            Count(result.day, idx.toString, rawCount = Some(v), decryptedCount = Some(0))
-          }
-        total +: rows
-      } else {
-        val counts = result.rawValues.zip(result.decryptedValues)
-        val total = Count(result.day, "total", rawCount = Some(counts.head._1), decryptedCount = Some(counts.head._2))
-        val rows = counts.tail
-          .zipWithIndex
-          .filter { case ((rawCount, decryptedCount), _) => rawCount > 0 || decryptedCount > 0 }
-          .map { case ((rawCount, decryptedCount), idx) =>
-            Count(result.day, idx.toString, rawCount = Some(rawCount), decryptedCount = Some(decryptedCount))
+            Count(Campaign.absoluteDate(startTime, result.day), campaign.vocabulary.queries(idx).toString, v)
           }
         total +: rows
       }
     }
   }
 
-  private def collectEncrypted(results: Seq[Aggregation]): Seq[Count] = {
-    results.flatMap { result =>
-      if (result.decryptedValues.isEmpty) {
-        // If for any reason we do not have data for that day, still return the total count.
-        Seq(Count(result.day, "total", decryptedCount = Some(0)))
-      } else {
-        val total = Count(result.day, "total", decryptedCount = Some(result.decryptedValues.head))
-        val rows = result.decryptedValues.tail
-          .zipWithIndex
-          .filter { case (v, _) => v > 0 }
-          .map { case (v, idx) => Count(result.day, idx.toString, decryptedCount = Some(v)) }
-        total +: rows
-      }
+  def collectAsCsv(campaign: Campaign, results: Seq[Aggregation]): String = {
+    val header = "day,query,count"
+    val lines = collect(campaign, results).map { count =>
+      s"${count.date},${count.query},${count.decryptedCount}"
     }
+    (header +: lines).mkString("\n")
   }
+}
+
+object Exporter {
+
+  case class Count(date: LocalDate, query: String, decryptedCount: Long)
+
 }
