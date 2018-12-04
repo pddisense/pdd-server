@@ -16,14 +16,15 @@
  * along with PDD.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ucl.pdd.jackson
+package ucl.pdd.server
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import com.twitter.finatra.json.modules.FinatraJacksonModule
 
 /**
- * Custom Jackson module for PDD servers.
+ * Custom Jackson module for PDD server.
  */
 object PddJacksonModule extends FinatraJacksonModule {
+  // Keep the generated JSON in camel case (by default underscores are used).
   override val propertyNamingStrategy: PropertyNamingStrategy = PropertyNamingStrategy.LOWER_CAMEL_CASE
 }

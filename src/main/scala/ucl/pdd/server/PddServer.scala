@@ -24,7 +24,7 @@ import com.twitter.finatra.http.HttpServer
 import com.twitter.finatra.http.filters.{CommonFilters, LoggingMDCFilter, TraceIdMDCFilter}
 import com.twitter.finatra.http.routing.HttpRouter
 import ucl.pdd.geocoder.GeocoderModule
-import ucl.pdd.jackson.PddJacksonModule
+import PddJacksonModule
 import ucl.pdd.monitoring.{LoggingConfigurator, MetricsModule}
 import ucl.pdd.service.ServiceModule
 import ucl.pdd.storage.StorageModule
