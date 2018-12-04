@@ -19,5 +19,4 @@ set -e
 
 # $DOCKER_USERNAME and $DOCKER_PASSWORD are provided by Travis CI.
 echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-sbt "project server" docker:publish
-sbt "project dashboard" docker:publish
+sbt docker:publish
