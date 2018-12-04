@@ -7,7 +7,7 @@ More specifically, it provides an API server, with which the clients interact, a
 The server components are written in Scala and rely on [Finatra](https://twitter.github.io/finatra/) to provide HTTP services.
 
 ## Build
-To build the server, you will need [Scala 2.12.x](https://www.scala-lang.org) and [SBT ≥ 0.13.17](https://www.scala-sbt.org).
+To build the server, you will need [Java 8](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html), [Scala 2.12.x](https://www.scala-lang.org) and [SBT ≥ 0.13.17](https://www.scala-sbt.org).
 Alternatively, you can use the `sbt` wrapper script included at the root of the repository.
 
 First clone the repository:
