@@ -34,11 +34,13 @@ class AggregateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach with Bef
 
   private var job: AggregateSketchesJob = _
   private var storage: Storage = _
-  private val timezone = DateTimeZone.forID("Europe/London")
 
   override def beforeAll(): Unit = {
     // We test here the collection of raw values, even though it is disabled by default.
     ServiceModule.FlagCollectRaw = true
+
+    // Normally done in ServiceModule, need to be done for tests as well.
+    DateTimeZone.setDefault(DateTimeZone.forID("Europe/London"))
   }
 
   override def beforeEach(): Unit = {
@@ -248,6 +250,5 @@ class AggregateSketchesJobSpec extends UnitSpec with BeforeAndAfterEach with Bef
         stats = Aggregation.Stats(activeCount = 2, submittedCount = 2, decryptedCount = 0)))
   }
 
-  // All our operations should use the canonical timezone used by the service.
-  private def at(str: String) = new DateTime(str, timezone).toInstant
+  private def at(str: String) = new DateTime(str).toInstant
 }
