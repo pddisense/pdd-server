@@ -24,6 +24,19 @@ import com.twitter.util.{Duration, Future}
 import org.joda.time.Instant
 import ucl.pdd.storage.{ActivityStore, Storage}
 
+/**
+ * Remove clients that have not been active since some amount of time. This delay should be
+ * relatively high (e.g., at least weeks), as [[ucl.pdd.strategy.GroupStrategy]]'s already contain
+ * built-in mechanisms to only select reasonably active clients. The goal here is to permanently
+ * remove clients that are likely to have left the data collection process (e.g., by uninstalling
+ * the extension).
+ *
+ * Please note that even once removed, clients can still come back later on, they will only need to
+ * re-register themselves to the server.
+ *
+ * @param storage        Storage.
+ * @param pruneThreshold Inactivity delay after which to remove clients.
+ */
 @Singleton
 final class PruneClientsJob @Inject()(storage: Storage, @PruneThreshold pruneThreshold: Duration)
   extends Job with Logging {
@@ -38,6 +51,7 @@ final class PruneClientsJob @Inject()(storage: Storage, @PruneThreshold pruneThr
   }
 
   private def deleteClient(clientName: String): Future[Unit] = {
+    // Delete a client and its associated activity.
     Future.join(
       storage.clients.delete(clientName),
       storage.activity.delete(ActivityStore.Query(clientName = Some(clientName)))

@@ -46,7 +46,7 @@ final class AggregateSketchesJob @Inject()(storage: Storage)
   private def aggregate(campaign: Campaign, now: Instant): Future[Unit] = {
     campaign.startTime match {
       case None =>
-        // This campaign was never started, nothing to do.
+        // This campaign is not started, nothing to do.
         Future.Done
       case Some(startTime) =>
         // On a given day `d`, we aggregate the sketches from day `d - 2 - campaign.delay -
@@ -54,24 +54,23 @@ final class AggregateSketchesJob @Inject()(storage: Storage)
         //
         // Indeed, it takes at least one full day to collect the sketches of the previous day
         // (given there is no delay). Therefore, on a given day `d`, we are collecting the sketches
-        // for day `d - 1`, which means we can expect them to be available on `d + 1` (hence the
-        // base `d - 2` in the above formula.
+        // for day `d - 1`, which means we can expect them to be available on `d + 1`.
+        //
         // If we have further delay, we do not compute the sketches before that delay is elapsed
         // (because the aggregations won't be available anyway). The grace delay means that the
         // aggregations are made available but might still evolve. We hence need to recompute those
-        // every during during the grace delay window.
+        // every day during during the grace delay window.
         val actualDay = Campaign.relativeDay(startTime, now)
         val endDay = actualDay - 2 - campaign.delay
         if (endDay < 0) {
           info(s"Nothing to do for campaign ${campaign.name} (just started)")
           Future.Done
         } else {
-          val startDay = math.max(0, actualDay - 2 - campaign.delay - campaign.graceDelay)
+          val startDay = math.max(0, endDay - campaign.graceDelay)
           val days = startDay to endDay
           Future.join(days.map(aggregate(campaign, _)))
         }
       //TODO: don't do it for stopped campaigns, once graceDelay is past.
-      //TODO: backfill.
       //TODO: clean old sketches.
     }
   }

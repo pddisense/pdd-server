@@ -29,6 +29,7 @@ import org.joda.time.{DateTimeUtils, DateTimeZone}
  */
 object ServiceModule extends TwitterModule {
   private val timezoneFlag = flag("timezone", "Europe/London", "Reference timezone")
+  private val pruneThresholdFlag = flag("prune_threshold", 15.days, "Delay after which to remove inactive clients")
   private val testingModeFlag = flag(
     "testing_mode",
     false,
@@ -43,7 +44,7 @@ object ServiceModule extends TwitterModule {
 
   override def configure(): Unit = {
     DateTimeZone.setDefault(DateTimeZone.forID(timezoneFlag()))
-    bind[Duration].annotatedWith[PruneThreshold].toInstance(15.days)
+    bind[Duration].annotatedWith[PruneThreshold].toInstance(pruneThresholdFlag())
 
     if (testingModeFlag()) {
       warn("Running in TESTING mode. Days will only last 5 minutes!")

@@ -22,7 +22,7 @@ import com.twitter.util.Future
 
 /**
  * Trait for services that can be started/stopped asynchronously. This is to be used
- * instead of [[com.google.common.util.concurrent.Service]], as its interfce is
+ * instead of [[com.google.common.util.concurrent.Service]], as its interface is
  * lighter and integrates better with our usage of Twitter's futures.
  */
 trait Service {
