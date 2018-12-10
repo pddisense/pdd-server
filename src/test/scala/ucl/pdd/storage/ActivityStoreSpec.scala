@@ -41,7 +41,10 @@ abstract class ActivityStoreSpec extends StoreSpec {
 
     Await.result(storage.activity.list(ActivityStore.Query(clientName = Some("client1")))) should contain theSameElementsAs activity.take(3)
     Await.result(storage.activity.list(ActivityStore.Query(countryCode = Some("UK")))) should contain theSameElementsAs Seq(activity(2), activity(4))
-    Await.result(storage.activity.list(ActivityStore.Query(startTime = Some(now().plus(1000)), endTime = Some(now().plus(11000))))) should contain theSameElementsAs Seq(activity(1), activity(2), activity(3))
+    Await.result(storage.activity.list(ActivityStore.Query(startTime = Some(t.plus(1000)), endTime = Some(t.plus(11000))))) should contain theSameElementsAs Seq(
+      activity(1),
+      activity(2),
+      activity(3))
   }
 
   it should "delete activity" in {
