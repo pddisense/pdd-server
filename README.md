@@ -20,6 +20,9 @@ Then build and test the server:
 ./sbt compile test
 ```
 
+Please note that the tests require to have a local MySQL server running.
+`./sbt compile` can be used to only build the server, `./sbt run` to run it locally.
+
 ## About
 
 Private Data Donor is a research project whose goal is to gather statistics about Web search queries in a privacy-preserving way.
